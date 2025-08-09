@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+body { @apply bg-slate-50 text-slate-800 antialiased; font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; }
+.dark body { @apply bg-slate-900 text-slate-100; }
+
+/* Layout */
+.container-wrap { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
+
+/* Cards */
+.card { @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700; }
+.card-header { @apply px-4 py-3 border-b border-slate-200 dark:border-slate-700; }
+.card-body { @apply p-4; }
+
+/* Buttons */
+.btn { @apply inline-flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-900; }
+.btn-primary { @apply bg-sky-600 text-white hover:bg-sky-700 focus:ring-sky-600; }
+.btn-secondary { @apply bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-600 focus:ring-slate-300 dark:focus:ring-slate-600; }
+.btn-danger { @apply bg-white dark:bg-slate-700 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-slate-600 focus:ring-red-300; }
+
+/* Inputs */
+.field { @apply w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:border-sky-500 focus:ring-sky-500 placeholder:text-slate-400 dark:placeholder:text-slate-400; }
+.field-sm { @apply px-2.5 py-2; }
+.field-md { @apply px-3.5 py-2.5; }
+.field-lg { @apply px-4 py-3; }
+.label { @apply block text-sm font-medium text-slate-700; }
+.dark .label { @apply text-slate-200; }
+
+/* Table */
+.table-wrap { @apply overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700; }
+.table-scroll { max-height: 48vh; overflow-y: auto; }
+.table { @apply w-full text-sm; }
+.thead { @apply bg-slate-50 dark:bg-slate-700 sticky top-0 z-10; }
+.th { @apply text-left font-semibold text-slate-600 dark:text-slate-200 px-3 py-2; }
+.td { @apply px-3 py-2 align-top; }
+.tr { @apply border-t border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors; }
+
+/* Badges */
+.badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+.badge-green { @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300; }
+.badge-red { @apply bg-red-100 text-red-700; }
+
+/* Section titles */
+.section-title { @apply text-sm font-semibold text-slate-700; }
+
+/* Density: compact mode */
+.compact .card-body { @apply p-3; }
+.compact .card-header { @apply px-3 py-2; }
+.compact .field { @apply field-sm; }
+.compact .th { @apply px-2 py-1.5; }
+.compact .td { @apply px-2 py-1.5; }
+.compact .btn { @apply px-3 py-2; }
