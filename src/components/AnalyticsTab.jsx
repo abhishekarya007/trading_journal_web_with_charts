@@ -1,9 +1,15 @@
 import React from "react";
 import { Line, Bar } from "react-chartjs-2";
 
-export default function AnalyticsTab({ totals, monthRows, setupRows, monthlyChart, equityChart, commonChartOptions, formatNumber }) {
+export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, monthlyChart, equityChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth }) {
   return (
     <div>
+      {/* Period Controls */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-sm text-slate-600 dark:text-slate-300">{periodLabel}</div>
+        <div className="flex items-center gap-2">{periodControls}</div>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div className="card">
@@ -37,7 +43,21 @@ export default function AnalyticsTab({ totals, monthRows, setupRows, monthlyChar
         <div className="card">
           <div className="card-header"><h2 className="font-semibold">Monthly P&L</h2></div>
           <div className="card-body h-64">
-            {monthRows.length ? <Bar data={monthlyChart} options={commonChartOptions} /> : <div className="text-slate-500">No monthly data</div>}
+            {allMonthRows.length ? (
+              <Bar
+                data={monthlyChart}
+                options={{
+                  ...commonChartOptions,
+                  onClick: (evt, elements, chart) => {
+                    const el = elements && elements[0];
+                    if (!el) return;
+                    const idx = el.index;
+                    const label = chart.data.labels?.[idx];
+                    if (label) onSelectMonth(label);
+                  }
+                }}
+              />
+            ) : <div className="text-slate-500">No monthly data</div>}
           </div>
         </div>
         <div className="card">
@@ -64,8 +84,8 @@ export default function AnalyticsTab({ totals, monthRows, setupRows, monthlyChar
                 </tr>
               </thead>
               <tbody>
-                {monthRows.length ? monthRows.map(m => (
-                  <tr key={m.month} className="tr">
+                {allMonthRows.length ? allMonthRows.map(m => (
+                  <tr key={m.month} className={"tr cursor-pointer " + (activeMonthLabel===m.month ? 'bg-sky-50 dark:bg-slate-700' : '')} onClick={() => onSelectMonth(m.month)}>
                     <td className="td">{m.month}</td>
                     <td className="td">{m.total}</td>
                     <td className="td">{m.winRate}%</td>

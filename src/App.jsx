@@ -53,6 +53,11 @@ export default function App() {
   });
   const [isCompact, setIsCompact] = useState(() => localStorage.getItem('ui_compact') === '1');
   const [filterText, setFilterText] = useState("");
+  const [filterStatus, setFilterStatus] = useState('all'); // all | wins | losses
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [sortKey, setSortKey] = useState('date');
+  const [sortDir, setSortDir] = useState('desc'); // asc | desc
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -298,6 +303,76 @@ export default function App() {
   }, [trades]);
 
   const formatNumber = (n) => (typeof n === "number" ? n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : n);
+  // Analytics period controls
+  const [analyticsScope, setAnalyticsScope] = useState('month'); // 'month' | 'overall'
+  const dateKey = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    return `${y}-${m}`;
+  };
+  const monthLabelFromKey = (key) => {
+    if (!key) return '';
+    const [y, m] = key.split('-');
+    const d = new Date(Number(y), Number(m) - 1, 1);
+    return d.toLocaleString("en-GB", { month: "short", year: "numeric" });
+  };
+  const [selectedMonthKey, setSelectedMonthKey] = useState(() => dateKey(new Date().toISOString()));
+  const [activeMonthLabel, setActiveMonthLabel] = useState(() => new Date().toLocaleString("en-GB", { month: "short", year: "numeric" }));
+  const availableMonths = useMemo(() => {
+    const set = new Set(trades.map(t => dateKey(t.date)).filter(Boolean));
+    const arr = Array.from(set);
+    arr.sort((a,b) => a.localeCompare(b));
+    return arr.reverse();
+  }, [trades]);
+  const scopedTrades = useMemo(() => {
+    if (analyticsScope === 'overall') return trades;
+    // Prefer activeMonthLabel if set via click; fall back to selectedMonthKey
+    const label = activeMonthLabel || monthLabelFromKey(selectedMonthKey);
+    return trades.filter(t => new Date(t.date).toLocaleString("en-GB", { month: "short", year: "numeric" }) === label);
+  }, [trades, analyticsScope, selectedMonthKey, activeMonthLabel]);
+  const scopedTotals = useMemo(() => {
+    const net = scopedTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0);
+    const wins = scopedTrades.filter(t => (t.meta?.net || 0) > 0).length;
+    const losses = scopedTrades.filter(t => (t.meta?.net || 0) <= 0).length;
+    const winRate = scopedTrades.length ? Math.round((wins / scopedTrades.length) * 10000) / 100 : 0;
+    const avg = scopedTrades.length ? Math.round((net / scopedTrades.length) * 100) / 100 : 0;
+    return { net: Math.round(net * 100) / 100, wins, losses, winRate, avg, trades: scopedTrades.length };
+  }, [scopedTrades]);
+  const scopedMonthly = useMemo(() => {
+    if (analyticsScope === 'overall') return monthRows;
+    const label = activeMonthLabel || monthLabelFromKey(selectedMonthKey);
+    return monthRows.filter(m => m.month === label);
+  }, [monthRows, analyticsScope, selectedMonthKey, activeMonthLabel]);
+  const scopedTradesSorted = useMemo(() => {
+    return [...scopedTrades].sort((a,b) => new Date(a.date) - new Date(b.date));
+  }, [scopedTrades]);
+  // Scoped equity
+  const scopedEquityLabels = scopedTradesSorted.map(t => t.date);
+  let scopedCum = 0;
+  const scopedEquityDataPoints = scopedTradesSorted.map(t => {
+    scopedCum += (t.meta?.net || 0);
+    return Math.round(scopedCum * 100) / 100;
+  });
+  const scopedEquityChart = {
+    labels: scopedEquityLabels,
+    datasets: [
+      { label: "Equity Curve (Net P&L)", data: scopedEquityDataPoints, tension: 0.25, borderColor: "#0ea5e9", backgroundColor: "rgba(14,165,233,0.15)", fill: true }
+    ]
+  };
+  const periodLabel = analyticsScope === 'overall' ? 'Showing: Overall' : `Showing: ${activeMonthLabel || monthLabelFromKey(selectedMonthKey)}`;
+  const periodControls = (
+    <div className="flex items-center gap-2">
+      <button className={"btn btn-secondary " + (analyticsScope==='overall'?'!bg-sky-600 !text-white':'')} onClick={(e)=>{e.preventDefault(); setAnalyticsScope('overall');}}>Overall</button>
+      {/* Select month via clicking Monthly Summary rows or Monthly P&L bars */}
+    </div>
+  );
+  const onSelectMonth = (label) => {
+    setAnalyticsScope('month');
+    setActiveMonthLabel(label);
+  };
+  const formatCurrency = (n) => (typeof n === "number" ? `₹ ${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : n);
 
   // Live charges preview from current form inputs
   const chargesPreview = useMemo(() => {
@@ -312,15 +387,50 @@ export default function App() {
   // Filtered trades for table view
   const filteredTrades = useMemo(() => {
     const q = filterText.trim().toLowerCase();
-    if (!q) return trades;
-    return trades.filter(t =>
-      (t.symbol || '').toLowerCase().includes(q) ||
-      (t.setup || '').toLowerCase().includes(q) ||
-      (t.type || '').toLowerCase().includes(q) ||
-      (t.remarks || '').toLowerCase().includes(q) ||
-      (t.date || '').toLowerCase().includes(q)
-    );
-  }, [trades, filterText]);
+    return trades.filter(t => {
+      const matchesText = !q || (t.symbol || '').toLowerCase().includes(q) || (t.setup || '').toLowerCase().includes(q) || (t.type || '').toLowerCase().includes(q) || (t.remarks || '').toLowerCase().includes(q) || (t.date || '').toLowerCase().includes(q);
+      const net = t.meta?.net || 0;
+      const matchesStatus = filterStatus === 'all' || (filterStatus === 'wins' && net > 0) || (filterStatus === 'losses' && net <= 0);
+      const d = (t.date || '');
+      const matchesFrom = !fromDate || d >= fromDate;
+      const matchesTo = !toDate || d <= toDate;
+      return matchesText && matchesStatus && matchesFrom && matchesTo;
+    });
+  }, [trades, filterText, filterStatus, fromDate, toDate]);
+
+  const visibleTrades = useMemo(() => {
+    const arr = [...filteredTrades];
+    const get = (t) => {
+      switch (sortKey) {
+        case 'date': return t.date || '';
+        case 'symbol': return (t.symbol || '').toLowerCase();
+        case 'type': return (t.type || '').toLowerCase();
+        case 'qty': return Number(t.qty) || 0;
+        case 'buy': return Number(t.buy) || 0;
+        case 'sell': return Number(t.sell) || 0;
+        case 'net': return Number(t.meta?.net) || 0;
+        default: return '';
+      }
+    };
+    arr.sort((a,b) => {
+      const va = get(a), vb = get(b);
+      if (typeof va === 'number' && typeof vb === 'number') return sortDir === 'asc' ? va - vb : vb - va;
+      // string compare
+      return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+    });
+    return arr;
+  }, [filteredTrades, sortKey, sortDir]);
+
+  const onSortChange = (key) => {
+    setSortKey(prev => {
+      if (prev === key) {
+        setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+        return prev;
+      }
+      setSortDir('asc');
+      return key;
+    });
+  };
 
   return (
     <div>
@@ -345,13 +455,18 @@ export default function App() {
         <Tabs
           analyticsComponent={
             <AnalyticsTab
-              totals={totals}
-              monthRows={monthRows}
+              totals={scopedTotals}
+              monthRows={scopedMonthly}
+              allMonthRows={monthRows}
+              activeMonthLabel={activeMonthLabel}
               setupRows={setupRows}
               monthlyChart={monthlyChart}
-              equityChart={equityChart}
+              equityChart={scopedEquityChart}
               commonChartOptions={commonChartOptions}
               formatNumber={formatNumber}
+              periodLabel={periodLabel}
+              periodControls={periodControls}
+              onSelectMonth={onSelectMonth}
             />
           }
           tradesComponent={
@@ -362,12 +477,22 @@ export default function App() {
               importExcel={importExcel}
               chargesPreview={chargesPreview}
               formatNumber={formatNumber}
-              filteredTrades={filteredTrades}
+              formatCurrency={formatCurrency}
+              visibleTrades={visibleTrades}
               editTrade={editTrade}
               duplicateTrade={duplicateTrade}
               deleteTrade={deleteTrade}
               filterText={filterText}
               setFilterText={setFilterText}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+              fromDate={fromDate}
+              setFromDate={setFromDate}
+              toDate={toDate}
+              setToDate={setToDate}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              onSortChange={onSortChange}
             />
           }
         />

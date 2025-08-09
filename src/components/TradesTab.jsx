@@ -7,12 +7,21 @@ export default function TradesTab({
   importExcel,
   chargesPreview,
   formatNumber,
-  filteredTrades,
+  visibleTrades,
   editTrade,
   duplicateTrade,
   deleteTrade,
   filterText,
   setFilterText,
+  filterStatus,
+  setFilterStatus,
+  fromDate,
+  setFromDate,
+  toDate,
+  setToDate,
+  sortKey,
+  sortDir,
+  onSortChange,
 }) {
   React.useEffect(() => {
     function onKey(e) {
@@ -52,10 +61,12 @@ export default function TradesTab({
           <div>
             <label className="label">Buy Price</label>
             <input placeholder="0.00" inputMode="decimal" type="text" value={form.buy} onChange={e => setForm({...form, buy: e.target.value.replace(/[^0-9.]/g, '')})} className="mt-1 field field-md"/>
+            <p className="text-xs text-slate-500 mt-1">Average buy price per unit</p>
           </div>
           <div>
             <label className="label">Sell Price</label>
             <input placeholder="0.00" inputMode="decimal" type="text" value={form.sell} onChange={e => setForm({...form, sell: e.target.value.replace(/[^0-9.]/g, '')})} className="mt-1 field field-md"/>
+            <p className="text-xs text-slate-500 mt-1">Average sell price per unit</p>
           </div>
 
           <div>
@@ -104,35 +115,43 @@ export default function TradesTab({
         <div className="card-header flex items-center justify-between">
           <h2 className="font-semibold">Trade Log</h2>
           <div className="flex items-center gap-2">
-            <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Filter by symbol, setup, type, remarks..." className="field field-sm w-64"/>
+            <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Search" className="field field-sm w-56"/>
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="field field-sm">
+              <option value="all">All</option>
+              <option value="wins">Wins</option>
+              <option value="losses">Losses</option>
+            </select>
+            <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="field field-sm"/>
+            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="field field-sm"/>
+            <button type="button" onClick={() => { setFilterText(''); setFilterStatus('all'); setFromDate(''); setToDate(''); }} className="btn btn-secondary">Clear</button>
           </div>
         </div>
         <div className="table-scroll">
           <table className="table">
             <thead className="thead">
               <tr>
-                <th className="th">Date</th>
-                <th className="th">Symbol</th>
-                <th className="th">Type</th>
-                <th className="th">Qty</th>
-                <th className="th">Buy</th>
-                <th className="th">Sell</th>
-                <th className="th">Net P&L</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('date')}>Date {sortKey==='date' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('symbol')}>Symbol {sortKey==='symbol' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('type')}>Type {sortKey==='type' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('qty')}>Qty {sortKey==='qty' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('buy')}>Buy {sortKey==='buy' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('sell')}>Sell {sortKey==='sell' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('net')}>Net P&L {sortKey==='net' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
                 <th className="th">Setup</th>
                 <th className="th">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredTrades.length ? filteredTrades.map(t => (
+              {visibleTrades.length ? visibleTrades.map(t => (
                 <tr key={t.id} className="tr">
                   <td className="td">{t.date}</td>
                   <td className="td">{t.symbol}</td>
                   <td className="td">{t.type}</td>
                   <td className="td">{t.qty}</td>
-                  <td className="td">{formatNumber(t.buy)}</td>
-                  <td className="td">{formatNumber(t.sell)}</td>
+                  <td className="td">{formatNumber(Number(t.buy))}</td>
+                  <td className="td">{formatNumber(Number(t.sell))}</td>
                   <td className={"td " + ((t.meta?.net || 0) > 0 ? "text-green-700" : "text-red-700")}>
-                    {t.meta?.net !== undefined ? formatNumber(t.meta?.net) : "-"}
+                    {t.meta?.net !== undefined ? formatNumber(Number(t.meta?.net)) : "-"}
                   </td>
                   <td className="td">{t.setup}</td>
                   <td className="td">
