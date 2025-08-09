@@ -33,9 +33,9 @@ function blankTrade() {
     date: new Date().toISOString().slice(0,10),
     symbol: "",
     type: "Long",
-    qty: 0,
-    buy: 0,
-    sell: 0,
+    qty: "",
+    buy: "",
+    sell: "",
     setup: "",
     remarks: ""
   };
@@ -50,6 +50,7 @@ export default function App() {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [isCompact, setIsCompact] = useState(() => localStorage.getItem('ui_compact') === '1');
+  const [filterText, setFilterText] = useState("");
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -103,6 +104,18 @@ export default function App() {
       buy: String(t.buy ?? ''),
       sell: String(t.sell ?? ''),
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function duplicateTrade(t) {
+    const dup = {
+      ...t,
+      id: Date.now() + Math.random(),
+      qty: String(t.qty ?? ''),
+      buy: String(t.buy ?? ''),
+      sell: String(t.sell ?? ''),
+    };
+    setForm(dup);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -276,6 +289,29 @@ export default function App() {
 
   const formatNumber = (n) => (typeof n === "number" ? n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : n);
 
+  // Live charges preview from current form inputs
+  const chargesPreview = useMemo(() => {
+    return calcTradeCharges({
+      qty: Number(form.qty || 0),
+      buy: Number(form.buy || 0),
+      sell: Number(form.sell || 0),
+      type: form.type,
+    });
+  }, [form.qty, form.buy, form.sell, form.type]);
+
+  // Filtered trades for table view
+  const filteredTrades = useMemo(() => {
+    const q = filterText.trim().toLowerCase();
+    if (!q) return trades;
+    return trades.filter(t =>
+      (t.symbol || '').toLowerCase().includes(q) ||
+      (t.setup || '').toLowerCase().includes(q) ||
+      (t.type || '').toLowerCase().includes(q) ||
+      (t.remarks || '').toLowerCase().includes(q) ||
+      (t.date || '').toLowerCase().includes(q)
+    );
+  }, [trades, filterText]);
+
   return (
     <div>
       {/* Topbar */}
@@ -384,7 +420,28 @@ export default function App() {
               <input placeholder="Notes, mistakes, improvements..." value={form.remarks} onChange={e => setForm({...form, remarks: e.target.value})} className="mt-1 field field-md"/>
             </div>
 
-            <div className="md:col-span-3 flex flex-wrap gap-2 pt-1">
+            <div className="md:col-span-3">
+              <div className="mt-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/40 p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="section-title">Charges preview</div>
+                  <div className={(chargesPreview.net >= 0 ? 'badge badge-green' : 'badge badge-red') + ' capitalize'}>
+                    Net: {formatNumber(chargesPreview.net)}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-sm">
+                  <div><span className="text-slate-500 dark:text-slate-300">Turnover</span><div className="font-medium">{formatNumber(chargesPreview.turnover)}</div></div>
+                  <div><span className="text-slate-500 dark:text-slate-300">Brokerage</span><div className="font-medium">{formatNumber(chargesPreview.brokerage)}</div></div>
+                  <div><span className="text-slate-500 dark:text-slate-300">STT</span><div className="font-medium">{formatNumber(chargesPreview.stt)}</div></div>
+                  <div><span className="text-slate-500 dark:text-slate-300">Exchange</span><div className="font-medium">{formatNumber(chargesPreview.exchangeCharges)}</div></div>
+                  <div><span className="text-slate-500 dark:text-slate-300">Stamp Duty</span><div className="font-medium">{formatNumber(chargesPreview.stampDuty)}</div></div>
+                  <div><span className="text-slate-500 dark:text-slate-300">SEBI</span><div className="font-medium">{formatNumber(chargesPreview.sebi)}</div></div>
+                  <div><span className="text-slate-500 dark:text-slate-300">GST</span><div className="font-medium">{formatNumber(chargesPreview.gst)}</div></div>
+                  <div><span className="text-slate-500 dark:text-slate-300">Total Charges</span><div className="font-medium">{formatNumber(chargesPreview.totalCharges)}</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-3 flex flex-wrap gap-2 pt-3">
               <button type="submit" className="btn btn-primary">Save Trade</button>
               <button type="button" onClick={() => setForm(blankTrade())} className="btn btn-secondary">Clear</button>
 
@@ -454,7 +511,12 @@ export default function App() {
         </div>
 
         <div className="card table-wrap">
-          <div className="card-header"><h2 className="font-semibold">Trade Log</h2></div>
+            <div className="card-header flex items-center justify-between">
+              <h2 className="font-semibold">Trade Log</h2>
+              <div className="flex items-center gap-2">
+                <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Filter by symbol, setup, type, remarks..." className="field field-sm w-64"/>
+              </div>
+            </div>
           <div className="table-scroll">
             <table className="table">
               <thead className="thead">
@@ -471,7 +533,7 @@ export default function App() {
                 </tr>
               </thead>
               <tbody>
-                {trades.length ? trades.map(t => (
+                {filteredTrades.length ? filteredTrades.map(t => (
                   <tr key={t.id} className="tr">
                     <td className="td">{t.date}</td>
                     <td className="td">{t.symbol}</td>
@@ -486,11 +548,12 @@ export default function App() {
                     <td className="td">
                       <div className="flex gap-2">
                         <button onClick={() => editTrade(t)} className="btn btn-secondary !px-2 !py-1 text-xs">Edit</button>
+                        <button onClick={() => duplicateTrade(t)} className="btn btn-secondary !px-2 !py-1 text-xs">Duplicate</button>
                         <button onClick={() => deleteTrade(t.id)} className="btn btn-danger !px-2 !py-1 text-xs">Delete</button>
                       </div>
                     </td>
                   </tr>
-                )) : <tr><td colSpan="9" className="td text-slate-500">No trades added</td></tr>}
+                )) : <tr><td colSpan="9" className="td text-slate-500">No trades found</td></tr>}
               </tbody>
             </table>
           </div>
