@@ -15,6 +15,7 @@ import {
 import { Line, Bar } from "react-chartjs-2";
 import AnalyticsTab from "./components/AnalyticsTab";
 import TradesTab from "./components/TradesTab";
+import { IconCandle, IconDownload, IconReset, IconMoon, IconSun } from "./components/icons";
 
 ChartJS.register(
   CategoryScale,
@@ -433,26 +434,56 @@ export default function App() {
   };
 
   return (
-    <div>
-      {/* Topbar */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
-        <div className="container-wrap flex items-center justify-between h-14">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold">Trading Journal</span>
-            <span className="badge badge-green">v1</span>
+    <div className="app-shell">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="nav">
+          <div className="text-xs uppercase tracking-wider text-slate-500 px-3 mb-2">Navigation</div>
+          <button className="nav-btn active">Dashboard</button>
+          <button className="nav-btn">Reports</button>
+          <button className="nav-btn">Settings</button>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <div className="grid grid-rows-[auto_1fr]">
+        {/* Header */}
+        <header className="header">
+          <div className="container-wrap flex items-center justify-between h-14">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <IconCandle className="w-5 h-5 text-sky-600"/>
+                <span className="text-lg font-semibold">Trading Journal</span>
+                <span className="badge badge-green">v1</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setIsCompact(v => !v)} type="button" className="btn btn-secondary" title="Toggle density">{isCompact ? 'Comfortable' : 'Compact'}</button>
+              <button onClick={() => setIsDark(v => !v)} type="button" className="btn btn-secondary" title="Toggle dark mode">{isDark ? <IconSun/> : <IconMoon/>}</button>
+              <button onClick={exportExcel} type="button" className="btn btn-secondary"><IconDownload/> Export</button>
+              <button onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} type="button" className="btn btn-danger"><IconReset/> Reset</button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setIsCompact(v => !v)} type="button" className="btn btn-secondary" title="Toggle density">{isCompact ? 'Comfortable' : 'Compact'}</button>
-            <button onClick={() => setIsDark(v => !v)} type="button" className="btn btn-secondary" title="Toggle dark mode">{isDark ? 'Light' : 'Dark'}</button>
-            <button onClick={exportExcel} type="button" className="btn btn-secondary">Export</button>
-            <button onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} type="button" className="btn btn-danger">Reset</button>
+        </header>
+        <div className="container-wrap pt-4">
+          <div className="rounded-xl bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-slate-200 dark:border-slate-700 p-4 mb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <div className="text-sm text-slate-600 dark:text-slate-300">Welcome back</div>
+                <div className="text-xl font-semibold">Your trading performance at a glance</div>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Win Rate</span> <span className="ml-2 font-semibold">{totals.winRate}%</span></div>
+                <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Total Net</span> <span className={"ml-2 font-semibold " + (totals.net>=0?'text-green-700':'text-red-700')}>{formatNumber(totals.net)}</span></div>
+                <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Trades</span> <span className="ml-2 font-semibold">{totals.trades}</span></div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="container-wrap py-6">
-        {/* Tabs */}
-        <Tabs
+        <main className="content">
+          <div className="container-wrap">
+            <Tabs
           analyticsComponent={
             <AnalyticsTab
               totals={scopedTotals}
@@ -495,7 +526,9 @@ export default function App() {
               onSortChange={onSortChange}
             />
           }
-        />
+            />
+          </div>
+        </main>
       </div>
     </div>
   );

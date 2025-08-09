@@ -115,7 +115,13 @@ export default function TradesTab({
         <div className="card-header flex items-center justify-between">
           <h2 className="font-semibold">Trade Log</h2>
           <div className="flex items-center gap-2">
-            <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Search" className="field field-sm w-56"/>
+            <div className="relative">
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400">
+                {/* search icon */}
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              </span>
+              <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Search" className="field field-sm w-56 pl-7"/>
+            </div>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="field field-sm">
               <option value="all">All</option>
               <option value="wins">Wins</option>
