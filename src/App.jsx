@@ -96,6 +96,14 @@ export default function App() {
       return [trade, ...prev];
     });
     setForm(blankTrade());
+    // Toast
+    try {
+      const el = document.createElement('div');
+      el.className = 'fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg';
+      el.textContent = 'Trade saved';
+      document.body.appendChild(el);
+      setTimeout(() => { el.remove(); }, 1500);
+    } catch {}
   }
 
   function editTrade(t) {
@@ -369,14 +377,15 @@ export default function App() {
 }
 
 function Tabs({ analyticsComponent, tradesComponent }) {
-  const [active, setActive] = React.useState('trades');
+  const [active, setActive] = React.useState(() => localStorage.getItem('ui_active_tab') || 'trades');
+  React.useEffect(() => { localStorage.setItem('ui_active_tab', active); }, [active]);
   return (
     <div>
       <div className="mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700">
-        <button onClick={() => setActive('trades')} className={(active === 'trades' ? 'bg-sky-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200') + ' rounded-lg px-3 py-1.5 text-sm font-medium'}>
+        <button onClick={() => setActive('trades')} className={(active === 'trades' ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200') + ' rounded-lg px-3 py-1.5 text-sm font-medium transition-colors'}>
           Trades
         </button>
-        <button onClick={() => setActive('analytics')} className={(active === 'analytics' ? 'bg-sky-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200') + ' rounded-lg px-3 py-1.5 text-sm font-medium'}>
+        <button onClick={() => setActive('analytics')} className={(active === 'analytics' ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200') + ' rounded-lg px-3 py-1.5 text-sm font-medium transition-colors'}>
           Analytics
         </button>
       </div>

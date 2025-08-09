@@ -14,6 +14,13 @@ export default function TradesTab({
   filterText,
   setFilterText,
 }) {
+  React.useEffect(() => {
+    function onKey(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); const fake = { preventDefault:()=>{} }; addOrUpdateTrade(fake); }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [addOrUpdateTrade]);
   return (
     <div>
       <form onSubmit={addOrUpdateTrade} className="card mb-6">
@@ -130,9 +137,9 @@ export default function TradesTab({
                   <td className="td">{t.setup}</td>
                   <td className="td">
                     <div className="flex gap-2">
-                      <button onClick={() => editTrade(t)} className="btn btn-secondary !px-2 !py-1 text-xs">Edit</button>
-                      <button onClick={() => duplicateTrade(t)} className="btn btn-secondary !px-2 !py-1 text-xs">Duplicate</button>
-                      <button onClick={() => deleteTrade(t.id)} className="btn btn-danger !px-2 !py-1 text-xs">Delete</button>
+                      <button onClick={() => editTrade(t)} className="btn btn-secondary !px-2 !py-1 text-xs" title="E">Edit</button>
+                      <button onClick={() => duplicateTrade(t)} className="btn btn-secondary !px-2 !py-1 text-xs" title="D">Duplicate</button>
+                      <button onClick={() => deleteTrade(t.id)} className="btn btn-danger !px-2 !py-1 text-xs" title="Delete">Delete</button>
                     </div>
                   </td>
                 </tr>
