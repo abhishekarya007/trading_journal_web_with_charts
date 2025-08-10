@@ -37,6 +37,7 @@ body { @apply bg-slate-50 text-slate-800 antialiased; font-family: 'Inter', ui-s
 
 /* Inputs */
 .field { @apply w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:border-sky-500 focus:ring-sky-500 placeholder:text-slate-400 dark:placeholder:text-slate-400; }
+.field.input-with-icon { @apply pl-7; }
 .field-sm { @apply px-2.5 py-2; }
 .field-md { @apply px-3.5 py-2.5; }
 .field-lg { @apply px-4 py-3; }

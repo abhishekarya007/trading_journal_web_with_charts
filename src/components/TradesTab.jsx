@@ -1,4 +1,5 @@
 import React from "react";
+import DateRangePicker from "./DateRangePicker";
 
 export default function TradesTab({
   form,
@@ -23,6 +24,7 @@ export default function TradesTab({
   sortDir,
   onSortChange,
 }) {
+  const [showRange, setShowRange] = React.useState(false);
   React.useEffect(() => {
     function onKey(e) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); const fake = { preventDefault:()=>{} }; addOrUpdateTrade(fake); }
@@ -83,7 +85,7 @@ export default function TradesTab({
               <div className="flex items-center justify-between mb-2">
                 <div className="section-title">Charges preview</div>
                 <div className={(chargesPreview.net >= 0 ? 'badge badge-green' : 'badge badge-red') + ' capitalize'}>
-                  Net: {formatNumber(chargesPreview.net)}
+                  Net: {formatNumber(Math.abs(chargesPreview.net) < 0.005 ? 0 : chargesPreview.net)}
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-sm">
@@ -120,7 +122,7 @@ export default function TradesTab({
                 {/* search icon */}
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
               </span>
-              <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Search" className="field field-sm w-56 pl-7"/>
+              <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Search" className="field field-sm w-56 input-with-icon"/>
             </div>
             <div className="hidden md:flex items-center gap-2">
               <button type="button" className={`chip ${filterStatus==='all' ? 'chip-active':''}`} onClick={()=>setFilterStatus('all')}>All</button>
@@ -133,9 +135,17 @@ export default function TradesTab({
               <option value="wins">Wins</option>
               <option value="losses">Losses</option>
             </select>
-            <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="field field-sm"/>
-            <span className="text-slate-400">to</span>
-            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="field field-sm"/>
+            <div className="relative">
+              <button type="button" className="btn btn-secondary" onClick={() => setShowRange(v=>!v)}>Date Range</button>
+              {showRange ? (
+                <div className="absolute right-0 mt-2 z-50">
+                  <DateRangePicker
+                    range={{ startDate: fromDate ? new Date(fromDate) : new Date(), endDate: toDate ? new Date(toDate) : new Date() }}
+                    onChange={({startDate, endDate}) => { setFromDate(startDate.toISOString().slice(0,10)); setToDate(endDate.toISOString().slice(0,10)); setShowRange(false); }}
+                  />
+                </div>
+              ) : null}
+            </div>
             <button type="button" onClick={() => { setFilterText(''); setFilterStatus('all'); setFromDate(''); setToDate(''); }} className="btn btn-secondary">Clear</button>
           </div>
         </div>
@@ -159,7 +169,7 @@ export default function TradesTab({
                 <tr key={t.id} className="tr">
                   <td className="td">{t.date}</td>
                   <td className="td">{t.symbol}</td>
-                  <td className="td">{t.type}</td>
+                  <td className="td">{t.type === 'Long' ? <span className="chip chip-green">Long</span> : <span className="chip chip-red">Short</span>}</td>
                   <td className="td">{t.qty}</td>
                   <td className="td">{formatNumber(Number(t.buy))}</td>
                   <td className="td">{formatNumber(Number(t.sell))}</td>
