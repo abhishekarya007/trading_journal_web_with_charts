@@ -47,42 +47,49 @@ export default function TradesTab({
     <div>
 
       <div className="card table-wrap">
-        <div className="card-header flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="font-semibold">Trade Log</h2>
-            <button type="button" className="btn btn-primary" onClick={() => { setForm({ id: Date.now() + Math.random(), date: new Date().toISOString().slice(0,10), symbol:'', type:'Long', qty:'', buy:'', sell:'', setup:'', remarks:''}); setShowModal(true); }}>Add Trade</button>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400">
-                {/* search icon */}
-                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-              </span>
-              <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Search" className="field field-sm w-56 input-with-icon"/>
+        <div className="card-header">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <h2 className="font-semibold">Trade Log</h2>
+              <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={() => { setForm({ id: Date.now() + Math.random(), date: new Date().toISOString().slice(0,10), symbol:'', type:'Long', qty:'', buy:'', sell:'', setup:'', remarks:''}); setShowModal(true); }}>Add Trade</button>
             </div>
-            <div className="hidden md:flex items-center gap-2">
-              <button type="button" className={`chip ${filterStatus==='all' ? 'chip-active':''}`} onClick={()=>setFilterStatus('all')}>All</button>
-              <button type="button" className={`chip chip-green ${filterStatus==='wins' ? 'chip-active':''}`} onClick={()=>setFilterStatus('wins')}>Wins</button>
-              <button type="button" className={`chip chip-red ${filterStatus==='losses' ? 'chip-active':''}`} onClick={()=>setFilterStatus('losses')}>Losses</button>
-            </div>
-            {/* Fallback select on small screens */}
-            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="field field-sm md:hidden">
-              <option value="all">All</option>
-              <option value="wins">Wins</option>
-              <option value="losses">Losses</option>
-            </select>
-            <div className="relative">
-              <button type="button" className="btn btn-secondary" onClick={() => setShowRange(v=>!v)}>Date Range</button>
-              {showRange ? (
-                <div className="absolute right-0 mt-2 z-50">
-                  <DateRangePicker
-                    range={{ startDate: fromDate ? new Date(fromDate) : new Date(), endDate: toDate ? new Date(toDate) : new Date() }}
-                    onChange={({startDate, endDate}) => { setFromDate(startDate.toISOString().slice(0,10)); setToDate(endDate.toISOString().slice(0,10)); setShowRange(false); }}
-                  />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400">
+                  {/* search icon */}
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                </span>
+                <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Search" className="field field-sm w-full sm:w-56 input-with-icon"/>
+              </div>
+              <div className="hidden md:flex items-center gap-2">
+                <button type="button" className={`chip ${filterStatus==='all' ? 'chip-active':''}`} onClick={()=>setFilterStatus('all')}>All</button>
+                <button type="button" className={`chip chip-green ${filterStatus==='wins' ? 'chip-active':''}`} onClick={()=>setFilterStatus('wins')}>Wins</button>
+                <button type="button" className={`chip chip-red ${filterStatus==='losses' ? 'chip-active':''}`} onClick={()=>setFilterStatus('losses')}>Losses</button>
+              </div>
+              {/* Fallback select on small screens */}
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="field field-sm md:hidden">
+                <option value="all">All</option>
+                <option value="wins">Wins</option>
+                <option value="losses">Losses</option>
+              </select>
+              <div className="flex gap-2">
+                <div className="relative">
+                  <button type="button" className="btn btn-secondary w-full sm:w-auto" onClick={() => setShowRange(v=>!v)}>
+                    <span className="hidden sm:inline">Date Range</span>
+                    <span className="sm:hidden">Range</span>
+                  </button>
+                  {showRange ? (
+                    <div className="absolute right-0 mt-2 z-50">
+                      <DateRangePicker
+                        range={{ startDate: fromDate ? new Date(fromDate) : new Date(), endDate: toDate ? new Date(toDate) : new Date() }}
+                        onChange={({startDate, endDate}) => { setFromDate(startDate.toISOString().slice(0,10)); setToDate(endDate.toISOString().slice(0,10)); setShowRange(false); }}
+                      />
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
+                <button type="button" onClick={() => { setFilterText(''); setFilterStatus('all'); setFromDate(''); setToDate(''); }} className="btn btn-secondary">Clear</button>
+              </div>
             </div>
-            <button type="button" onClick={() => { setFilterText(''); setFilterStatus('all'); setFromDate(''); setToDate(''); }} className="btn btn-secondary">Clear</button>
           </div>
         </div>
         <div className="table-scroll">
@@ -144,10 +151,19 @@ export default function TradesTab({
                     )}
                   </td>
                   <td className="td">
-                    <div className="flex gap-2">
-                      <button onClick={() => { editTrade(t); setShowModal(true); }} className="btn btn-secondary !px-2 !py-1 text-xs" title="E">Edit</button>
-                      <button onClick={() => { duplicateTrade(t); setShowModal(true); }} className="btn btn-secondary !px-2 !py-1 text-xs" title="D">Duplicate</button>
-                      <button onClick={() => deleteTrade(t.id)} className="btn btn-danger !px-2 !py-1 text-xs" title="Delete">Delete</button>
+                    <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                      <button onClick={() => { editTrade(t); setShowModal(true); }} className="btn btn-secondary !px-2 !py-1 text-xs whitespace-nowrap" title="Edit">
+                        <span className="sm:hidden">✏️</span>
+                        <span className="hidden sm:inline">Edit</span>
+                      </button>
+                      <button onClick={() => { duplicateTrade(t); setShowModal(true); }} className="btn btn-secondary !px-2 !py-1 text-xs whitespace-nowrap" title="Duplicate">
+                        <span className="sm:hidden">📋</span>
+                        <span className="hidden sm:inline">Dup</span>
+                      </button>
+                      <button onClick={() => deleteTrade(t.id)} className="btn btn-danger !px-2 !py-1 text-xs whitespace-nowrap" title="Delete">
+                        <span className="sm:hidden">🗑️</span>
+                        <span className="hidden sm:inline">Del</span>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -253,14 +269,14 @@ export default function TradesTab({
       )}
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowModal(false)}>
-          <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-xl shadow-xl border border-slate-200 dark:border-slate-700" onClick={(e)=>e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/50 p-2 sm:p-4 overflow-y-auto" onClick={() => setShowModal(false)}>
+          <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 my-2 sm:my-0" onClick={(e)=>e.stopPropagation()}>
             <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <h2 className="font-semibold">Add / Edit Trade</h2>
               <button className="btn btn-secondary !px-2 !py-1 text-sm" onClick={()=>setShowModal(false)}>Close</button>
             </div>
-            <form onSubmit={(e)=>{ addOrUpdateTrade(e); setShowModal(false); }} className="p-4 grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[80vh] overflow-y-auto">
-              <div className="md:col-span-2">
+            <form onSubmit={(e)=>{ addOrUpdateTrade(e); setShowModal(false); }} className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[85vh] sm:max-h-[80vh] overflow-y-auto">
+              <div className="sm:col-span-2">
                 <div className="text-slate-500 dark:text-slate-300 text-sm mb-2">Trade details</div>
               </div>
               <div>
@@ -312,7 +328,7 @@ export default function TradesTab({
                 <label className="label">Setup</label>
                 <input placeholder="e.g. Breakout, Pullback" value={form.setup} onChange={e => setForm({...form, setup: e.target.value})} className="field field-md"/>
               </div>
-              <div className="md:col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Remarks</label>
                 <input placeholder="Notes, mistakes, improvements..." value={form.remarks} onChange={e => setForm({...form, remarks: e.target.value})} className="field field-md"/>
               </div>
@@ -334,15 +350,15 @@ export default function TradesTab({
                 <input placeholder="e.g. 1:2" value={form.riskReward} onChange={e => setForm({...form, riskReward: e.target.value})} className="field field-md"/>
               </div>
 
-              <div className="md:col-span-2">
-                <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/40 p-2">
-                  <div className="flex items-center justify-between mb-2">
+              <div className="sm:col-span-2">
+                <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/40 p-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                     <div className="section-title">Charges preview</div>
                     <div className={(chargesPreview.net >= 0 ? 'badge badge-green' : 'badge badge-red') + ' capitalize'}>
                       Net: {formatNumber(Math.abs(chargesPreview.net) < 0.015 ? 0 : chargesPreview.net)}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm">
                     <div><span className="text-slate-500 dark:text-slate-300">Turnover</span><div className="font-medium">{formatNumber(chargesPreview.turnover)}</div></div>
                     <div><span className="text-slate-500 dark:text-slate-300">Brokerage</span><div className="font-medium">{formatNumber(chargesPreview.brokerage)}</div></div>
                     <div><span className="text-slate-500 dark:text-slate-300">STT</span><div className="font-medium">{formatNumber(chargesPreview.stt)}</div></div>
@@ -355,7 +371,7 @@ export default function TradesTab({
                 </div>
               </div>
 
-              <div className="md:col-span-2 flex flex-wrap gap-2 pt-3">
+              <div className="sm:col-span-2 flex flex-col sm:flex-row flex-wrap gap-2 pt-3">
                 <button type="submit" className="btn btn-primary">Save Trade</button>
                 <button type="button" onClick={() => setForm({ ...form, id: Date.now() + Math.random(), qty: '', buy: '', sell: '' })} className="btn btn-secondary">Clear</button>
 

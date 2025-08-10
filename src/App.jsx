@@ -551,7 +551,7 @@ export default function App() {
       <div className="grid grid-rows-[auto_1fr]">
         {/* Header */}
         <header className="header">
-          <div className="container-wrap flex items-center justify-between h-14">
+          <div className="container-wrap flex flex-col sm:flex-row items-start sm:items-center justify-between min-h-14 py-2 gap-3">
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
                 <IconCandle className="w-5 h-5 text-sky-600"/>
@@ -559,11 +559,11 @@ export default function App() {
                 <span className="badge badge-green">v1</span>
         </div>
       </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setIsCompact(v => !v)} type="button" className="btn btn-secondary" title="Toggle density">{isCompact ? 'Comfortable' : 'Compact'}</button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setIsCompact(v => !v)} type="button" className="btn btn-secondary hidden sm:inline-flex" title="Toggle density">{isCompact ? 'Comfortable' : 'Compact'}</button>
               <button onClick={() => setIsDark(v => !v)} type="button" className="btn btn-secondary" title="Toggle dark mode">{isDark ? <IconSun/> : <IconMoon/>}</button>
-              <button onClick={exportExcel} type="button" className="btn btn-secondary"><IconDownload/> Export</button>
-              <button onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} type="button" className="btn btn-danger"><IconReset/> Reset</button>
+              <button onClick={exportExcel} type="button" className="btn btn-secondary"><IconDownload/> <span className="hidden sm:inline">Export</span></button>
+              <button onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} type="button" className="btn btn-danger"><IconReset/> <span className="hidden sm:inline">Reset</span></button>
         </div>
         </div>
         </header>

@@ -5,7 +5,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
   return (
     <div>
       {/* Period Controls */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
         <div className="text-sm text-slate-600 dark:text-slate-300">{periodLabel}</div>
         <div className="flex items-center gap-2">{periodControls}</div>
       </div>
@@ -39,10 +39,10 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
       </div>
 
       {/* Charts */}
-      <div className="grid md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <div className="card">
           <div className="card-header"><h2 className="font-semibold">Monthly P&L</h2></div>
-          <div className="card-body h-64">
+          <div className="card-body h-48 sm:h-64">
             {allMonthRows.length ? (
               <Bar
                 data={monthlyChart}
@@ -66,7 +66,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
         </div>
         <div className="card">
           <div className="card-header"><h2 className="font-semibold">Equity Curve</h2></div>
-          <div className="card-body h-64">
+          <div className="card-body h-48 sm:h-64">
             {totals.trades ? <Line data={equityChart} options={{...commonChartOptions, scales:{ x:{ grid:{ display:false } }, y:{ grid:{ color:'#e5e7eb' } } }}} /> : <div className="text-slate-500">No trades yet</div>}
           </div>
         </div>
