@@ -1,7 +1,7 @@
 import React from "react";
 import { Line, Bar } from "react-chartjs-2";
 
-export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, monthlyChart, equityChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth }) {
+export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, directionRows, emotionRows, monthlyChart, equityChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth }) {
   return (
     <div>
       {/* Period Controls */}
@@ -123,6 +123,65 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                     <td className={"td " + (s.avgNet >= 0 ? "text-green-700" : "text-red-700")}>{formatNumber(s.avgNet)}</td>
                   </tr>
                 )) : <tr><td colSpan="4" className="td text-slate-500">No setups yet</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Analytics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="card table-wrap">
+          <div className="card-header"><h2 className="font-semibold">Direction Analytics</h2></div>
+          <div className="table-scroll">
+            <table className="table">
+              <thead className="thead">
+                <tr>
+                  <th className="th">Type→Trend</th>
+                  <th className="th">Trades</th>
+                  <th className="th">Win%</th>
+                  <th className="th">Avg Net</th>
+                </tr>
+              </thead>
+              <tbody>
+                {directionRows && directionRows.length ? directionRows.map(d => (
+                  <tr key={d.combo} className="tr">
+                    <td className="td">
+                      <span className="font-medium">{d.combo}</span>
+                    </td>
+                    <td className="td">{d.trades}</td>
+                    <td className="td">{d.winRate}%</td>
+                    <td className={"td " + (d.avgNet >= 0 ? "text-green-700" : "text-red-700")}>{formatNumber(d.avgNet)}</td>
+                  </tr>
+                )) : <tr><td colSpan="4" className="td text-slate-500">No direction data yet</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="card table-wrap">
+          <div className="card-header"><h2 className="font-semibold">Emotion Analytics</h2></div>
+          <div className="table-scroll">
+            <table className="table">
+              <thead className="thead">
+                <tr>
+                  <th className="th">Emotion</th>
+                  <th className="th">Trades</th>
+                  <th className="th">Win%</th>
+                  <th className="th">Avg Net</th>
+                </tr>
+              </thead>
+              <tbody>
+                {emotionRows && emotionRows.length ? emotionRows.map(e => (
+                  <tr key={e.emotion} className="tr">
+                    <td className="td">
+                      <span className="font-medium">{e.emotion}</span>
+                    </td>
+                    <td className="td">{e.trades}</td>
+                    <td className="td">{e.winRate}%</td>
+                    <td className={"td " + (e.avgNet >= 0 ? "text-green-700" : "text-red-700")}>{formatNumber(e.avgNet)}</td>
+                  </tr>
+                )) : <tr><td colSpan="4" className="td text-slate-500">No emotion data yet</td></tr>}
               </tbody>
             </table>
           </div>

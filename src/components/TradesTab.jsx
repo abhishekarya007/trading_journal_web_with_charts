@@ -88,6 +88,7 @@ export default function TradesTab({
                 <th className="th cursor-pointer" onClick={() => onSortChange('buy')}>Buy {sortKey==='buy' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
                 <th className="th cursor-pointer" onClick={() => onSortChange('sell')}>Sell {sortKey==='sell' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
                 <th className="th cursor-pointer" onClick={() => onSortChange('net')}>Net P&L {sortKey==='net' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('riskReward')}>R:R {sortKey==='riskReward' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
                 <th className="th">Setup</th>
                 <th className="th">Actions</th>
               </tr>
@@ -119,6 +120,13 @@ export default function TradesTab({
                     {t.meta?.net !== undefined ? formatNumber(Number(t.meta?.net)) : "-"}
                   </td>
                   <td className="td">
+                    {t.riskReward ? (
+                      <span className="text-slate-700 dark:text-slate-200 font-medium">{t.riskReward}</span>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
+                  <td className="td">
                     {t.setup ? (
                       <span className="chip">{t.setup}</span>
                     ) : (
@@ -133,7 +141,7 @@ export default function TradesTab({
                     </div>
                   </td>
                 </tr>
-              )) : <tr><td colSpan="9" className="td text-slate-500">No trades found</td></tr>}
+              )) : <tr><td colSpan="10" className="td text-slate-500">No trades found</td></tr>}
             </tbody>
           </table>
         </div>
@@ -141,40 +149,40 @@ export default function TradesTab({
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowModal(false)}>
-          <div className="bg-white dark:bg-slate-800 w-full max-w-3xl rounded-xl shadow-xl border border-slate-200 dark:border-slate-700" onClick={(e)=>e.stopPropagation()}>
-            <div className="card-header flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-xl shadow-xl border border-slate-200 dark:border-slate-700" onClick={(e)=>e.stopPropagation()}>
+            <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <h2 className="font-semibold">Add / Edit Trade</h2>
-              <button className="btn btn-secondary" onClick={()=>setShowModal(false)}>Close</button>
+              <button className="btn btn-secondary !px-2 !py-1 text-sm" onClick={()=>setShowModal(false)}>Close</button>
             </div>
-            <form onSubmit={(e)=>{ addOrUpdateTrade(e); setShowModal(false); }} className="card-body grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="md:col-span-3">
+            <form onSubmit={(e)=>{ addOrUpdateTrade(e); setShowModal(false); }} className="p-4 grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[80vh] overflow-y-auto">
+              <div className="md:col-span-2">
                 <div className="text-slate-500 dark:text-slate-300 text-sm mb-2">Trade details</div>
               </div>
               <div>
                 <label className="label">Date</label>
-                <input required value={form.date} onChange={e => setForm({...form, date: e.target.value})} type="date" className="mt-1 field field-md"/>
+                <input required value={form.date} onChange={e => setForm({...form, date: e.target.value})} type="date" className="field field-md"/>
               </div>
               <div>
                 <label className="label">Symbol</label>
-                <input placeholder="e.g. NIFTY" required value={form.symbol} onChange={e => setForm({...form, symbol: e.target.value.toUpperCase()})} className="mt-1 field field-md"/>
+                <input placeholder="e.g. NIFTY" required value={form.symbol} onChange={e => setForm({...form, symbol: e.target.value.toUpperCase()})} className="field field-md"/>
               </div>
               <div>
                 <label className="label">Trade Type</label>
-                <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="mt-1 field field-md">
+                <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="field field-md">
                   <option>Long</option>
                   <option>Short</option>
                 </select>
               </div>
               <div>
                 <label className="label">Trend</label>
-                <select value={form.trend || 'Up'} onChange={e => setForm({...form, trend: e.target.value})} className="mt-1 field field-md">
+                <select value={form.trend || 'Up'} onChange={e => setForm({...form, trend: e.target.value})} className="field field-md">
                   <option>Up</option>
                   <option>Down</option>
                 </select>
               </div>
               <div>
                 <label className="label">Rule Followed</label>
-                <select value={form.rule || 'Yes'} onChange={e => setForm({...form, rule: e.target.value})} className="mt-1 field field-md">
+                <select value={form.rule || 'Yes'} onChange={e => setForm({...form, rule: e.target.value})} className="field field-md">
                   <option>Yes</option>
                   <option>No</option>
                 </select>
@@ -182,45 +190,47 @@ export default function TradesTab({
 
               <div>
                 <label className="label">Qty</label>
-                <input placeholder="0" inputMode="numeric" type="text" value={form.qty} onChange={e => setForm({...form, qty: e.target.value.replace(/[^0-9]/g, '')})} className="mt-1 field field-md"/>
+                <input placeholder="0" inputMode="numeric" type="text" value={form.qty} onChange={e => setForm({...form, qty: e.target.value.replace(/[^0-9]/g, '')})} className="field field-md"/>
               </div>
               <div>
                 <label className="label">Buy Price</label>
-                <input placeholder="0.00" inputMode="decimal" type="text" value={form.buy} onChange={e => setForm({...form, buy: e.target.value.replace(/[^0-9.]/g, '')})} className="mt-1 field field-md"/>
+                <input placeholder="0.00" inputMode="decimal" type="text" value={form.buy} onChange={e => setForm({...form, buy: e.target.value.replace(/[^0-9.]/g, '')})} className="field field-md"/>
                 <p className="text-xs text-slate-500 mt-1">Average buy price per unit</p>
               </div>
               <div>
                 <label className="label">Sell Price</label>
-                <input placeholder="0.00" inputMode="decimal" type="text" value={form.sell} onChange={e => setForm({...form, sell: e.target.value.replace(/[^0-9.]/g, '')})} className="mt-1 field field-md"/>
+                <input placeholder="0.00" inputMode="decimal" type="text" value={form.sell} onChange={e => setForm({...form, sell: e.target.value.replace(/[^0-9.]/g, '')})} className="field field-md"/>
                 <p className="text-xs text-slate-500 mt-1">Average sell price per unit</p>
               </div>
 
               <div>
                 <label className="label">Setup</label>
-                <input placeholder="e.g. Breakout, Pullback" value={form.setup} onChange={e => setForm({...form, setup: e.target.value})} className="mt-1 field field-md"/>
+                <input placeholder="e.g. Breakout, Pullback" value={form.setup} onChange={e => setForm({...form, setup: e.target.value})} className="field field-md"/>
               </div>
               <div className="md:col-span-2">
                 <label className="label">Remarks</label>
-                <input placeholder="Notes, mistakes, improvements..." value={form.remarks} onChange={e => setForm({...form, remarks: e.target.value})} className="mt-1 field field-md"/>
+                <input placeholder="Notes, mistakes, improvements..." value={form.remarks} onChange={e => setForm({...form, remarks: e.target.value})} className="field field-md"/>
               </div>
-              <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div>
-                  <label className="label">Emotion</label>
-                  <select value={form.emotion || ''} onChange={e => setForm({...form, emotion: e.target.value})} className="mt-1 field field-md">
-                    <option value="">Select emotion</option>
-                    <option>Calm</option>
-                    <option>Confident</option>
-                    <option>Fearful</option>
-                    <option>Greedy</option>
-                    <option>FOMO</option>
-                    <option>Revenge</option>
-                    <option>Stressed</option>
-                  </select>
-                </div>
+              <div>
+                <label className="label">Emotion</label>
+                <select value={form.emotion || ''} onChange={e => setForm({...form, emotion: e.target.value})} className="field field-md">
+                  <option value="">Select emotion</option>
+                  <option>Calm</option>
+                  <option>Confident</option>
+                  <option>Fearful</option>
+                  <option>Greedy</option>
+                  <option>FOMO</option>
+                  <option>Revenge</option>
+                  <option>Stressed</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">Risk:Reward</label>
+                <input placeholder="e.g. 1:2" value={form.riskReward} onChange={e => setForm({...form, riskReward: e.target.value})} className="field field-md"/>
               </div>
 
-              <div className="md:col-span-3">
-                <div className="mt-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/40 p-3">
+              <div className="md:col-span-2">
+                <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/40 p-2">
                   <div className="flex items-center justify-between mb-2">
                     <div className="section-title">Charges preview</div>
                     <div className={(chargesPreview.net >= 0 ? 'badge badge-green' : 'badge badge-red') + ' capitalize'}>
@@ -240,7 +250,7 @@ export default function TradesTab({
                 </div>
               </div>
 
-              <div className="md:col-span-3 flex flex-wrap gap-2 pt-3">
+              <div className="md:col-span-2 flex flex-wrap gap-2 pt-3">
                 <button type="submit" className="btn btn-primary">Save Trade</button>
                 <button type="button" onClick={() => setForm({ ...form, id: Date.now() + Math.random(), qty: '', buy: '', sell: '' })} className="btn btn-secondary">Clear</button>
 

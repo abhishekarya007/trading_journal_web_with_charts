@@ -42,6 +42,7 @@ function blankTrade() {
     trend: "Up",
     rule: "Yes",
     emotion: "",
+    riskReward: "",
     setup: "",
     remarks: ""
   };
@@ -93,6 +94,7 @@ export default function App() {
       trend: form.trend || 'Up',
       rule: form.rule || 'Yes',
       emotion: form.emotion || '',
+      riskReward: form.riskReward || '',
     };
     const computed = calcTradeCharges({
       qty: trade.qty, buy: trade.buy, sell: trade.sell, type: trade.type
@@ -128,6 +130,7 @@ export default function App() {
       trend: t.trend || 'Up',
       rule: t.rule || 'Yes',
       emotion: t.emotion || '',
+      riskReward: t.riskReward || '',
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -165,6 +168,7 @@ export default function App() {
           trend: r.Trend || r.trend || "Up",
           rule: r["Rule Followed"] || r.rule || "Yes",
           emotion: r.Emotion || r.emotion || "",
+          riskReward: r["Risk Reward"] || r.riskReward || "",
           qty: Number(r.Qty || r.qty || 0),
           buy: Number(r["Buy Price"] || r.buy || 0),
           sell: Number(r["Sell Price"] || r.sell || 0),
@@ -187,6 +191,7 @@ export default function App() {
       Trend: t.trend,
       "Rule Followed": t.rule,
       Emotion: t.emotion,
+      "Risk Reward": t.riskReward,
       Qty: t.qty,
       "Buy Price": t.buy,
       "Sell Price": t.sell,
@@ -233,23 +238,7 @@ export default function App() {
     avg: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
   }));
 
-  const setupMap = trades.reduce((acc, t) => {
-    const s = t.setup || "Unspecified";
-    if (!acc[s]) acc[s] = { trades:0, wins:0, losses:0, net:0 };
-    acc[s].trades++;
-    const net = t.meta?.net || 0;
-    if (net > 0) acc[s].wins++; else acc[s].losses++;
-    acc[s].net += net;
-    return acc;
-  }, {});
-  const setupRows = Object.entries(setupMap).map(([s, v]) => ({
-    setup: s,
-    trades: v.trades,
-    wins: v.wins,
-    losses: v.losses,
-    winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
-    avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
-  }));
+
 
   // Chart data: Monthly P&L bar
   const monthLabels = monthRows.map(m => m.month);
@@ -359,6 +348,70 @@ export default function App() {
     const avg = scopedTrades.length ? Math.round((net / scopedTrades.length) * 100) / 100 : 0;
     return { net: Math.round(net * 100) / 100, wins, losses, winRate, avg, trades: scopedTrades.length };
   }, [scopedTrades]);
+
+  // Scoped Setup Analytics
+  const scopedSetupRows = useMemo(() => {
+    const setupMap = scopedTrades.reduce((acc, t) => {
+      const s = t.setup || "Unspecified";
+      if (!acc[s]) acc[s] = { trades:0, wins:0, losses:0, net:0 };
+      acc[s].trades++;
+      const net = t.meta?.net || 0;
+      if (net > 0) acc[s].wins++; else acc[s].losses++;
+      acc[s].net += net;
+      return acc;
+    }, {});
+    return Object.entries(setupMap).map(([s, v]) => ({
+      setup: s,
+      trades: v.trades,
+      wins: v.wins,
+      losses: v.losses,
+      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+      avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+    }));
+  }, [scopedTrades]);
+
+  // Scoped Direction Analytics (Type + Trend combinations)
+  const scopedDirectionRows = useMemo(() => {
+    const directionMap = scopedTrades.reduce((acc, t) => {
+      const combo = `${t.type || 'Long'}→${t.trend || 'Up'}`;
+      if (!acc[combo]) acc[combo] = { trades:0, wins:0, losses:0, net:0 };
+      acc[combo].trades++;
+      const net = t.meta?.net || 0;
+      if (net > 0) acc[combo].wins++; else acc[combo].losses++;
+      acc[combo].net += net;
+      return acc;
+    }, {});
+    return Object.entries(directionMap).map(([combo, v]) => ({
+      combo,
+      trades: v.trades,
+      wins: v.wins,
+      losses: v.losses,
+      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+      avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+    }));
+  }, [scopedTrades]);
+
+  // Scoped Emotion Analytics
+  const scopedEmotionRows = useMemo(() => {
+    const emotionMap = scopedTrades.reduce((acc, t) => {
+      const emotion = t.emotion || "Not Specified";
+      if (!acc[emotion]) acc[emotion] = { trades:0, wins:0, losses:0, net:0 };
+      acc[emotion].trades++;
+      const net = t.meta?.net || 0;
+      if (net > 0) acc[emotion].wins++; else acc[emotion].losses++;
+      acc[emotion].net += net;
+      return acc;
+    }, {});
+    return Object.entries(emotionMap).map(([emotion, v]) => ({
+      emotion,
+      trades: v.trades,
+      wins: v.wins,
+      losses: v.losses,
+      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+      avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+    }));
+  }, [scopedTrades]);
+
   const scopedMonthly = useMemo(() => {
     if (analyticsScope === 'overall') return monthRows;
     const label = activeMonthLabel || monthLabelFromKey(selectedMonthKey);
@@ -428,10 +481,13 @@ export default function App() {
         case 'date': return t.date || '';
         case 'symbol': return (t.symbol || '').toLowerCase();
         case 'type': return (t.type || '').toLowerCase();
+        case 'trend': return (t.trend || '').toLowerCase();
+        case 'rule': return (t.rule || '').toLowerCase();
         case 'qty': return Number(t.qty) || 0;
         case 'buy': return Number(t.buy) || 0;
         case 'sell': return Number(t.sell) || 0;
         case 'net': return Number(t.meta?.net) || 0;
+        case 'riskReward': return (t.riskReward || '').toLowerCase();
         default: return '';
       }
     };
@@ -477,23 +533,23 @@ export default function App() {
                 <IconCandle className="w-5 h-5 text-sky-600"/>
                 <span className="text-lg font-semibold">Trading Journal</span>
                 <span className="badge badge-green">v1</span>
-              </div>
-            </div>
+        </div>
+      </div>
             <div className="flex items-center gap-2">
               <button onClick={() => setIsCompact(v => !v)} type="button" className="btn btn-secondary" title="Toggle density">{isCompact ? 'Comfortable' : 'Compact'}</button>
               <button onClick={() => setIsDark(v => !v)} type="button" className="btn btn-secondary" title="Toggle dark mode">{isDark ? <IconSun/> : <IconMoon/>}</button>
               <button onClick={exportExcel} type="button" className="btn btn-secondary"><IconDownload/> Export</button>
               <button onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} type="button" className="btn btn-danger"><IconReset/> Reset</button>
-            </div>
-          </div>
+        </div>
+        </div>
         </header>
         <div className="container-wrap pt-4">
           <div className="rounded-xl bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-slate-200 dark:border-slate-700 p-4 mb-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div>
+        <div>
                 <div className="text-sm text-slate-600 dark:text-slate-300">Welcome back</div>
                 <div className="text-xl font-semibold">Your trading performance at a glance</div>
-              </div>
+        </div>
               <div className="flex items-center gap-3 text-sm">
                 <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Win Rate</span> <span className="ml-2 font-semibold">{totals.winRate}%</span></div>
                 <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600">
@@ -501,12 +557,12 @@ export default function App() {
                   <span className={"ml-2 font-semibold " + (totals.net>=0?'text-green-700':'text-red-700')}>{formatNumber(totals.net)}</span>
                   <div className="mt-1 h-6">
                     <Line data={{ labels: spark.map((_,i)=>i+1), datasets:[{ data:spark, borderColor: totals.net>=0?'#16a34a':'#dc2626', backgroundColor:'transparent', tension:0.3, pointRadius:0, borderWidth:1.5 }] }} options={{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{enabled:false}}, scales:{ x:{display:false}, y:{display:false} } }} />
-                  </div>
-                </div>
+        </div>
+        </div>
                 <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Trades</span> <span className="ml-2 font-semibold">{totals.trades}</span></div>
-              </div>
-            </div>
-          </div>
+        </div>
+        </div>
+        </div>
         </div>
 
         <main className="content">
@@ -518,7 +574,9 @@ export default function App() {
               monthRows={scopedMonthly}
               allMonthRows={monthRows}
               activeMonthLabel={activeMonthLabel}
-              setupRows={setupRows}
+              setupRows={scopedSetupRows}
+              directionRows={scopedDirectionRows}
+              emotionRows={scopedEmotionRows}
               monthlyChart={monthlyChart}
               equityChart={scopedEquityChart}
               commonChartOptions={commonChartOptions}
@@ -555,10 +613,10 @@ export default function App() {
             />
           }
             />
-          </div>
+        </div>
         </main>
       </div>
-    </div>
+        </div>
   );
 }
 
