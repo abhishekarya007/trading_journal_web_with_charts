@@ -154,7 +154,6 @@ export default function ScreenshotManager({ screenshots, onChange }) {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Thumbnail clicked:', screenshot.name, 'Has fullSize:', !!screenshot.fullSize);
                     setViewingImage(screenshot);
                   }}
                   className="flex-shrink-0 group relative"
@@ -227,7 +226,6 @@ export default function ScreenshotManager({ screenshots, onChange }) {
               className="max-w-full max-h-full object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
               onError={(e) => {
-                console.error('Image failed to load:', viewingImage.name);
                 // Fallback to thumbnail if fullSize fails
                 if (e.target.src !== viewingImage.thumbnail) {
                   e.target.src = viewingImage.thumbnail;

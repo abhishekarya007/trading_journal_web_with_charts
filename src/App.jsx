@@ -17,6 +17,7 @@ import {
 import { Line, Bar } from "react-chartjs-2";
 import AnalyticsTab from "./components/AnalyticsTab";
 import TradesTab from "./components/TradesTab";
+import TradingRulesTab from "./components/TradingRulesTab";
 import { IconCandle, IconDownload, IconReset, IconMoon, IconSun } from "./components/icons";
 
 ChartJS.register(
@@ -948,6 +949,9 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
               goToNextPage={goToNextPage}
             />
           }
+          rulesComponent={
+            <TradingRulesTab />
+          }
             />
         </div>
         </main>
@@ -956,7 +960,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
   );
 }
 
-function Tabs({ analyticsComponent, tradesComponent }) {
+function Tabs({ analyticsComponent, tradesComponent, rulesComponent }) {
   const [active, setActive] = React.useState(() => localStorage.getItem('ui_active_tab') || 'trades');
   React.useEffect(() => { localStorage.setItem('ui_active_tab', active); }, [active]);
   return (
@@ -968,8 +972,11 @@ function Tabs({ analyticsComponent, tradesComponent }) {
         <button onClick={() => setActive('analytics')} className={(active === 'analytics' ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200') + ' rounded-lg px-3 py-1.5 text-sm font-medium transition-colors'}>
           Analytics
         </button>
+        <button onClick={() => setActive('rules')} className={(active === 'rules' ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200') + ' rounded-lg px-3 py-1.5 text-sm font-medium transition-colors'}>
+          Trading Rules
+        </button>
       </div>
-      {active === 'trades' ? tradesComponent : analyticsComponent}
+      {active === 'trades' ? tradesComponent : active === 'analytics' ? analyticsComponent : rulesComponent}
     </div>
   );
 }
