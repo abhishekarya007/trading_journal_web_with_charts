@@ -18,6 +18,7 @@ import { Line, Bar } from "react-chartjs-2";
 import AnalyticsTab from "./components/AnalyticsTab";
 import TradesTab from "./components/TradesTab";
 import TradingRulesTab from "./components/TradingRulesTab";
+import CooldownTimer from "./components/CooldownTimer";
 import { IconCandle, IconDownload, IconReset, IconMoon, IconSun } from "./components/icons";
 
 ChartJS.register(
@@ -815,13 +816,16 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
         {/* Header */}
         <header className="header">
           <div className="container-wrap flex flex-col sm:flex-row items-start sm:items-center justify-between min-h-14 py-2 gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <div className="flex items-center gap-2">
                 <IconCandle className="w-5 h-5 text-sky-600"/>
                 <span className="text-lg font-semibold">Trading Journal</span>
                 <span className="badge badge-green">v1</span>
-        </div>
-      </div>
+              </div>
+              
+              {/* Cooldown Timer */}
+              <CooldownTimer />
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               <button onClick={() => setIsCompact(v => !v)} type="button" className="btn btn-secondary hidden sm:inline-flex" title="Toggle density">{isCompact ? 'Comfortable' : 'Compact'}</button>
               <button onClick={() => setIsDark(v => !v)} type="button" className="btn btn-secondary" title="Toggle dark mode">{isDark ? <IconSun/> : <IconMoon/>}</button>
