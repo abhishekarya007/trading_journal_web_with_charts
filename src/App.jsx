@@ -18,6 +18,7 @@ import { Line, Bar } from "react-chartjs-2";
 import AnalyticsTab from "./components/AnalyticsTab";
 import TradesTab from "./components/TradesTab";
 import TradingRulesTab from "./components/TradingRulesTab";
+import GrowthCalculatorTab from "./components/GrowthCalculatorTab";
 import CooldownTimer from "./components/CooldownTimer";
 import Navigation from "./components/Navigation";
 import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX } from "./components/icons";
@@ -1093,6 +1094,14 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
             
             {activeTab === 'rules' && (
               <TradingRulesTab />
+            )}
+            
+            {activeTab === 'growth-calculator' && (
+              <GrowthCalculatorTab
+                trades={trades}
+                formatNumber={formatNumber}
+                formatCurrency={formatCurrency}
+              />
             )}
         </div>
         </main>

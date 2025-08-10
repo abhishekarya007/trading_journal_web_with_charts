@@ -11,7 +11,8 @@ import {
   IconRocket,
   IconStar,
   IconHeart,
-  IconSparkles
+  IconSparkles,
+  IconTarget
 } from './icons';
 
 const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }) => {
@@ -49,6 +50,10 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
           case '3':
             e.preventDefault();
             setActiveTab('rules');
+            break;
+          case '4':
+            e.preventDefault();
+            setActiveTab('growth-calculator');
             break;
           case 'b':
             e.preventDefault();
@@ -89,6 +94,15 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       color: 'from-purple-500 to-pink-500',
       bgColor: 'from-purple-50 to-pink-50',
       darkBgColor: 'from-purple-900/20 to-pink-900/20'
+    },
+    {
+      id: 'growth-calculator',
+      label: 'Growth Calculator',
+      icon: IconTarget,
+      description: 'Calculate your potential growth',
+      color: 'from-indigo-500 to-purple-500',
+      bgColor: 'from-indigo-50 to-purple-50',
+      darkBgColor: 'from-indigo-900/20 to-purple-900/20'
     }
   ];
 
