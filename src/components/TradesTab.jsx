@@ -25,7 +25,9 @@ import {
   IconUpload,
   IconRefresh,
   IconCheck,
-  IconX
+  IconX,
+  IconChevronUp,
+  IconChevronDown
 } from './icons';
 
 const TradesTab = ({ 
@@ -101,7 +103,31 @@ const TradesTab = ({
   };
 
   const getTradeTypeIcon = (type) => {
-    return type === 'Long' ? <IconTrendingUp className="w-3 h-3" /> : <IconTrendingDown className="w-3 h-3" />;
+    return type === 'Long' 
+      ? <IconTrendingUp className="w-4 h-4" />
+      : <IconTrendingDown className="w-4 h-4" />;
+  };
+
+  const getSortIcon = (columnKey) => {
+    if (sortKey !== columnKey) {
+      return <IconChevronUp className="w-4 h-4 text-slate-400" />;
+    }
+    return sortDir === 'asc' 
+      ? <IconChevronUp className="w-4 h-4 text-blue-500" />
+      : <IconChevronDown className="w-4 h-4 text-blue-500" />;
+  };
+
+  const getSortTooltip = (columnKey) => {
+    if (sortKey !== columnKey) {
+      return `Sort by ${columnKey}`;
+    }
+    return sortDir === 'asc' 
+      ? `Sorted by ${columnKey} (ascending) - Click to sort descending`
+      : `Sorted by ${columnKey} (descending) - Click to sort ascending`;
+  };
+
+  const handleSort = (key) => {
+    onSortChange(key);
   };
 
   return (
@@ -306,19 +332,60 @@ const TradesTab = ({
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Trade
+                  <button 
+                    onClick={() => handleSort('date')}
+                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    title={getSortTooltip('date')}
+                  >
+                    <span>Date</span>
+                    {getSortIcon('date')}
+                  </button>
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Details
+                  <button 
+                    onClick={() => handleSort('symbol')}
+                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    title={getSortTooltip('symbol')}
+                  >
+                    <span>Symbol</span>
+                    {getSortIcon('symbol')}
+                  </button>
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Performance
+                  <button 
+                    onClick={() => handleSort('type')}
+                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    title={getSortTooltip('type')}
+                  >
+                    <span>Type</span>
+                    {getSortIcon('type')}
+                  </button>
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Analysis
+                  <button 
+                    onClick={() => handleSort('qty')}
+                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    title={getSortTooltip('qty')}
+                  >
+                    <span>Qty</span>
+                    {getSortIcon('qty')}
+                  </button>
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <button 
+                    onClick={() => handleSort('net')}
+                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    title={getSortTooltip('net')}
+                  >
+                    <span>Performance</span>
+                    {getSortIcon('net')}
+                  </button>
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <span>Analysis</span>
                 </th>
                 <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Actions
+                  <span>Actions</span>
                 </th>
               </tr>
             </thead>
@@ -326,33 +393,25 @@ const TradesTab = ({
               {visibleTrades.map((trade, index) => (
                 <tr key={trade.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg" style={{ animationDelay: `${index * 50}ms` }}>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getTradeStatusColor(trade.meta?.net || 0)}`}>
-                        {getTradeStatusIcon(trade.meta?.net || 0)}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-900 dark:text-white">{trade.symbol || 'Unknown'}</div>
-                        <div className="text-sm text-slate-500 dark:text-slate-400">
-                          {new Date(trade.date).toLocaleDateString()}
-                        </div>
-                      </div>
+                    <div className="text-sm text-slate-500 dark:text-slate-400">
+                      {new Date(trade.date).toLocaleDateString()}
                     </div>
                   </td>
                   
                   <td className="px-6 py-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-white ${getTradeTypeColor(trade.type)}`}>
-                          {getTradeTypeIcon(trade.type)}
-                          {trade.type}
-                        </span>
-                        <span className="text-sm text-slate-600 dark:text-slate-400">
-                          Qty: {trade.qty}
-                        </span>
-                      </div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">
-                        Buy: ₹{trade.buy} | Sell: ₹{trade.sell}
-                      </div>
+                    <div className="font-semibold text-slate-900 dark:text-white">{trade.symbol || 'Unknown'}</div>
+                  </td>
+                  
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-white ${getTradeTypeColor(trade.type)}`}>
+                      {getTradeTypeIcon(trade.type)}
+                      {trade.type}
+                    </span>
+                  </td>
+                  
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-slate-500 dark:text-slate-400">
+                      {trade.qty}
                     </div>
                   </td>
                   
@@ -362,7 +421,7 @@ const TradesTab = ({
                         ₹{formatNumber(trade.meta?.net || 0)}
                       </div>
                       <div className="text-xs text-slate-500 dark:text-slate-400">
-                        Charges: ₹{formatNumber(trade.meta?.totalCharges || 0)}
+                        Buy: ₹{trade.buy} | Sell: ₹{trade.sell}
                       </div>
                     </div>
                   </td>

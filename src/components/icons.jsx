@@ -349,3 +349,15 @@ export const IconFilter = (props) => (
     <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
   </svg>
 );
+
+export const IconChevronUp = ({ className = "w-6 h-6" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+  </svg>
+);
+
+export const IconChevronDown = ({ className = "w-6 h-6" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+  </svg>
+);
