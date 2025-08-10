@@ -326,7 +326,24 @@ export default function TradesTab({
 
               <div>
                 <label className="label">Setup</label>
-                <input placeholder="e.g. Breakout, Pullback" value={form.setup} onChange={e => setForm({...form, setup: e.target.value})} className="field field-md"/>
+                <select value={form.setup || ''} onChange={e => setForm({...form, setup: e.target.value})} className="field field-md">
+                  <option value="">Select setup</option>
+                  <option>Breakout</option>
+                  <option>Breakdown</option>
+                  <option>Liquidity-Sweep</option>
+                  <option>Reversal</option>
+                  <option>Support</option>
+                  <option>Resistance</option>
+                  <option>Trendline</option>
+                  <option>Scalping</option>
+                  <option>Price Action</option>
+                  <option>M pattern</option>
+                  <option>W pattern</option>
+                  <option>Pin Bar</option>
+                  <option>Magic candle</option>
+                  <option>Retest</option>
+                  <option>Trap</option>
+                </select>
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Remarks</label>
