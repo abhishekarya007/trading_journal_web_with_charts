@@ -7,7 +7,7 @@ import {
   IconSearch, 
   IconFilter, 
   IconCalendar,
-  IconDollarSign,
+  IconRupee,
   IconTarget,
   IconChartBar,
   IconStar,
@@ -635,11 +635,10 @@ const TradesTab = ({
                     Risk to Reward
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     value={form.riskReward}
                     onChange={(e) => setForm({...form, riskReward: e.target.value})}
                     placeholder="e.g., 1:2"
-                    step="0.1"
                     className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   />
                 </div>
@@ -793,7 +792,7 @@ const TradesTab = ({
                 <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-900/20 dark:via-green-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <IconDollarSign className="w-5 h-5 text-white" />
+                      <IconRupee className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">Charges Breakdown</h3>

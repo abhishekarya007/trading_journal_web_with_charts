@@ -7,7 +7,7 @@ import {
   IconDownload, 
   IconUpload, 
   IconCalendar,
-  IconDollarSign,
+  IconRupee,
   IconTarget,
   IconChartBar,
   IconStar,
@@ -26,6 +26,7 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
   const [showImportMenu, setShowImportMenu] = useState(false);
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
+  const [selectedMonth, setSelectedMonth] = useState(null);
 
   // Generate dummy data for August
   const generateDummyData = () => {
@@ -411,21 +412,34 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
   const summaryMetrics = useMemo(() => {
     if (sortedData.length === 0) return null;
 
+    // Get the selected month data or the latest month if none selected
+    const selectedData = selectedMonth 
+      ? sortedData.find(item => item.id === selectedMonth)
+      : sortedData[sortedData.length - 1];
+
+    if (!selectedData) return null;
+
+    // Calculate totals for all data
     const totalPnL = sortedData.reduce((sum, item) => sum + item.pnl, 0);
     const totalGrowth = ((sortedData[sortedData.length - 1]?.finalCapital || 20000) - 20000) / 20000 * 100;
-    const avgMonthlyGrowth = sortedData.reduce((sum, item) => sum + item.growthPercentage, 0) / sortedData.length;
     const totalTrades = sortedData.reduce((sum, item) => sum + item.trades, 0);
-    const avgWinRate = sortedData.reduce((sum, item) => sum + item.winRate, 0) / sortedData.length;
 
     return {
+      // Selected month data
+      selectedMonth: selectedData.month,
+      selectedYear: selectedData.year,
+      selectedPnL: selectedData.pnl,
+      selectedGrowth: selectedData.growthPercentage,
+      selectedTrades: selectedData.trades,
+      selectedWinRate: selectedData.winRate,
+      selectedCapitalUsed: selectedData.initialCapital,
+      selectedFinalCapital: selectedData.finalCapital,
+      // Overall data
       totalPnL,
       totalGrowth,
-      avgMonthlyGrowth,
-      totalTrades,
-      avgWinRate,
-      finalCapital: sortedData[sortedData.length - 1]?.finalCapital || 20000
+      totalTrades
     };
-  }, [sortedData]);
+  }, [sortedData, selectedMonth]);
 
   return (
     <div className="space-y-6 p-6">
@@ -448,47 +462,68 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
 
           {/* Summary Cards */}
           {summaryMetrics && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-3">
-                  <IconDollarSign className="w-6 h-6 text-emerald-300" />
-                  <div>
-                    <div className="text-2xl font-bold">{formatCurrency(summaryMetrics.finalCapital)}</div>
-                    <div className="text-indigo-100 text-sm">Final Capital</div>
+            <>
+              {/* Selected Month Header */}
+              <div className="mb-4 text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+                  <IconCalendar className="w-5 h-5 text-indigo-200" />
+                  <span className="text-lg font-semibold text-white">
+                    {summaryMetrics.selectedMonth} {summaryMetrics.selectedYear}
+                  </span>
+                  {selectedMonth && (
+                    <button
+                      onClick={() => setSelectedMonth(null)}
+                      className="ml-2 p-1 hover:bg-white/20 rounded-lg transition-colors"
+                      title="Show latest month"
+                    >
+                      <IconX className="w-4 h-4 text-indigo-200" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="flex items-center gap-3">
+                    <IconRupee className="w-6 h-6 text-emerald-300" />
+                    <div>
+                      <div className="text-2xl font-bold">{formatCurrency(summaryMetrics.selectedFinalCapital)}</div>
+                      <div className="text-indigo-100 text-sm">Final Capital</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="flex items-center gap-3">
+                    <IconTarget className="w-6 h-6 text-blue-300" />
+                    <div>
+                      <div className="text-2xl font-bold">{formatCurrency(summaryMetrics.selectedCapitalUsed)}</div>
+                      <div className="text-indigo-100 text-sm">Capital Used</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="flex items-center gap-3">
+                    <IconTrendingUp className="w-6 h-6 text-yellow-300" />
+                    <div>
+                      <div className="text-2xl font-bold">{formatNumber(summaryMetrics.selectedGrowth)}%</div>
+                      <div className="text-indigo-100 text-sm">Growth</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="flex items-center gap-3">
+                    <IconTrophy className="w-6 h-6 text-purple-300" />
+                    <div>
+                      <div className="text-2xl font-bold">{summaryMetrics.selectedTrades}</div>
+                      <div className="text-indigo-100 text-sm">Trades</div>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-3">
-                  <IconTarget className="w-6 h-6 text-blue-300" />
-                  <div>
-                    <div className="text-2xl font-bold">{formatCurrency(sortedData[sortedData.length - 1]?.initialCapital || 20000)}</div>
-                    <div className="text-indigo-100 text-sm">Latest Capital Used</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-3">
-                  <IconTrendingUp className="w-6 h-6 text-yellow-300" />
-                  <div>
-                    <div className="text-2xl font-bold">{formatNumber(summaryMetrics.totalGrowth)}%</div>
-                    <div className="text-indigo-100 text-sm">Total Growth</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-3">
-                  <IconTrophy className="w-6 h-6 text-purple-300" />
-                  <div>
-                    <div className="text-2xl font-bold">{summaryMetrics.totalTrades}</div>
-                    <div className="text-indigo-100 text-sm">Total Trades</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -631,7 +666,14 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
               {sortedData.map((item, index) => (
-                <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300">
+                <tr 
+                  key={item.id} 
+                  className={`hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 cursor-pointer hover:shadow-md ${
+                    selectedMonth === item.id ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500' : ''
+                  }`}
+                  onClick={() => setSelectedMonth(item.id)}
+                  title="Click to view this month's details"
+                >
                   <td className="px-6 py-4">
                     <div className="font-semibold text-slate-900 dark:text-white">{item.month} {item.year}</div>
                   </td>

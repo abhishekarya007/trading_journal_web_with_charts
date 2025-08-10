@@ -21,7 +21,7 @@ import TradingRulesTab from "./components/TradingRulesTab";
 import GrowthCalculatorTab from "./components/GrowthCalculatorTab";
 import CooldownTimer from "./components/CooldownTimer";
 import Navigation from "./components/Navigation";
-import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX } from "./components/icons";
+import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX, IconAlertTriangle, IconTrash } from "./components/icons";
 
 ChartJS.register(
   CategoryScale,
@@ -36,26 +36,40 @@ ChartJS.register(
 
 const STORAGE_KEY = "trading_journal_trades_v1";
 
-// Success sound function
+// Money sound function
 function playSuccessSound() {
   try {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
     
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    // Create multiple oscillators for a richer money sound
+    const oscillators = [];
+    const gainNodes = [];
     
-    // Create a pleasant success sound (rising tone)
-    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+    // Create 3 oscillators with different frequencies for a coin-like sound
+    const frequencies = [800, 1200, 1600];
     
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    frequencies.forEach((freq, index) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Set frequency
+      oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+      
+      // Create a money-like envelope with higher volume
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.4, audioContext.currentTime + 0.02); // Higher volume
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime + (index * 0.05)); // Staggered start
+      oscillator.stop(audioContext.currentTime + 0.3 + (index * 0.05));
+      
+      oscillators.push(oscillator);
+      gainNodes.push(gainNode);
+    });
     
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.2);
   } catch (error) {
     console.log('Audio not supported:', error);
   }
@@ -101,8 +115,12 @@ export default function App() {
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('desc'); // asc | desc
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [toasts, setToasts] = useState([]);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTradeId, setDeleteTradeId] = useState(null);
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -158,17 +176,23 @@ export default function App() {
       return [trade, ...prev];
     });
     setForm(blankTrade());
-    // Toast and sound notification
-    try {
-      const el = document.createElement('div');
-      el.className = 'fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg';
-      el.textContent = 'Trade saved';
-      document.body.appendChild(el);
-      setTimeout(() => { el.remove(); }, 1500);
+    
+    // Show success toast
+    const toastId = Date.now();
+    setToasts(prev => [...prev, {
+      id: toastId,
+      type: 'success',
+      message: 'Trade saved successfully!',
+      icon: '🎯'
+    }]);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== toastId));
+    }, 3000);
 
-      // Play success sound
-      playSuccessSound();
-    } catch {}
+    // Play success sound
+    playSuccessSound();
   }
 
   function editTrade(t) {
@@ -200,8 +224,29 @@ export default function App() {
   }
 
   function deleteTrade(id) {
-    if (!confirm("Delete this trade?")) return;
-    setTrades(prev => prev.filter(t => t.id !== id));
+    setDeleteTradeId(id);
+    setShowDeleteConfirm(true);
+  }
+
+  function confirmDelete() {
+    if (deleteTradeId) {
+      setTrades(prev => prev.filter(t => t.id !== deleteTradeId));
+      
+      // Show delete toast
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'info',
+        message: 'Trade deleted successfully!',
+        icon: '🗑️'
+      }]);
+      
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 3000);
+    }
+    setShowDeleteConfirm(false);
+    setDeleteTradeId(null);
   }
 
   function importExcel(file) {
@@ -942,7 +987,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
 
               {/* Reset Button */}
               <button 
-                onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} 
+                onClick={() => setShowResetConfirm(true)} 
                 type="button" 
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
@@ -1098,6 +1143,133 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
         </div>
         </main>
       </div>
+
+      {/* Toast Notifications */}
+      <div className="fixed bottom-4 right-4 z-50 space-y-2">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border backdrop-blur-sm transform transition-all duration-300 ${
+              toast.type === 'success' 
+                ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-400' 
+                : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-400'
+            }`}
+            style={{
+              animation: 'slideInRight 0.3s ease-out'
+            }}
+          >
+            <span className="text-lg">{toast.icon}</span>
+            <span className="font-medium">{toast.message}</span>
+            <button
+              onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+              className="ml-2 p-1 hover:bg-white/20 rounded-lg transition-colors"
+            >
+              <IconX className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <IconAlertTriangle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Reset All Data</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">This action cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-slate-700 dark:text-slate-300 mb-6">
+              Are you sure you want to delete all trades and reset the application? This will permanently remove all your trading data.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.removeItem(STORAGE_KEY);
+                  setTrades([]);
+                  setShowResetConfirm(false);
+                  
+                  // Show reset toast
+                  const toastId = Date.now();
+                  setToasts(prev => [...prev, {
+                    id: toastId,
+                    type: 'info',
+                    message: 'All data has been reset!',
+                    icon: '🔄'
+                  }]);
+                  
+                  setTimeout(() => {
+                    setToasts(prev => prev.filter(toast => toast.id !== toastId));
+                  }, 3000);
+                }}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-medium hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
+              >
+                Reset All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <IconTrash className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Delete Trade</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">This action cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-slate-700 dark:text-slate-300 mb-6">
+              Are you sure you want to delete this trade? This action cannot be undone and the trade data will be permanently removed.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteTradeId(null);
+                }}
+                className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-medium hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
+              >
+                Delete Trade
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 }

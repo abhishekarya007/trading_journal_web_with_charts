@@ -13,7 +13,7 @@ import {
   IconFire,
   IconChartBar,
   IconCalendar,
-  IconDollarSign,
+  IconRupee,
   IconPercent,
   IconUsers,
   IconActivity
@@ -88,7 +88,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                 <div className={`w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center ${
                   hoveredMetric === 'net' ? 'animate-bounce' : 'animate-pulse'
                 }`}>
-                  <IconDollarSign className="w-5 h-5 text-emerald-300" />
+                                      <IconRupee className="w-5 h-5 text-emerald-300" />
                 </div>
                 <div>
                   <div className={`text-2xl font-bold ${

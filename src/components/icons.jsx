@@ -159,6 +159,16 @@ export const IconStar = (props) => (
   </svg>
 );
 
+export const IconRupee = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <path d="M6 3h12"/>
+    <path d="M6 8h12"/>
+    <path d="M6 13l8-4"/>
+    <path d="M6 13l8 4"/>
+    <path d="M6 13v8"/>
+  </svg>
+);
+
 export const IconDollarSign = (props) => (
   <svg viewBox="0 0 24 24" {...base} {...props}>
     <line x1="12" y1="1" x2="12" y2="23"/>
