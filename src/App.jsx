@@ -30,6 +30,31 @@ ChartJS.register(
 
 const STORAGE_KEY = "trading_journal_trades_v1";
 
+// Success sound function
+function playSuccessSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Create a pleasant success sound (rising tone)
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+  } catch (error) {
+    console.log('Audio not supported:', error);
+  }
+}
+
 function blankTrade() {
   return {
     id: Date.now() + Math.random(),
@@ -112,13 +137,16 @@ export default function App() {
       return [trade, ...prev];
     });
     setForm(blankTrade());
-    // Toast
+    // Toast and sound notification
     try {
       const el = document.createElement('div');
       el.className = 'fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg';
       el.textContent = 'Trade saved';
       document.body.appendChild(el);
       setTimeout(() => { el.remove(); }, 1500);
+
+      // Play success sound
+      playSuccessSound();
     } catch {}
   }
 
