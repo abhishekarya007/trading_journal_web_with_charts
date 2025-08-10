@@ -82,6 +82,8 @@ export default function TradesTab({
                 <th className="th cursor-pointer" onClick={() => onSortChange('date')}>Date {sortKey==='date' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
                 <th className="th cursor-pointer" onClick={() => onSortChange('symbol')}>Symbol {sortKey==='symbol' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
                 <th className="th cursor-pointer" onClick={() => onSortChange('type')}>Type {sortKey==='type' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('trend')}>Trend {sortKey==='trend' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                <th className="th cursor-pointer" onClick={() => onSortChange('rule')}>Rule {sortKey==='rule' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
                 <th className="th cursor-pointer" onClick={() => onSortChange('qty')}>Qty {sortKey==='qty' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
                 <th className="th cursor-pointer" onClick={() => onSortChange('buy')}>Buy {sortKey==='buy' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
                 <th className="th cursor-pointer" onClick={() => onSortChange('sell')}>Sell {sortKey==='sell' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
@@ -96,6 +98,20 @@ export default function TradesTab({
                   <td className="td">{t.date}</td>
                   <td className="td">{t.symbol}</td>
                   <td className="td">{t.type === 'Long' ? <span className="chip chip-green">Long</span> : <span className="chip chip-red">Short</span>}</td>
+                  <td className="td">
+                    {t.trend ? (
+                      <span className={t.trend === 'Up' ? "chip chip-green" : "chip chip-red"}>{t.trend}</span>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
+                  <td className="td">
+                    {t.rule ? (
+                      <span className={t.rule === 'Yes' ? "chip chip-green" : "chip chip-red"}>{t.rule}</span>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
                   <td className="td">{t.qty}</td>
                   <td className="td">{formatNumber(Number(t.buy))}</td>
                   <td className="td">{formatNumber(Number(t.sell))}</td>
@@ -149,6 +165,20 @@ export default function TradesTab({
                   <option>Short</option>
                 </select>
               </div>
+              <div>
+                <label className="label">Trend</label>
+                <select value={form.trend || 'Up'} onChange={e => setForm({...form, trend: e.target.value})} className="mt-1 field field-md">
+                  <option>Up</option>
+                  <option>Down</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">Rule Followed</label>
+                <select value={form.rule || 'Yes'} onChange={e => setForm({...form, rule: e.target.value})} className="mt-1 field field-md">
+                  <option>Yes</option>
+                  <option>No</option>
+                </select>
+              </div>
 
               <div>
                 <label className="label">Qty</label>
@@ -172,6 +202,21 @@ export default function TradesTab({
               <div className="md:col-span-2">
                 <label className="label">Remarks</label>
                 <input placeholder="Notes, mistakes, improvements..." value={form.remarks} onChange={e => setForm({...form, remarks: e.target.value})} className="mt-1 field field-md"/>
+              </div>
+              <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="label">Emotion</label>
+                  <select value={form.emotion || ''} onChange={e => setForm({...form, emotion: e.target.value})} className="mt-1 field field-md">
+                    <option value="">Select emotion</option>
+                    <option>Calm</option>
+                    <option>Confident</option>
+                    <option>Fearful</option>
+                    <option>Greedy</option>
+                    <option>FOMO</option>
+                    <option>Revenge</option>
+                    <option>Stressed</option>
+                  </select>
+                </div>
               </div>
 
               <div className="md:col-span-3">

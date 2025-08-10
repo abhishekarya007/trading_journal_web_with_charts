@@ -39,6 +39,9 @@ function blankTrade() {
     qty: "",
     buy: "",
     sell: "",
+    trend: "Up",
+    rule: "Yes",
+    emotion: "",
     setup: "",
     remarks: ""
   };
@@ -87,6 +90,9 @@ export default function App() {
       qty: Number(form.qty || 0),
       buy: Number(form.buy || 0),
       sell: Number(form.sell || 0),
+      trend: form.trend || 'Up',
+      rule: form.rule || 'Yes',
+      emotion: form.emotion || '',
     };
     const computed = calcTradeCharges({
       qty: trade.qty, buy: trade.buy, sell: trade.sell, type: trade.type
@@ -119,6 +125,9 @@ export default function App() {
       qty: String(t.qty ?? ''),
       buy: String(t.buy ?? ''),
       sell: String(t.sell ?? ''),
+      trend: t.trend || 'Up',
+      rule: t.rule || 'Yes',
+      emotion: t.emotion || '',
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -153,6 +162,9 @@ export default function App() {
           date: r.Date || r.date || new Date().toISOString().slice(0,10),
           symbol: r.Symbol || r.symbol || r.SymbolName || "",
           type: r["Trade Type"] || r.type || "Long",
+          trend: r.Trend || r.trend || "Up",
+          rule: r["Rule Followed"] || r.rule || "Yes",
+          emotion: r.Emotion || r.emotion || "",
           qty: Number(r.Qty || r.qty || 0),
           buy: Number(r["Buy Price"] || r.buy || 0),
           sell: Number(r["Sell Price"] || r.sell || 0),
@@ -172,6 +184,9 @@ export default function App() {
       Date: t.date,
       Symbol: t.symbol,
       "Trade Type": t.type,
+      Trend: t.trend,
+      "Rule Followed": t.rule,
+      Emotion: t.emotion,
       Qty: t.qty,
       "Buy Price": t.buy,
       "Sell Price": t.sell,
