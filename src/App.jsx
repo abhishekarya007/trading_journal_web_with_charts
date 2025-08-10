@@ -828,14 +828,18 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="header">
-          <div className="container-wrap flex flex-col sm:flex-row items-start sm:items-center justify-between min-h-14 py-2 gap-3">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <div className="flex items-center gap-3">
+        <header className="relative overflow-hidden bg-gradient-to-r from-white via-slate-50 to-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-lg">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full translate-y-12 -translate-x-12 animate-bounce"></div>
+          
+          <div className="relative z-10 container-wrap flex flex-col sm:flex-row items-start sm:items-center justify-between min-h-16 py-4 gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+              <div className="flex items-center gap-4">
                 {/* Mobile Menu Button */}
                 <button
                   onClick={() => setMobileNavOpen(!mobileNavOpen)}
-                  className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  className="lg:hidden w-10 h-10 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-md"
                   title="Toggle navigation menu"
                 >
                   {mobileNavOpen ? (
@@ -845,26 +849,56 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                   )}
                 </button>
                 
-                <div className="flex items-center gap-2">
-                  <IconCandle className="w-5 h-5 text-sky-600"/>
-                  <span className="text-lg font-semibold">Trading Journal</span>
-                  <span className="badge badge-green">v1</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <IconCandle className="w-6 h-6 text-white"/>
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-slate-900 dark:text-white">Trading Journal</h1>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Professional Trading Companion</p>
+                  </div>
+                  <div className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs font-bold rounded-full shadow-md">
+                    v1.0
+                  </div>
                 </div>
               </div>
               
               {/* Cooldown Timer */}
-              <CooldownTimer />
+              <div className="transform hover:scale-105 transition-transform duration-300">
+                <CooldownTimer />
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => setIsCompact(v => !v)} type="button" className="btn btn-secondary hidden sm:inline-flex" title="Toggle density">{isCompact ? 'Comfortable' : 'Compact'}</button>
-              <button onClick={() => setIsDark(v => !v)} type="button" className="btn btn-secondary" title="Toggle dark mode">{isDark ? <IconSun/> : <IconMoon/>}</button>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Density Toggle */}
+              <button 
+                onClick={() => setIsCompact(v => !v)} 
+                type="button" 
+                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-md" 
+                title="Toggle density"
+              >
+                <div className="w-4 h-4 bg-current rounded-sm"></div>
+                {isCompact ? 'Comfortable' : 'Compact'}
+              </button>
+
+              {/* Dark Mode Toggle */}
+              <button 
+                onClick={() => setIsDark(v => !v)} 
+                type="button" 
+                className="w-10 h-10 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-md" 
+                title="Toggle dark mode"
+              >
+                {isDark ? <IconSun className="w-5 h-5 text-slate-600 dark:text-slate-400"/> : <IconMoon className="w-5 h-5 text-slate-600 dark:text-slate-400"/>}
+              </button>
+
+              {/* Export Menu */}
               <div className="relative">
                 <button 
                   onClick={() => setShowExportMenu(v => !v)} 
                   type="button" 
-                  className="btn btn-secondary flex items-center gap-1"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
-                  <IconDownload/> 
+                  <IconDownload className="w-4 h-4"/> 
                   <span className="hidden sm:inline">Export</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -872,56 +906,121 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 </button>
                 
                 {showExportMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-50">
-                    <div className="py-1">
+                  <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
+                    <div className="p-2">
                       <button 
                         onClick={() => { exportExcel(); setShowExportMenu(false); }}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                        className="w-full text-left px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 dark:hover:from-slate-700 dark:hover:to-slate-600 flex items-center gap-3 rounded-xl transition-all duration-300"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Excel Only
-                        <span className="text-xs text-slate-500 ml-auto">Fast</span>
+                        <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-900 dark:text-white">Excel Only</div>
+                          <div className="text-xs text-slate-500">Fast export</div>
+                        </div>
                       </button>
                       <button 
                         onClick={() => { exportZip(); setShowExportMenu(false); }}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                        className="w-full text-left px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 dark:hover:from-slate-700 dark:hover:to-slate-600 flex items-center gap-3 rounded-xl transition-all duration-300"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        ZIP with Screenshots
-                        <span className="text-xs text-slate-500 ml-auto">Complete</span>
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-900 dark:text-white">ZIP with Screenshots</div>
+                          <div className="text-xs text-slate-500">Complete backup</div>
+                        </div>
                       </button>
-        </div>
-      </div>
+                    </div>
+                  </div>
                 )}
-        </div>
-              <button onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} type="button" className="btn btn-danger"><IconReset/> <span className="hidden sm:inline">Reset</span></button>
-        </div>
-        </div>
+              </div>
+
+              {/* Reset Button */}
+              <button 
+                onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} 
+                type="button" 
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                <IconReset className="w-4 h-4"/> 
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+            </div>
+          </div>
         </header>
-        <div className="container-wrap pt-4">
-          <div className="rounded-xl bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-slate-200 dark:border-slate-700 p-4 mb-4">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-                <div className="text-sm text-slate-600 dark:text-slate-300">Welcome back</div>
-                <div className="text-xl font-semibold">Your trading performance at a glance</div>
-        </div>
-              <div className="flex items-center gap-3 text-sm">
-                <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Win Rate</span> <span className="ml-2 font-semibold">{totals.winRate}%</span></div>
-                <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600">
-                  <span className="text-slate-500">Total Net</span>
-                  <span className={"ml-2 font-semibold " + (totals.net>=0?'text-green-700':'text-red-700')}>{formatNumber(totals.net)}</span>
-                  <div className="mt-1 h-6">
-                    <Line data={{ labels: spark.map((_,i)=>i+1), datasets:[{ data:spark, borderColor: totals.net>=0?'#16a34a':'#dc2626', backgroundColor:'transparent', tension:0.3, pointRadius:0, borderWidth:1.5 }] }} options={{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{enabled:false}}, scales:{ x:{display:false}, y:{display:false} } }} />
-        </div>
-        </div>
-                <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Trades</span> <span className="ml-2 font-semibold">{totals.trades}</span></div>
-        </div>
-        </div>
-        </div>
+        <div className="container-wrap pt-6">
+          <div className="relative overflow-hidden bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 mb-6 shadow-lg">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-pink-500/5"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full -translate-y-12 translate-x-12 animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full translate-y-10 -translate-x-10 animate-bounce"></div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+                    <IconCandle className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Welcome back, Trader!</div>
+                </div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Your trading performance at a glance</div>
+                <p className="text-slate-600 dark:text-slate-400">Track your progress and optimize your strategy</p>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Win Rate</span>
+                  </div>
+                  <div className="text-xl font-bold text-slate-900 dark:text-white">{totals.winRate}%</div>
+                </div>
+                
+                <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Net</span>
+                  </div>
+                  <div className={`text-xl font-bold ${totals.net>=0?'text-emerald-600 dark:text-emerald-400':'text-red-600 dark:text-red-400'}`}>
+                    ₹{formatNumber(totals.net)}
+                  </div>
+                  <div className="mt-2 h-8">
+                    <Line 
+                      data={{ 
+                        labels: spark.map((_,i)=>i+1), 
+                        datasets:[{ 
+                          data:spark, 
+                          borderColor: totals.net>=0?'#16a34a':'#dc2626', 
+                          backgroundColor:'transparent', 
+                          tension:0.4, 
+                          pointRadius:0, 
+                          borderWidth:2 
+                        }] 
+                      }} 
+                      options={{ 
+                        responsive:true, 
+                        maintainAspectRatio:false, 
+                        plugins:{legend:{display:false}, tooltip:{enabled:false}}, 
+                        scales:{ x:{display:false}, y:{display:false} } 
+                      }} 
+                    />
+                  </div>
+                </div>
+                
+                <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Trades</span>
+                  </div>
+                  <div className="text-xl font-bold text-slate-900 dark:text-white">{totals.trades}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
