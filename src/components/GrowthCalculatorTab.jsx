@@ -493,84 +493,6 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
         </div>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Capital Used Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Capital Used Over Time</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Track your capital utilization</p>
-          </div>
-          <div className="p-6">
-            {sortedData.length > 0 ? (
-              <Line 
-                data={chartData.capitalUsed}
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      display: false
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        callback: function(value) {
-                          return formatCurrency(value);
-                        }
-                      }
-                    }
-                  }
-                }}
-              />
-            ) : (
-              <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                <IconChartBar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No data available</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Monthly Growth Percentage Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Monthly Growth %</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Percentage growth or loss by month</p>
-          </div>
-          <div className="p-6">
-            {sortedData.length > 0 ? (
-              <Bar 
-                data={chartData.growthPercentage}
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      display: false
-                    }
-                  },
-                  scales: {
-                    y: {
-                      ticks: {
-                        callback: function(value) {
-                          return formatNumber(value) + '%';
-                        }
-                      }
-                    }
-                  }
-                }}
-              />
-            ) : (
-              <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                <IconChartBar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No data available</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Growth Data Table */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="p-6 border-b border-slate-200 dark:border-slate-700">
@@ -739,6 +661,84 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Capital Used Chart */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Capital Used Over Time</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Track your capital utilization</p>
+          </div>
+          <div className="p-6">
+            {sortedData.length > 0 ? (
+              <Line 
+                data={chartData.capitalUsed}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      display: false
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: function(value) {
+                          return formatCurrency(value);
+                        }
+                      }
+                    }
+                  }
+                }}
+              />
+            ) : (
+              <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                <IconChartBar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No data available</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Monthly Growth Percentage Chart */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Monthly Growth %</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Percentage growth or loss by month</p>
+          </div>
+          <div className="p-6">
+            {sortedData.length > 0 ? (
+              <Bar 
+                data={chartData.growthPercentage}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      display: false
+                    }
+                  },
+                  scales: {
+                    y: {
+                      ticks: {
+                        callback: function(value) {
+                          return formatNumber(value) + '%';
+                        }
+                      }
+                    }
+                  }
+                }}
+              />
+            ) : (
+              <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                <IconChartBar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No data available</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -7,8 +7,6 @@ import {
   IconChevronRight,
   IconCandle,
   IconDownload,
-  IconZap,
-  IconRocket,
   IconStar,
   IconHeart,
   IconSparkles,
@@ -156,30 +154,6 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
                 )}
               </button>
             </div>
-
-            {/* Quick Stats */}
-            {!isCollapsed && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                  <div className="flex items-center gap-2">
-                    <IconZap className="w-4 h-4 text-yellow-300" />
-                    <div>
-                      <div className="text-lg font-bold">Active</div>
-                      <div className="text-indigo-100 text-xs">Ready to trade</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                  <div className="flex items-center gap-2">
-                    <IconRocket className="w-4 h-4 text-emerald-300" />
-                    <div>
-                      <div className="text-lg font-bold">Pro</div>
-                      <div className="text-indigo-100 text-xs">Premium features</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

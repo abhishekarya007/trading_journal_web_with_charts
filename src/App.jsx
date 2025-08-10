@@ -88,7 +88,7 @@ export default function App() {
     if (saved != null) return saved === '1';
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
-  const [isCompact, setIsCompact] = useState(() => localStorage.getItem('ui_compact') === '1');
+
   
   // Navigation states
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('ui_active_tab') || 'trades');
@@ -116,12 +116,11 @@ export default function App() {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
     localStorage.setItem('ui_dark', isDark ? '1' : '0');
+    // Clean up old compact mode setting
+    localStorage.removeItem('ui_compact');
   }, [isDark]);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('compact', isCompact);
-    localStorage.setItem('ui_compact', isCompact ? '1' : '0');
-  }, [isCompact]);
+
 
   useEffect(() => {
     localStorage.setItem('ui_active_tab', activeTab);
@@ -879,16 +878,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {/* Density Toggle */}
-              <button 
-                onClick={() => setIsCompact(v => !v)} 
-                type="button" 
-                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-md" 
-                title="Toggle density"
-              >
-                <div className="w-4 h-4 bg-current rounded-sm"></div>
-                {isCompact ? 'Comfortable' : 'Compact'}
-              </button>
+
 
               {/* Dark Mode Toggle */}
               <button 
@@ -962,75 +952,77 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
             </div>
           </div>
         </header>
-        <div className="container-wrap pt-6">
-          <div className="relative overflow-hidden bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 mb-6 shadow-lg">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-pink-500/5"></div>
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full -translate-y-12 translate-x-12 animate-pulse"></div>
-            <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full translate-y-10 -translate-x-10 animate-bounce"></div>
-            
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-                    <IconCandle className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Welcome back, Trader!</div>
-                </div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Your trading performance at a glance</div>
-                <p className="text-slate-600 dark:text-slate-400">Track your progress and optimize your strategy</p>
-              </div>
+        {activeTab === 'analytics' && (
+          <div className="container-wrap pt-6">
+            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 mb-6 shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-pink-500/5"></div>
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full -translate-y-12 translate-x-12 animate-pulse"></div>
+              <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full translate-y-10 -translate-x-10 animate-bounce"></div>
               
-              <div className="flex items-center gap-4">
-                <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Win Rate</span>
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+                      <IconCandle className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Welcome back, Trader!</div>
                   </div>
-                  <div className="text-xl font-bold text-slate-900 dark:text-white">{totals.winRate}%</div>
+                  <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Your trading performance at a glance</div>
+                  <p className="text-slate-600 dark:text-slate-400">Track your progress and optimize your strategy</p>
                 </div>
                 
-                <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Net</span>
+                <div className="flex items-center gap-4">
+                  <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Win Rate</span>
+                    </div>
+                    <div className="text-xl font-bold text-slate-900 dark:text-white">{totals.winRate}%</div>
                   </div>
-                  <div className={`text-xl font-bold ${totals.net>=0?'text-emerald-600 dark:text-emerald-400':'text-red-600 dark:text-red-400'}`}>
-                    ₹{formatNumber(totals.net)}
+                  
+                  <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Net</span>
+                    </div>
+                    <div className={`text-xl font-bold ${totals.net>=0?'text-emerald-600 dark:text-emerald-400':'text-red-600 dark:text-red-400'}`}>
+                      ₹{formatNumber(totals.net)}
+                    </div>
+                    <div className="mt-2 h-8">
+                      <Line 
+                        data={{ 
+                          labels: spark.map((_,i)=>i+1), 
+                          datasets:[{ 
+                            data:spark, 
+                            borderColor: totals.net>=0?'#16a34a':'#dc2626', 
+                            backgroundColor:'transparent', 
+                            tension:0.4, 
+                            pointRadius:0, 
+                            borderWidth:2 
+                          }] 
+                        }} 
+                        options={{ 
+                          responsive:true, 
+                          maintainAspectRatio:false, 
+                          plugins:{legend:{display:false}, tooltip:{enabled:false}}, 
+                          scales:{ x:{display:false}, y:{display:false} } 
+                        }} 
+                      />
+                    </div>
                   </div>
-                  <div className="mt-2 h-8">
-                    <Line 
-                      data={{ 
-                        labels: spark.map((_,i)=>i+1), 
-                        datasets:[{ 
-                          data:spark, 
-                          borderColor: totals.net>=0?'#16a34a':'#dc2626', 
-                          backgroundColor:'transparent', 
-                          tension:0.4, 
-                          pointRadius:0, 
-                          borderWidth:2 
-                        }] 
-                      }} 
-                      options={{ 
-                        responsive:true, 
-                        maintainAspectRatio:false, 
-                        plugins:{legend:{display:false}, tooltip:{enabled:false}}, 
-                        scales:{ x:{display:false}, y:{display:false} } 
-                      }} 
-                    />
+                  
+                  <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Trades</span>
+                    </div>
+                    <div className="text-xl font-bold text-slate-900 dark:text-white">{totals.trades}</div>
                   </div>
-                </div>
-                
-                <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Trades</span>
-                  </div>
-                  <div className="text-xl font-bold text-slate-900 dark:text-white">{totals.trades}</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
