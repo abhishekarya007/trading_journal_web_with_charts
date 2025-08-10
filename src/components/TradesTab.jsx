@@ -1,11 +1,13 @@
 import React from "react";
 import DateRangePicker from "./DateRangePicker";
+import ScreenshotManager from "./ScreenshotManager";
 
 export default function TradesTab({
   form,
   setForm,
   addOrUpdateTrade,
   importExcel,
+  importZip,
   chargesPreview,
   formatNumber,
   visibleTrades,
@@ -36,6 +38,7 @@ export default function TradesTab({
 }) {
   const [showRange, setShowRange] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
+  const [showImportMenu, setShowImportMenu] = React.useState(false);
   React.useEffect(() => {
     function onKey(e) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); const fake = { preventDefault:()=>{} }; addOrUpdateTrade(fake); }
@@ -43,6 +46,18 @@ export default function TradesTab({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [addOrUpdateTrade]);
+
+  // Close import menu when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (showImportMenu && !event.target.closest('.relative')) {
+        setShowImportMenu(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showImportMenu]);
   return (
     <div>
 
@@ -144,11 +159,23 @@ export default function TradesTab({
                     )}
                   </td>
                   <td className="td">
-                    {t.setup ? (
-                      <span className="chip">{t.setup}</span>
-                    ) : (
-                      <span className="text-slate-400">—</span>
-                    )}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        {t.setup ? (
+                          <span className="chip">{t.setup}</span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </div>
+                      {t.screenshots && t.screenshots.length > 0 && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded" title={`${t.screenshots.length} screenshot(s)`}>
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {t.screenshots.length}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="td">
                     <div className="flex items-center gap-1">
@@ -391,14 +418,75 @@ export default function TradesTab({
                 </div>
               </div>
 
+              {/* Screenshots Section */}
+              <div className="sm:col-span-2">
+                <ScreenshotManager 
+                  screenshots={form.screenshots || []}
+                  onChange={(newScreenshots) => setForm({...form, screenshots: newScreenshots})}
+                />
+              </div>
+
               <div className="sm:col-span-2 flex flex-col sm:flex-row flex-wrap gap-2 pt-3">
                 <button type="submit" className="btn btn-primary">Save Trade</button>
                 <button type="button" onClick={() => setForm({ ...form, id: Date.now() + Math.random(), qty: '', buy: '', sell: '' })} className="btn btn-secondary">Clear</button>
 
-                <label className="btn btn-secondary cursor-pointer">
-                  Import Excel
-                  <input accept=".xlsx, .xls" type="file" onChange={e => e.target.files?.[0] && importExcel(e.target.files[0])} className="hidden"/>
-                </label>
+                <div className="relative">
+                  <button 
+                    type="button"
+                    onClick={() => setShowImportMenu(v => !v)} 
+                    className="btn btn-secondary flex items-center gap-1"
+                  >
+                    Import
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {showImportMenu && (
+                    <div className="absolute left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-50">
+                      <div className="py-1">
+                        <label className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 cursor-pointer">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Excel Only
+                          <span className="text-xs text-slate-500 ml-auto">Data only</span>
+                          <input 
+                            accept=".xlsx, .xls" 
+                            type="file" 
+                            onChange={e => {
+                              if (e.target.files?.[0]) {
+                                importExcel(e.target.files[0]);
+                                setShowImportMenu(false);
+                                e.target.value = '';
+                              }
+                            }} 
+                            className="hidden"
+                          />
+                        </label>
+                        <label className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 cursor-pointer">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          ZIP with Screenshots
+                          <span className="text-xs text-slate-500 ml-auto">Complete</span>
+                          <input 
+                            accept=".zip" 
+                            type="file" 
+                            onChange={e => {
+                              if (e.target.files?.[0]) {
+                                importZip(e.target.files[0]);
+                                setShowImportMenu(false);
+                                e.target.value = '';
+                              }
+                            }} 
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </form>
           </div>

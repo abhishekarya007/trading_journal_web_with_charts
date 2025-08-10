@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { calcTradeCharges } from "./utils/calc";
 import * as XLSX from "xlsx";
+import JSZip from 'jszip';
+import { dataUrlToBlob } from './utils/imageUtils';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -69,7 +71,8 @@ function blankTrade() {
     emotion: "",
     riskReward: "",
     setup: "",
-    remarks: ""
+    remarks: "",
+    screenshots: [] // Array of {id, name, thumbnail, fullSize, fileName}
   };
 }
 
@@ -90,6 +93,7 @@ export default function App() {
   const [sortDir, setSortDir] = useState('desc'); // asc | desc
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -122,6 +126,7 @@ export default function App() {
       rule: form.rule || 'Yes',
       emotion: form.emotion || '',
       riskReward: form.riskReward || '',
+      screenshots: form.screenshots || [],
     };
     const computed = calcTradeCharges({
       qty: trade.qty, buy: trade.buy, sell: trade.sell, type: trade.type
@@ -161,6 +166,7 @@ export default function App() {
       rule: t.rule || 'Yes',
       emotion: t.emotion || '',
       riskReward: t.riskReward || '',
+      screenshots: t.screenshots || [],
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -203,7 +209,8 @@ export default function App() {
           buy: Number(r["Buy Price"] || r.buy || 0),
           sell: Number(r["Sell Price"] || r.sell || 0),
           setup: r.Setup || r.setup || "",
-          remarks: r.Remarks || r.remarks || ""
+          remarks: r.Remarks || r.remarks || "",
+          screenshots: [] // Screenshots can't be imported from Excel, start with empty array
         };
         t.meta = calcTradeCharges({ qty: t.qty, buy: t.buy, sell: t.sell, type: t.type});
         return t;
@@ -213,6 +220,117 @@ export default function App() {
     reader.readAsArrayBuffer(file);
   }
 
+  // Import ZIP file with Excel + Screenshots
+  async function importZip(file) {
+    try {
+      const zip = new JSZip();
+      const zipContent = await zip.loadAsync(file);
+      
+      // Find and read Excel file
+      let excelFile = null;
+      let excelData = null;
+      
+      const excelFileName = Object.keys(zipContent.files).find(name => 
+        name.endsWith('.xlsx') || name.endsWith('.xls')
+      );
+      
+      if (!excelFileName) {
+        throw new Error('No Excel file found in ZIP archive');
+      }
+      
+      const excelBuffer = await zipContent.files[excelFileName].async('arraybuffer');
+      const wb = XLSX.read(new Uint8Array(excelBuffer), {type: "array"});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet, {defval: ""});
+      
+      // Process screenshot files
+      const screenshotFiles = {};
+      const screenshotsFolder = 'screenshots/';
+      
+      for (const [fileName, file] of Object.entries(zipContent.files)) {
+        if (fileName.startsWith(screenshotsFolder) && !file.dir) {
+          const actualFileName = fileName.replace(screenshotsFolder, '');
+          if (actualFileName && (actualFileName.endsWith('.jpg') || actualFileName.endsWith('.jpeg') || actualFileName.endsWith('.png') || actualFileName.endsWith('.gif'))) {
+            try {
+              const imageData = await file.async('base64');
+              const mimeType = actualFileName.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+              screenshotFiles[actualFileName] = `data:${mimeType};base64,${imageData}`;
+            } catch (error) {
+              console.warn(`Failed to process screenshot ${actualFileName}:`, error);
+            }
+          }
+        }
+      }
+      
+      // Map Excel data to trades and restore screenshots
+      const mapped = json.map(r => {
+        const t = {
+          id: Date.now() + Math.random(),
+          date: r.Date || r.date || new Date().toISOString().slice(0,10),
+          symbol: r.Symbol || r.symbol || r.SymbolName || "",
+          type: r["Trade Type"] || r.type || "Long",
+          trend: r.Trend || r.trend || "Up",
+          rule: r["Rule Followed"] || r.rule || "Yes",
+          emotion: r.Emotion || r.emotion || "",
+          riskReward: r["Risk Reward"] || r.riskReward || "",
+          qty: Number(r.Qty || r.qty || 0),
+          buy: Number(r["Buy Price"] || r.buy || 0),
+          sell: Number(r["Sell Price"] || r.sell || 0),
+          setup: r.Setup || r.setup || "",
+          remarks: r.Remarks || r.remarks || "",
+          screenshots: []
+        };
+        
+        // Restore screenshots if references exist
+        const screenshotFilesPaths = r["Screenshot Files"] || "";
+        if (screenshotFilesPaths) {
+          const filePaths = screenshotFilesPaths.split(', ').filter(Boolean);
+          t.screenshots = filePaths.map((filePath, index) => {
+            const fileName = filePath.replace('screenshots/', '');
+            const fullSizeData = screenshotFiles[fileName];
+            
+            if (fullSizeData) {
+              // Create a basic screenshot object
+              // Note: We can't recreate the exact thumbnail without processing, 
+              // but we'll use the full image as both thumbnail and full size for now
+              return {
+                id: Date.now() + Math.random() + index,
+                name: r["Screenshot Names"]?.split(', ')[index] || `Screenshot ${index + 1}`,
+                thumbnail: fullSizeData, // Using full size as thumbnail for imported
+                fullSize: fullSizeData,
+                fileName: fileName,
+                originalSize: Math.round(fullSizeData.length * 0.75), // Approximate
+                processedSize: Math.round(fullSizeData.length * 0.75),
+                dimensions: {
+                  original: { width: 0, height: 0 }, // Unknown for imported
+                  fullSize: { width: 0, height: 0 },
+                  thumbnail: { width: 150, height: 100 }
+                },
+                uploadedAt: new Date().toISOString(),
+                imported: true // Mark as imported
+              };
+            }
+            return null;
+          }).filter(Boolean);
+        }
+        
+        t.meta = calcTradeCharges({ qty: t.qty, buy: t.buy, sell: t.sell, type: t.type});
+        return t;
+      });
+      
+      setTrades(prev => [...mapped, ...prev]);
+      
+      // Show success message
+      const totalScreenshots = mapped.reduce((sum, t) => sum + t.screenshots.length, 0);
+      alert(`Import successful!\n${mapped.length} trades imported with ${totalScreenshots} screenshots restored.`);
+      
+    } catch (error) {
+      alert(`Import failed: ${error.message}`);
+      console.error('ZIP import error:', error);
+    }
+  }
+
+  // Export Excel only
   function exportExcel() {
     const rows = trades.map(t => ({
       Date: t.date,
@@ -236,12 +354,116 @@ export default function App() {
       "Gross P&L": t.meta?.gross,
       "Net P&L": t.meta?.net,
       Setup: t.setup,
-      Remarks: t.remarks
+      Remarks: t.remarks,
+      "Screenshots Count": t.screenshots?.length || 0,
+      "Screenshot Names": t.screenshots?.map(s => s.name).join(', ') || ''
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Trades");
     XLSX.writeFile(wb, "trading_journal_export.xlsx");
+  }
+
+  // Export ZIP with Excel + Screenshots
+  async function exportZip() {
+    const zip = new JSZip();
+    
+    // Create Excel file data
+    const rows = trades.map(t => ({
+      Date: t.date,
+      Symbol: t.symbol,
+      "Trade Type": t.type,
+      Trend: t.trend,
+      "Rule Followed": t.rule,
+      Emotion: t.emotion,
+      "Risk Reward": t.riskReward,
+      Qty: t.qty,
+      "Buy Price": t.buy,
+      "Sell Price": t.sell,
+      Turnover: t.meta?.turnover,
+      Brokerage: t.meta?.brokerage,
+      STT: t.meta?.stt,
+      "Exchange Charges": t.meta?.exchangeCharges,
+      "Stamp Duty": t.meta?.stampDuty,
+      "SEBI Fees": t.meta?.sebi,
+      GST: t.meta?.gst,
+      "Total Charges": t.meta?.totalCharges,
+      "Gross P&L": t.meta?.gross,
+      "Net P&L": t.meta?.net,
+      Setup: t.setup,
+      Remarks: t.remarks,
+      "Screenshots Count": t.screenshots?.length || 0,
+      "Screenshot Names": t.screenshots?.map(s => s.name).join(', ') || '',
+      "Screenshot Files": t.screenshots?.map(s => `screenshots/${s.fileName}`).join(', ') || ''
+    }));
+    
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Trades");
+    
+    // Add Excel file to ZIP
+    const excelBuffer = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    zip.file("trading_journal_export.xlsx", excelBuffer);
+    
+    // Add screenshots to ZIP
+    const screenshotsFolder = zip.folder("screenshots");
+    let hasScreenshots = false;
+    
+    for (const trade of trades) {
+      if (trade.screenshots && trade.screenshots.length > 0) {
+        for (const screenshot of trade.screenshots) {
+          try {
+            const blob = dataUrlToBlob(screenshot.fullSize);
+            screenshotsFolder.file(screenshot.fileName, blob);
+            hasScreenshots = true;
+          } catch (error) {
+            console.error('Error processing screenshot:', error);
+          }
+        }
+      }
+    }
+    
+    // Add README with instructions
+    const readmeContent = `Trading Journal Export
+=====================
+
+This archive contains:
+- trading_journal_export.xlsx: Complete trade data with screenshot references
+- screenshots/ folder: All trade screenshots in full resolution
+
+Screenshot Files:
+- Each screenshot is saved with its original filename
+- The Excel file contains references to screenshot files in the "Screenshot Files" column
+- You can view screenshots by opening the files in the screenshots folder
+
+Generated on: ${new Date().toLocaleString()}
+Total Trades: ${trades.length}
+Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0), 0)}
+`;
+    
+    zip.file("README.txt", readmeContent);
+    
+    // Generate and download ZIP
+    try {
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `trading_journal_export_${new Date().toISOString().slice(0,10)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      // Show success message
+      const message = hasScreenshots 
+        ? `Export complete! ZIP contains ${trades.length} trades and ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0), 0)} screenshots.`
+        : `Export complete! ZIP contains ${trades.length} trades (no screenshots found).`;
+      
+      alert(message);
+    } catch (error) {
+      alert('Error creating ZIP file: ' + error.message);
+    }
   }
 
   // Derived summaries
@@ -563,6 +785,18 @@ export default function App() {
     setCurrentPage(1);
   }, [filterText, filterStatus, fromDate, toDate]);
 
+  // Close export menu when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (showExportMenu && !event.target.closest('.relative')) {
+        setShowExportMenu(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showExportMenu]);
+
   return (
     <div className="app-shell">
       {/* Sidebar */}
@@ -590,7 +824,46 @@ export default function App() {
             <div className="flex flex-wrap items-center gap-2">
               <button onClick={() => setIsCompact(v => !v)} type="button" className="btn btn-secondary hidden sm:inline-flex" title="Toggle density">{isCompact ? 'Comfortable' : 'Compact'}</button>
               <button onClick={() => setIsDark(v => !v)} type="button" className="btn btn-secondary" title="Toggle dark mode">{isDark ? <IconSun/> : <IconMoon/>}</button>
-              <button onClick={exportExcel} type="button" className="btn btn-secondary"><IconDownload/> <span className="hidden sm:inline">Export</span></button>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowExportMenu(v => !v)} 
+                  type="button" 
+                  className="btn btn-secondary flex items-center gap-1"
+                >
+                  <IconDownload/> 
+                  <span className="hidden sm:inline">Export</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {showExportMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-50">
+                    <div className="py-1">
+                      <button 
+                        onClick={() => { exportExcel(); setShowExportMenu(false); }}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Excel Only
+                        <span className="text-xs text-slate-500 ml-auto">Fast</span>
+                      </button>
+                      <button 
+                        onClick={() => { exportZip(); setShowExportMenu(false); }}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        ZIP with Screenshots
+                        <span className="text-xs text-slate-500 ml-auto">Complete</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <button onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} type="button" className="btn btn-danger"><IconReset/> <span className="hidden sm:inline">Reset</span></button>
         </div>
         </div>
@@ -644,6 +917,7 @@ export default function App() {
               setForm={setForm}
               addOrUpdateTrade={addOrUpdateTrade}
               importExcel={importExcel}
+              importZip={importZip}
               chargesPreview={chargesPreview}
               formatNumber={formatNumber}
               formatCurrency={formatCurrency}
