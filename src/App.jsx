@@ -286,11 +286,14 @@ export default function App() {
     }
   };
 
-  // Add styling for bar dataset
-  monthlyChart.datasets[0].backgroundColor = "rgba(2,132,199,0.2)";
-  monthlyChart.datasets[0].borderColor = "#0284c7";
+  // Add styling for bar dataset with green/red colors per bar
+  const barBg = monthData.map(v => (v >= 0 ? "rgba(22,163,74,0.2)" : "rgba(220,38,38,0.2)"));
+  const barBorder = monthData.map(v => (v >= 0 ? "#16a34a" : "#dc2626"));
+  monthlyChart.datasets[0].backgroundColor = barBg;
+  monthlyChart.datasets[0].borderColor = barBorder;
   monthlyChart.datasets[0].borderWidth = 2;
   monthlyChart.datasets[0].borderRadius = 6;
+  monthlyChart.datasets[0].borderSkipped = false;
 
   // KPIs
   const round2 = (x) => Math.round(x * 100) / 100;
@@ -362,6 +365,10 @@ export default function App() {
       { label: "Equity Curve (Net P&L)", data: scopedEquityDataPoints, tension: 0.25, borderColor: "#0ea5e9", backgroundColor: "rgba(14,165,233,0.15)", fill: true }
     ]
   };
+  // Sparkline for last 10 trades
+  const last10 = tradesSorted.slice(-10);
+  let s = 0;
+  const spark = last10.map(t => { s += (t.meta?.net || 0); return Math.round(s*100)/100; });
   const periodLabel = analyticsScope === 'overall' ? 'Showing: Overall' : `Showing: ${activeMonthLabel || monthLabelFromKey(selectedMonthKey)}`;
   const periodControls = (
     <div className="flex items-center gap-2">
@@ -474,7 +481,13 @@ export default function App() {
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Win Rate</span> <span className="ml-2 font-semibold">{totals.winRate}%</span></div>
-                <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Total Net</span> <span className={"ml-2 font-semibold " + (totals.net>=0?'text-green-700':'text-red-700')}>{formatNumber(totals.net)}</span></div>
+                <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600">
+                  <span className="text-slate-500">Total Net</span>
+                  <span className={"ml-2 font-semibold " + (totals.net>=0?'text-green-700':'text-red-700')}>{formatNumber(totals.net)}</span>
+                  <div className="mt-1 h-6">
+                    <Line data={{ labels: spark.map((_,i)=>i+1), datasets:[{ data:spark, borderColor: totals.net>=0?'#16a34a':'#dc2626', backgroundColor:'transparent', tension:0.3, pointRadius:0, borderWidth:1.5 }] }} options={{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{enabled:false}}, scales:{ x:{display:false}, y:{display:false} } }} />
+                  </div>
+                </div>
                 <div className="px-3 py-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600"><span className="text-slate-500">Trades</span> <span className="ml-2 font-semibold">{totals.trades}</span></div>
               </div>
             </div>

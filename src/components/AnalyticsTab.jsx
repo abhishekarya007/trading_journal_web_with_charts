@@ -48,6 +48,10 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                 data={monthlyChart}
                 options={{
                   ...commonChartOptions,
+                  scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: '#e5e7eb' } }
+                  },
                   onClick: (evt, elements, chart) => {
                     const el = elements && elements[0];
                     if (!el) return;
@@ -63,7 +67,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
         <div className="card">
           <div className="card-header"><h2 className="font-semibold">Equity Curve</h2></div>
           <div className="card-body h-64">
-            {totals.trades ? <Line data={equityChart} options={commonChartOptions} /> : <div className="text-slate-500">No trades yet</div>}
+            {totals.trades ? <Line data={equityChart} options={{...commonChartOptions, scales:{ x:{ grid:{ display:false } }, y:{ grid:{ color:'#e5e7eb' } } }}} /> : <div className="text-slate-500">No trades yet</div>}
           </div>
         </div>
       </div>

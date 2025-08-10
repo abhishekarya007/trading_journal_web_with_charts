@@ -122,12 +122,19 @@ export default function TradesTab({
               </span>
               <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Search" className="field field-sm w-56 pl-7"/>
             </div>
-            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="field field-sm">
+            <div className="hidden md:flex items-center gap-2">
+              <button type="button" className={`chip ${filterStatus==='all' ? 'chip-active':''}`} onClick={()=>setFilterStatus('all')}>All</button>
+              <button type="button" className={`chip chip-green ${filterStatus==='wins' ? 'chip-active':''}`} onClick={()=>setFilterStatus('wins')}>Wins</button>
+              <button type="button" className={`chip chip-red ${filterStatus==='losses' ? 'chip-active':''}`} onClick={()=>setFilterStatus('losses')}>Losses</button>
+            </div>
+            {/* Fallback select on small screens */}
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="field field-sm md:hidden">
               <option value="all">All</option>
               <option value="wins">Wins</option>
               <option value="losses">Losses</option>
             </select>
             <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="field field-sm"/>
+            <span className="text-slate-400">to</span>
             <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="field field-sm"/>
             <button type="button" onClick={() => { setFilterText(''); setFilterStatus('all'); setFromDate(''); setToDate(''); }} className="btn btn-secondary">Clear</button>
           </div>
@@ -159,7 +166,13 @@ export default function TradesTab({
                   <td className={"td " + ((t.meta?.net || 0) > 0 ? "text-green-700" : "text-red-700")}>
                     {t.meta?.net !== undefined ? formatNumber(Number(t.meta?.net)) : "-"}
                   </td>
-                  <td className="td">{t.setup}</td>
+                  <td className="td">
+                    {t.setup ? (
+                      <span className="chip">{t.setup}</span>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
                   <td className="td">
                     <div className="flex gap-2">
                       <button onClick={() => editTrade(t)} className="btn btn-secondary !px-2 !py-1 text-xs" title="E">Edit</button>

@@ -30,6 +30,11 @@ body { @apply bg-slate-50 text-slate-800 antialiased; font-family: 'Inter', ui-s
 .btn-secondary { @apply bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-600 focus:ring-slate-300 dark:focus:ring-slate-600; }
 .btn-danger { @apply bg-white dark:bg-slate-700 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-slate-600 focus:ring-red-300; }
 
+/* Futuristic button variant */
+.btn-primary { @apply relative; background-image: linear-gradient(90deg, #0ea5e9, #6366f1); box-shadow: 0 10px 20px rgba(14,165,233,0.2), 0 6px 12px rgba(99,102,241,0.15); border: 1px solid rgba(255,255,255,0.15); }
+.btn-primary:hover { filter: brightness(1.03); }
+.btn-primary:active { transform: translateY(1px); }
+
 /* Inputs */
 .field { @apply w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:border-sky-500 focus:ring-sky-500 placeholder:text-slate-400 dark:placeholder:text-slate-400; }
 .field-sm { @apply px-2.5 py-2; }
@@ -53,6 +58,11 @@ body { @apply bg-slate-50 text-slate-800 antialiased; font-family: 'Inter', ui-s
 .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
 .badge-green { @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300; }
 .badge-red { @apply bg-red-100 text-red-700; }
+/* Chips colored */
+.chip { @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border transition-colors; }
+.chip-active { @apply ring-1 ring-sky-300; }
+.chip-green { @apply border-green-300 text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-300; }
+.chip-red { @apply border-red-300 text-red-700 bg-red-50 dark:bg-red-900/20 dark:text-red-300; }
 
 /* Section titles */
 .section-title { @apply text-sm font-semibold text-slate-700; }
@@ -72,3 +82,7 @@ body { @apply bg-slate-50 text-slate-800 antialiased; font-family: 'Inter', ui-s
 .skeleton { @apply relative overflow-hidden rounded-md bg-slate-200 dark:bg-slate-700; }
 .skeleton::after { content: ""; @apply absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent; animation: shimmer 1.25s infinite; }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+/* Chips */
+.chip { @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-100 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600; }
+.chip-active { @apply border-sky-600 text-sky-700 bg-sky-50 dark:bg-slate-600 dark:text-sky-300; }
