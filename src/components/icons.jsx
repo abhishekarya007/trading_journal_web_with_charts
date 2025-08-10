@@ -60,3 +60,52 @@ export const IconSearch = (props) => (
     <path d="M21 21l-4.3-4.3"/>
   </svg>
 );
+
+export const IconMenu = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <path d="M3 12h18"/>
+    <path d="M3 6h18"/>
+    <path d="M3 18h18"/>
+  </svg>
+);
+
+export const IconX = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <path d="M18 6L6 18"/>
+    <path d="M6 6l12 12"/>
+  </svg>
+);
+
+export const IconTrendingUp = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
+    <polyline points="16,7 22,7 22,13"/>
+  </svg>
+);
+
+export const IconBarChart = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <path d="M12 20V4"/>
+    <path d="M18 20V8"/>
+    <path d="M6 20v-6"/>
+  </svg>
+);
+
+export const IconBookOpen = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+  </svg>
+);
+
+export const IconChevronLeft = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <polyline points="15,18 9,12 15,6"/>
+  </svg>
+);
+
+export const IconChevronRight = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <polyline points="9,18 15,12 9,6"/>
+  </svg>
+);

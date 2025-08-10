@@ -19,7 +19,8 @@ import AnalyticsTab from "./components/AnalyticsTab";
 import TradesTab from "./components/TradesTab";
 import TradingRulesTab from "./components/TradingRulesTab";
 import CooldownTimer from "./components/CooldownTimer";
-import { IconCandle, IconDownload, IconReset, IconMoon, IconSun } from "./components/icons";
+import Navigation from "./components/Navigation";
+import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX } from "./components/icons";
 
 ChartJS.register(
   CategoryScale,
@@ -87,6 +88,11 @@ export default function App() {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [isCompact, setIsCompact] = useState(() => localStorage.getItem('ui_compact') === '1');
+  
+  // Navigation states
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('ui_active_tab') || 'trades');
+  const [navCollapsed, setNavCollapsed] = useState(() => localStorage.getItem('ui_nav_collapsed') === '1');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [filterText, setFilterText] = useState("");
   const [filterStatus, setFilterStatus] = useState('all'); // all | wins | losses
   const [fromDate, setFromDate] = useState("");
@@ -115,6 +121,14 @@ export default function App() {
     document.documentElement.classList.toggle('compact', isCompact);
     localStorage.setItem('ui_compact', isCompact ? '1' : '0');
   }, [isCompact]);
+
+  useEffect(() => {
+    localStorage.setItem('ui_active_tab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem('ui_nav_collapsed', navCollapsed ? '1' : '0');
+  }, [navCollapsed]);
 
   function addOrUpdateTrade(e) {
     e.preventDefault();
@@ -800,27 +814,42 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
   }, [showExportMenu]);
 
   return (
-    <div className="app-shell">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="nav">
-          <div className="text-xs uppercase tracking-wider text-slate-500 px-3 mb-2">Navigation</div>
-          <button className="nav-btn active">Dashboard</button>
-          <button className="nav-btn">Reports</button>
-          <button className="nav-btn">Settings</button>
-        </div>
-      </aside>
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
+      {/* Navigation Sidebar */}
+      <Navigation 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isCollapsed={navCollapsed}
+        setIsCollapsed={setNavCollapsed}
+        mobileOpen={mobileNavOpen}
+        setMobileOpen={setMobileNavOpen}
+      />
 
-      {/* Main */}
-      <div className="grid grid-rows-[auto_1fr]">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="header">
           <div className="container-wrap flex flex-col sm:flex-row items-start sm:items-center justify-between min-h-14 py-2 gap-3">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <div className="flex items-center gap-2">
-                <IconCandle className="w-5 h-5 text-sky-600"/>
-                <span className="text-lg font-semibold">Trading Journal</span>
-                <span className="badge badge-green">v1</span>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-3">
+                {/* Mobile Menu Button */}
+                <button
+                  onClick={() => setMobileNavOpen(!mobileNavOpen)}
+                  className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  title="Toggle navigation menu"
+                >
+                  {mobileNavOpen ? (
+                    <IconX className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  ) : (
+                    <IconMenu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  )}
+                </button>
+                
+                <div className="flex items-center gap-2">
+                  <IconCandle className="w-5 h-5 text-sky-600"/>
+                  <span className="text-lg font-semibold">Trading Journal</span>
+                  <span className="badge badge-green">v1</span>
+                </div>
               </div>
               
               {/* Cooldown Timer */}
@@ -865,10 +894,10 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                         ZIP with Screenshots
                         <span className="text-xs text-slate-500 ml-auto">Complete</span>
                       </button>
-                    </div>
-                  </div>
+        </div>
+      </div>
                 )}
-              </div>
+        </div>
               <button onClick={() => { localStorage.removeItem(STORAGE_KEY); setTrades([]); }} type="button" className="btn btn-danger"><IconReset/> <span className="hidden sm:inline">Reset</span></button>
         </div>
         </div>
@@ -895,92 +924,74 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
         </div>
         </div>
 
-        <main className="content">
-          <div className="container-wrap">
-            <Tabs
-          analyticsComponent={
-            <AnalyticsTab
-              totals={scopedTotals}
-              monthRows={scopedMonthly}
-              allMonthRows={monthRows}
-              activeMonthLabel={activeMonthLabel}
-              setupRows={scopedSetupRows}
-              directionRows={scopedDirectionRows}
-              emotionRows={scopedEmotionRows}
-              monthlyChart={monthlyChart}
-              equityChart={scopedEquityChart}
-              commonChartOptions={commonChartOptions}
-              formatNumber={formatNumber}
-              periodLabel={periodLabel}
-              periodControls={periodControls}
-              onSelectMonth={onSelectMonth}
-            />
-          }
-          tradesComponent={
-            <TradesTab
-              form={form}
-              setForm={setForm}
-              addOrUpdateTrade={addOrUpdateTrade}
-              importExcel={importExcel}
-              importZip={importZip}
-              chargesPreview={chargesPreview}
-              formatNumber={formatNumber}
-              formatCurrency={formatCurrency}
-              visibleTrades={visibleTrades}
-              editTrade={editTrade}
-              duplicateTrade={duplicateTrade}
-              deleteTrade={deleteTrade}
-              filterText={filterText}
-              setFilterText={setFilterText}
-              filterStatus={filterStatus}
-              setFilterStatus={setFilterStatus}
-              fromDate={fromDate}
-              setFromDate={setFromDate}
-              toDate={toDate}
-              setToDate={setToDate}
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSortChange={onSortChange}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalTrades={totalTrades}
-              pageSize={pageSize}
-              setPageSize={setPageSize}
-              goToPage={goToPage}
-              goToFirstPage={goToFirstPage}
-              goToLastPage={goToLastPage}
-              goToPrevPage={goToPrevPage}
-              goToNextPage={goToNextPage}
-            />
-          }
-          rulesComponent={
-            <TradingRulesTab />
-          }
-            />
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">
+          <div className="container-wrap p-6">
+            {activeTab === 'trades' && (
+              <TradesTab
+                form={form}
+                setForm={setForm}
+                addOrUpdateTrade={addOrUpdateTrade}
+                importExcel={importExcel}
+                importZip={importZip}
+                chargesPreview={chargesPreview}
+                formatNumber={formatNumber}
+                formatCurrency={formatCurrency}
+                visibleTrades={visibleTrades}
+                editTrade={editTrade}
+                duplicateTrade={duplicateTrade}
+                deleteTrade={deleteTrade}
+                filterText={filterText}
+                setFilterText={setFilterText}
+                filterStatus={filterStatus}
+                setFilterStatus={setFilterStatus}
+                fromDate={fromDate}
+                setFromDate={setFromDate}
+                toDate={toDate}
+                setToDate={setToDate}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onSortChange={onSortChange}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalTrades={totalTrades}
+                pageSize={pageSize}
+                setPageSize={setPageSize}
+                goToPage={goToPage}
+                goToFirstPage={goToFirstPage}
+                goToLastPage={goToLastPage}
+                goToPrevPage={goToPrevPage}
+                goToNextPage={goToNextPage}
+              />
+            )}
+            
+            {activeTab === 'analytics' && (
+              <AnalyticsTab
+                totals={scopedTotals}
+                monthRows={scopedMonthly}
+                allMonthRows={monthRows}
+                activeMonthLabel={activeMonthLabel}
+                setupRows={scopedSetupRows}
+                directionRows={scopedDirectionRows}
+                emotionRows={scopedEmotionRows}
+                monthlyChart={monthlyChart}
+                equityChart={scopedEquityChart}
+                commonChartOptions={commonChartOptions}
+                formatNumber={formatNumber}
+                periodLabel={periodLabel}
+                periodControls={periodControls}
+                onSelectMonth={onSelectMonth}
+              />
+            )}
+            
+            {activeTab === 'rules' && (
+              <TradingRulesTab />
+            )}
         </div>
         </main>
       </div>
-        </div>
-  );
-}
-
-function Tabs({ analyticsComponent, tradesComponent, rulesComponent }) {
-  const [active, setActive] = React.useState(() => localStorage.getItem('ui_active_tab') || 'trades');
-  React.useEffect(() => { localStorage.setItem('ui_active_tab', active); }, [active]);
-  return (
-    <div>
-      <div className="mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700">
-        <button onClick={() => setActive('trades')} className={(active === 'trades' ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200') + ' rounded-lg px-3 py-1.5 text-sm font-medium transition-colors'}>
-          Trades
-        </button>
-        <button onClick={() => setActive('analytics')} className={(active === 'analytics' ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200') + ' rounded-lg px-3 py-1.5 text-sm font-medium transition-colors'}>
-          Analytics
-        </button>
-        <button onClick={() => setActive('rules')} className={(active === 'rules' ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200') + ' rounded-lg px-3 py-1.5 text-sm font-medium transition-colors'}>
-          Trading Rules
-        </button>
-      </div>
-      {active === 'trades' ? tradesComponent : active === 'analytics' ? analyticsComponent : rulesComponent}
     </div>
   );
 }
+
+
