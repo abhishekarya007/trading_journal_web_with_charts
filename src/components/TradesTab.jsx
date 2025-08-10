@@ -23,6 +23,16 @@ export default function TradesTab({
   sortKey,
   sortDir,
   onSortChange,
+  currentPage,
+  totalPages,
+  totalTrades,
+  pageSize,
+  setPageSize,
+  goToPage,
+  goToFirstPage,
+  goToLastPage,
+  goToPrevPage,
+  goToNextPage,
 }) {
   const [showRange, setShowRange] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
@@ -146,6 +156,101 @@ export default function TradesTab({
           </table>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {totalTrades > 0 && (
+        <div className="card-body border-t border-slate-200 dark:border-slate-700">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Results info */}
+            <div className="text-sm text-slate-600 dark:text-slate-300">
+              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalTrades)} of {totalTrades} trades
+            </div>
+            
+            {/* Page size selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-600 dark:text-slate-300">Show:</span>
+              <select 
+                value={pageSize} 
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="field field-sm"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span className="text-sm text-slate-600 dark:text-slate-300">per page</span>
+            </div>
+
+            {/* Pagination buttons */}
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={goToFirstPage} 
+                disabled={currentPage === 1}
+                className="btn btn-secondary !px-2 !py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                title="First page"
+              >
+                ««
+              </button>
+              <button 
+                onClick={goToPrevPage} 
+                disabled={currentPage === 1}
+                className="btn btn-secondary !px-2 !py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Previous page"
+              >
+                «
+              </button>
+              
+              {/* Page numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => goToPage(pageNum)}
+                      className={`btn !px-3 !py-1 text-sm ${
+                        currentPage === pageNum 
+                          ? 'btn-primary' 
+                          : 'btn-secondary'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button 
+                onClick={goToNextPage} 
+                disabled={currentPage === totalPages}
+                className="btn btn-secondary !px-2 !py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Next page"
+              >
+                »
+              </button>
+              <button 
+                onClick={goToLastPage} 
+                disabled={currentPage === totalPages}
+                className="btn btn-secondary !px-2 !py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Last page"
+              >
+                »»
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowModal(false)}>

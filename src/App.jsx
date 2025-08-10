@@ -63,6 +63,8 @@ export default function App() {
   const [toDate, setToDate] = useState("");
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('desc'); // asc | desc
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -474,6 +476,12 @@ export default function App() {
     });
   }, [trades, filterText, filterStatus, fromDate, toDate]);
 
+  // Pagination calculations
+  const totalTrades = filteredTrades.length;
+  const totalPages = Math.ceil(totalTrades / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
   const visibleTrades = useMemo(() => {
     const arr = [...filteredTrades];
     const get = (t) => {
@@ -497,8 +505,9 @@ export default function App() {
       // string compare
       return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
     });
-    return arr;
-  }, [filteredTrades, sortKey, sortDir]);
+    // Apply pagination
+    return arr.slice(startIndex, endIndex);
+  }, [filteredTrades, sortKey, sortDir, startIndex, endIndex]);
 
   const onSortChange = (key) => {
     setSortKey(prev => {
@@ -510,6 +519,21 @@ export default function App() {
       return key;
     });
   };
+
+  // Pagination handlers
+  const goToPage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const goToFirstPage = () => setCurrentPage(1);
+  const goToLastPage = () => setCurrentPage(totalPages);
+  const goToPrevPage = () => setCurrentPage(prev => Math.max(1, prev - 1));
+  const goToNextPage = () => setCurrentPage(prev => Math.min(totalPages, prev + 1));
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filterText, filterStatus, fromDate, toDate]);
 
   return (
     <div className="app-shell">
@@ -610,6 +634,16 @@ export default function App() {
               sortKey={sortKey}
               sortDir={sortDir}
               onSortChange={onSortChange}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalTrades={totalTrades}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              goToPage={goToPage}
+              goToFirstPage={goToFirstPage}
+              goToLastPage={goToLastPage}
+              goToPrevPage={goToPrevPage}
+              goToNextPage={goToNextPage}
             />
           }
             />
