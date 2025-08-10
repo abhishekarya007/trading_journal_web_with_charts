@@ -97,13 +97,13 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm" 
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden backdrop-blur-sm" 
           onClick={() => setMobileOpen(false)}
         />
       )}
       
       {/* Navigation Sidebar */}
-      <nav className={`bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-500 flex flex-col z-50 shadow-xl ${
+      <nav className={`bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-500 flex flex-col z-10 shadow-xl ${
         // Desktop: Always visible with collapse functionality
         isCollapsed ? 'hidden lg:flex lg:w-20' : 'hidden lg:flex lg:w-72'
       } ${
