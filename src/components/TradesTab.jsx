@@ -1,492 +1,791 @@
-import React from "react";
-import DateRangePicker from "./DateRangePicker";
-import ScreenshotManager from "./ScreenshotManager";
+import React, { useState, useEffect } from 'react';
+import ScreenshotManager from './ScreenshotManager';
+import { 
+  IconTrendingUp, 
+  IconTrendingDown, 
+  IconPlus, 
+  IconSearch, 
+  IconFilter, 
+  IconCalendar,
+  IconDollarSign,
+  IconTarget,
+  IconChartBar,
+  IconStar,
+  IconFire,
+  IconZap,
+  IconRocket,
+  IconTrophy,
+  IconTrendingUp as IconProfit,
+  IconTrendingDown as IconLoss,
+  IconEye,
+  IconEdit,
+  IconCopy,
+  IconTrash,
+  IconDownload,
+  IconUpload,
+  IconRefresh,
+  IconCheck,
+  IconX
+} from './icons';
 
-export default function TradesTab({
-  form,
-  setForm,
-  addOrUpdateTrade,
-  importExcel,
-  importZip,
-  chargesPreview,
-  formatNumber,
-  visibleTrades,
-  editTrade,
-  duplicateTrade,
-  deleteTrade,
-  filterText,
-  setFilterText,
-  filterStatus,
-  setFilterStatus,
-  fromDate,
-  setFromDate,
-  toDate,
-  setToDate,
-  sortKey,
-  sortDir,
-  onSortChange,
-  currentPage,
-  totalPages,
-  totalTrades,
-  pageSize,
-  setPageSize,
-  goToPage,
-  goToFirstPage,
-  goToLastPage,
-  goToPrevPage,
-  goToNextPage,
-}) {
-  const [showRange, setShowRange] = React.useState(false);
-  const [showModal, setShowModal] = React.useState(false);
-  const [showImportMenu, setShowImportMenu] = React.useState(false);
-  React.useEffect(() => {
-    function onKey(e) {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); const fake = { preventDefault:()=>{} }; addOrUpdateTrade(fake); }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [addOrUpdateTrade]);
+const TradesTab = ({ 
+  form, setForm, addOrUpdateTrade, importExcel, importZip, chargesPreview, 
+  formatNumber, formatCurrency, visibleTrades, editTrade, duplicateTrade, 
+  deleteTrade, filterText, setFilterText, filterStatus, setFilterStatus, 
+  fromDate, setFromDate, toDate, setToDate, sortKey, sortDir, onSortChange, 
+  currentPage, totalPages, totalTrades, pageSize, setPageSize, goToPage, 
+  goToFirstPage, goToLastPage, goToPrevPage, goToNextPage 
+}) => {
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [showImportMenu, setShowImportMenu] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
-  // Close import menu when clicking outside
-  React.useEffect(() => {
-    function handleClickOutside(event) {
-      if (showImportMenu && !event.target.closest('.relative')) {
-        setShowImportMenu(false);
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+        setEditingId(null);
       }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showImportMenu]);
-  return (
-    <div>
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'n') {
+          e.preventDefault();
+          setForm({ id: Date.now() + Math.random(), date: new Date().toISOString().slice(0,10), symbol: "", type: "Long", qty: "", buy: "", sell: "", trend: "Up", rule: "Yes", emotion: "", riskReward: "", setup: "", remarks: "", screenshots: [] });
+          setEditingId(null);
+          setShowModal(true);
+        }
+      }
+    };
 
-      <div className="card table-wrap">
-        <div className="card-header">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <h2 className="font-semibold">Trade Log</h2>
-              <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={() => { setForm({ id: Date.now() + Math.random(), date: new Date().toISOString().slice(0,10), symbol:'', type:'Long', qty:'', buy:'', sell:'', setup:'', remarks:''}); setShowModal(true); }}>Add Trade</button>
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, setForm]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    addOrUpdateTrade(e);
+    setShowModal(false);
+    setEditingId(null);
+  };
+
+  const handleEdit = (trade) => {
+    setForm(trade);
+    setEditingId(trade.id);
+    setShowModal(true);
+  };
+
+  const handleDuplicate = (trade) => {
+    const duplicatedTrade = { ...trade, id: Date.now() + Math.random() };
+    setForm(duplicatedTrade);
+    setEditingId(null);
+    setShowModal(true);
+  };
+
+  const getTradeStatusColor = (net) => {
+    if (net > 0) return 'bg-gradient-to-r from-emerald-500 to-green-500';
+    if (net < 0) return 'bg-gradient-to-r from-red-500 to-pink-500';
+    return 'bg-gradient-to-r from-slate-500 to-gray-500';
+  };
+
+  const getTradeStatusIcon = (net) => {
+    if (net > 0) return <IconTrophy className="w-4 h-4" />;
+    if (net < 0) return <IconFire className="w-4 h-4" />;
+    return <IconTarget className="w-4 h-4" />;
+  };
+
+  const getTradeTypeColor = (type) => {
+    return type === 'Long' 
+      ? 'bg-gradient-to-r from-emerald-500 to-green-500' 
+      : 'bg-gradient-to-r from-red-500 to-pink-500';
+  };
+
+  const getTradeTypeIcon = (type) => {
+    return type === 'Long' ? <IconTrendingUp className="w-3 h-3" /> : <IconTrendingDown className="w-3 h-3" />;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-2xl p-8 text-white animate-pulse">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 animate-bounce"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12 animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-white/5 rounded-full -translate-x-8 -translate-y-8 animate-spin"></div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <IconChartBar className="w-8 h-8" />
             </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <div className="relative">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400">
-                  {/* search icon */}
-                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-                </span>
-                <input value={filterText} onChange={e => setFilterText(e.target.value)} placeholder="Search" className="field field-sm w-full sm:w-56 input-with-icon"/>
-              </div>
-              <div className="hidden md:flex items-center gap-2">
-                <button type="button" className={`chip ${filterStatus==='all' ? 'chip-active':''}`} onClick={()=>setFilterStatus('all')}>All</button>
-                <button type="button" className={`chip chip-green ${filterStatus==='wins' ? 'chip-active':''}`} onClick={()=>setFilterStatus('wins')}>Wins</button>
-                <button type="button" className={`chip chip-red ${filterStatus==='losses' ? 'chip-active':''}`} onClick={()=>setFilterStatus('losses')}>Losses</button>
-              </div>
-              {/* Fallback select on small screens */}
-              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="field field-sm md:hidden">
-                <option value="all">All</option>
-                <option value="wins">Wins</option>
-                <option value="losses">Losses</option>
-              </select>
-              <div className="flex gap-2">
-                <div className="relative">
-                  <button type="button" className="btn btn-secondary w-full sm:w-auto" onClick={() => setShowRange(v=>!v)}>
-                    <span className="hidden sm:inline">Date Range</span>
-                    <span className="sm:hidden">Range</span>
-                  </button>
-                  {showRange ? (
-                    <div className="absolute right-0 mt-2 z-50">
-                      <DateRangePicker
-                        range={{ startDate: fromDate ? new Date(fromDate) : new Date(), endDate: toDate ? new Date(toDate) : new Date() }}
-                        onChange={({startDate, endDate}) => { setFromDate(startDate.toISOString().slice(0,10)); setToDate(endDate.toISOString().slice(0,10)); setShowRange(false); }}
-                      />
-                    </div>
-                  ) : null}
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Trade Management</h1>
+              <p className="text-blue-100 text-lg">Track, analyze, and optimize your trading performance</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center animate-pulse">
+                  <IconRocket className="w-5 h-5 text-emerald-300" />
                 </div>
-                <button type="button" onClick={() => { setFilterText(''); setFilterStatus('all'); setFromDate(''); setToDate(''); }} className="btn btn-secondary">Clear</button>
+                <div>
+                  <div className="text-2xl font-bold animate-pulse">{totalTrades}</div>
+                  <div className="text-blue-100 text-sm">Total Trades</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center animate-bounce">
+                  <IconProfit className="w-5 h-5 text-blue-300" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold animate-pulse">
+                    {visibleTrades.filter(t => (t.meta?.net || 0) > 0).length}
+                  </div>
+                  <div className="text-blue-100 text-sm">Winning Trades</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center animate-pulse">
+                  <IconZap className="w-5 h-5 text-purple-300" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold animate-pulse">
+                    {visibleTrades.filter(t => (t.meta?.net || 0) < 0).length}
+                  </div>
+                  <div className="text-blue-100 text-sm">Losing Trades</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center animate-spin">
+                  <IconStar className="w-5 h-5 text-orange-300" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold animate-pulse">
+                    {visibleTrades.filter(t => t.screenshots && t.screenshots.length > 0).length}
+                  </div>
+                  <div className="text-blue-100 text-sm">With Screenshots</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="table-scroll">
-          <table className="table">
-            <thead className="thead">
+      </div>
+
+      {/* Action Bar */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => { setForm({ id: Date.now() + Math.random(), date: new Date().toISOString().slice(0,10), symbol: "", type: "Long", qty: "", buy: "", sell: "", trend: "Up", rule: "Yes", emotion: "", riskReward: "", setup: "", remarks: "", screenshots: [] }); setEditingId(null); setShowModal(true); }}
+              className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              title="Add New Trade (Ctrl+N)"
+            >
+              <IconPlus className="w-5 h-5" />
+              <span>Add New Trade</span>
+              <span className="text-xs opacity-75">Ctrl+N</span>
+            </button>
+
+            <div className="relative">
+              <button
+                onClick={() => setShowImportMenu(!showImportMenu)}
+                className="btn btn-secondary flex items-center gap-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-200 px-4 py-3 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                <IconUpload className="w-4 h-4" />
+                <span>Import</span>
+                <IconTrendingDown className="w-4 h-4" />
+              </button>
+
+              {showImportMenu && (
+                <div className="absolute left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
+                  <div className="p-2">
+                    <label className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
+                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                        <IconDownload className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium text-slate-900 dark:text-white">Excel Only</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">Data only</div>
+                      </div>
+                      <input 
+                        accept=".xlsx, .xls" 
+                        type="file" 
+                        onChange={e => { 
+                          if (e.target.files?.[0]) { 
+                            importExcel(e.target.files[0]); 
+                            setShowImportMenu(false); 
+                            e.target.value = ''; 
+                          } 
+                        }} 
+                        className="hidden"
+                      />
+                    </label>
+                    <label className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                        <IconDownload className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium text-slate-900 dark:text-white">ZIP with Screenshots</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">Complete backup</div>
+                      </div>
+                      <input 
+                        accept=".zip" 
+                        type="file" 
+                        onChange={e => { 
+                          if (e.target.files?.[0]) { 
+                            importZip(e.target.files[0]); 
+                            setShowImportMenu(false); 
+                            e.target.value = ''; 
+                          } 
+                        }} 
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search trades..."
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
+              {['all', 'wins', 'losses'].map(status => (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    filterStatus === status
+                      ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  {status === 'all' ? 'All' : status === 'wins' ? 'Wins' : 'Losses'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      {/* Trade Log */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Trade Log</h2>
+            <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+              <span>Showing {visibleTrades.length} of {totalTrades} trades</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800">
               <tr>
-                <th className="th cursor-pointer" onClick={() => onSortChange('date')}>Date {sortKey==='date' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th cursor-pointer" onClick={() => onSortChange('symbol')}>Symbol {sortKey==='symbol' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th cursor-pointer" onClick={() => onSortChange('type')}>Type {sortKey==='type' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th cursor-pointer" onClick={() => onSortChange('trend')}>Trend {sortKey==='trend' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th cursor-pointer" onClick={() => onSortChange('rule')}>Rule {sortKey==='rule' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th cursor-pointer" onClick={() => onSortChange('qty')}>Qty {sortKey==='qty' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th cursor-pointer" onClick={() => onSortChange('buy')}>Buy {sortKey==='buy' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th cursor-pointer" onClick={() => onSortChange('sell')}>Sell {sortKey==='sell' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th cursor-pointer" onClick={() => onSortChange('net')}>Net P&L {sortKey==='net' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th cursor-pointer" onClick={() => onSortChange('riskReward')}>R:R {sortKey==='riskReward' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                <th className="th">Setup</th>
-                <th className="th">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Trade
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Details
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Performance
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Analysis
+                </th>
+                <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
-            <tbody>
-              {visibleTrades.length ? visibleTrades.map(t => (
-                <tr key={t.id} className="tr">
-                  <td className="td">{t.date}</td>
-                  <td className="td">{t.symbol}</td>
-                  <td className="td">{t.type === 'Long' ? <span className="chip chip-green">Long</span> : <span className="chip chip-red">Short</span>}</td>
-                  <td className="td">
-                    {t.trend ? (
-                      <span className={t.trend === 'Up' ? "chip chip-green" : "chip chip-red"}>{t.trend}</span>
-                    ) : (
-                      <span className="text-slate-400">—</span>
-                    )}
-                  </td>
-                  <td className="td">
-                    {t.rule ? (
-                      <span className={t.rule === 'Yes' ? "chip chip-green" : "chip chip-red"}>{t.rule}</span>
-                    ) : (
-                      <span className="text-slate-400">—</span>
-                    )}
-                  </td>
-                  <td className="td">{t.qty}</td>
-                  <td className="td">{formatNumber(Number(t.buy))}</td>
-                  <td className="td">{formatNumber(Number(t.sell))}</td>
-                  <td className={"td " + ((t.meta?.net || 0) > 0 ? "text-green-700" : "text-red-700")}>
-                    {t.meta?.net !== undefined ? formatNumber(Number(t.meta?.net)) : "-"}
-                  </td>
-                  <td className="td">
-                    {t.riskReward ? (
-                      <span className="text-slate-700 dark:text-slate-200 font-medium">{t.riskReward}</span>
-                    ) : (
-                      <span className="text-slate-400">—</span>
-                    )}
-                  </td>
-                  <td className="td">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        {t.setup ? (
-                          <span className="chip">{t.setup}</span>
-                        ) : (
-                          <span className="text-slate-400">—</span>
-                        )}
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+              {visibleTrades.map((trade, index) => (
+                <tr key={trade.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg" style={{ animationDelay: `${index * 50}ms` }}>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getTradeStatusColor(trade.meta?.net || 0)}`}>
+                        {getTradeStatusIcon(trade.meta?.net || 0)}
                       </div>
-                      {t.screenshots && t.screenshots.length > 0 && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded" title={`${t.screenshots.length} screenshot(s)`}>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          {t.screenshots.length}
+                      <div>
+                        <div className="font-semibold text-slate-900 dark:text-white">{trade.symbol || 'Unknown'}</div>
+                        <div className="text-sm text-slate-500 dark:text-slate-400">
+                          {new Date(trade.date).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  
+                  <td className="px-6 py-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-white ${getTradeTypeColor(trade.type)}`}>
+                          {getTradeTypeIcon(trade.type)}
+                          {trade.type}
                         </span>
+                        <span className="text-sm text-slate-600 dark:text-slate-400">
+                          Qty: {trade.qty}
+                        </span>
+                      </div>
+                      <div className="text-sm text-slate-600 dark:text-slate-400">
+                        Buy: ₹{trade.buy} | Sell: ₹{trade.sell}
+                      </div>
+                    </div>
+                  </td>
+                  
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      <div className={`text-lg font-bold ${(trade.meta?.net || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                        ₹{formatNumber(trade.meta?.net || 0)}
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                        Charges: ₹{formatNumber(trade.meta?.totalCharges || 0)}
+                      </div>
+                    </div>
+                  </td>
+                  
+                  <td className="px-6 py-4">
+                    <div className="space-y-2">
+                      {trade.setup && (
+                        <span className="inline-block px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs rounded-lg">
+                          {trade.setup}
+                        </span>
+                      )}
+                      {trade.trend && (
+                        <span className="inline-block px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-xs rounded-lg ml-1">
+                          {trade.trend}
+                        </span>
+                      )}
+                      {trade.screenshots && trade.screenshots.length > 0 && (
+                        <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
+                          <IconEye className="w-3 h-3" />
+                          {trade.screenshots.length} screenshot{trade.screenshots.length !== 1 ? 's' : ''}
+                        </div>
                       )}
                     </div>
                   </td>
-                  <td className="td">
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => { editTrade(t); setShowModal(true); }} className="btn btn-secondary !px-2 !py-1 text-xs" title="Edit">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                  
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        onClick={() => handleEdit(trade)}
+                        className="p-2 text-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 dark:hover:from-blue-900/30 dark:hover:to-blue-800/30 rounded-lg transition-all duration-300 transform hover:scale-110"
+                        title="Edit trade"
+                      >
+                        <IconEdit className="w-4 h-4" />
                       </button>
-                      <button onClick={() => { duplicateTrade(t); setShowModal(true); }} className="btn btn-secondary !px-2 !py-1 text-xs" title="Duplicate">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
+                      <button
+                        onClick={() => handleDuplicate(trade)}
+                        className="p-2 text-green-600 hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 dark:hover:from-green-900/30 dark:hover:to-green-800/30 rounded-lg transition-all duration-300 transform hover:scale-110"
+                        title="Duplicate trade"
+                      >
+                        <IconCopy className="w-4 h-4" />
                       </button>
-                      <button onClick={() => deleteTrade(t.id)} className="btn btn-danger !px-2 !py-1 text-xs" title="Delete">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                      <button
+                        onClick={() => deleteTrade(trade.id)}
+                        className="p-2 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 dark:hover:from-red-900/30 dark:hover:to-red-800/30 rounded-lg transition-all duration-300 transform hover:scale-110"
+                        title="Delete trade"
+                      >
+                        <IconTrash className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
                 </tr>
-              )) : <tr><td colSpan="10" className="td text-slate-500">No trades found</td></tr>}
+              ))}
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* Pagination Controls */}
-      {totalTrades > 0 && (
-        <div className="card-body border-t border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            {/* Results info */}
-            <div className="text-sm text-slate-600 dark:text-slate-300">
-              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalTrades)} of {totalTrades} trades
-            </div>
-            
-            {/* Page size selector */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600 dark:text-slate-300">Show:</span>
-              <select 
-                value={pageSize} 
-                onChange={(e) => setPageSize(Number(e.target.value))}
-                className="field field-sm"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-              <span className="text-sm text-slate-600 dark:text-slate-300">per page</span>
-            </div>
-
-            {/* Pagination buttons */}
-            <div className="flex items-center gap-1">
-              <button 
-                onClick={goToFirstPage} 
-                disabled={currentPage === 1}
-                className="btn btn-secondary !px-2 !py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                title="First page"
-              >
-                ««
-              </button>
-              <button 
-                onClick={goToPrevPage} 
-                disabled={currentPage === 1}
-                className="btn btn-secondary !px-2 !py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Previous page"
-              >
-                «
-              </button>
-              
-              {/* Page numbers */}
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => goToPage(pageNum)}
-                      className={`btn !px-3 !py-1 text-sm ${
-                        currentPage === pageNum 
-                          ? 'btn-primary' 
-                          : 'btn-secondary'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
+        {/* Pagination */}
+        {totalTrades > 0 && (
+          <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+                <span>Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalTrades)} of {totalTrades} results</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="px-2 py-1 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={25}>25 per page</option>
+                  <option value={50}>50 per page</option>
+                </select>
               </div>
-
-              <button 
-                onClick={goToNextPage} 
-                disabled={currentPage === totalPages}
-                className="btn btn-secondary !px-2 !py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Next page"
-              >
-                »
-              </button>
-              <button 
-                onClick={goToLastPage} 
-                disabled={currentPage === totalPages}
-                className="btn btn-secondary !px-2 !py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Last page"
-              >
-                »»
-              </button>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToFirstPage}
+                  disabled={currentPage === 1}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                >
+                  <IconTrendingDown className="w-4 h-4 rotate-90" />
+                </button>
+                <button
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                >
+                  <IconTrendingDown className="w-4 h-4 rotate-90" />
+                </button>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => goToPage(page)}
+                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                          page === currentPage
+                            ? 'bg-blue-500 text-white'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                >
+                  <IconTrendingDown className="w-4 h-4 -rotate-90" />
+                </button>
+                <button
+                  onClick={goToLastPage}
+                  disabled={currentPage === totalPages}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                >
+                  <IconTrendingDown className="w-4 h-4 -rotate-90" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
+      {/* Add/Edit Trade Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/50 p-2 sm:p-4 overflow-y-auto" onClick={() => setShowModal(false)}>
-          <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 my-2 sm:my-0" onClick={(e)=>e.stopPropagation()}>
-            <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <h2 className="font-semibold">Add / Edit Trade</h2>
-              <button className="btn btn-secondary !px-2 !py-1 text-sm" onClick={()=>setShowModal(false)}>Close</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-slate-800 p-6 border-b border-slate-200 dark:border-slate-700 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                  {editingId ? 'Edit Trade' : 'Add New Trade'}
+                </h2>
+                <button
+                  onClick={() => { setShowModal(false); setEditingId(null); }}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition-colors"
+                  title="Close (Esc)"
+                >
+                  <IconX className="w-6 h-6" />
+                </button>
+              </div>
             </div>
-            <form onSubmit={(e)=>{ addOrUpdateTrade(e); setShowModal(false); }} className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[85vh] sm:max-h-[80vh] overflow-y-auto">
-              <div className="sm:col-span-2">
-                <div className="text-slate-500 dark:text-slate-300 text-sm mb-2">Trade details</div>
-              </div>
-              <div>
-                <label className="label">Date</label>
-                <input required value={form.date} onChange={e => setForm({...form, date: e.target.value})} type="date" className="field field-md"/>
-              </div>
-              <div>
-                <label className="label">Symbol</label>
-                <input placeholder="e.g. NIFTY" required value={form.symbol} onChange={e => setForm({...form, symbol: e.target.value.toUpperCase()})} className="field field-md"/>
-              </div>
-              <div>
-                <label className="label">Trade Type</label>
-                <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="field field-md">
-                  <option>Long</option>
-                  <option>Short</option>
-                </select>
-              </div>
-              <div>
-                <label className="label">Trend</label>
-                <select value={form.trend || 'Up'} onChange={e => setForm({...form, trend: e.target.value})} className="field field-md">
-                  <option>Up</option>
-                  <option>Down</option>
-                </select>
-              </div>
-              <div>
-                <label className="label">Rule Followed</label>
-                <select value={form.rule || 'Yes'} onChange={e => setForm({...form, rule: e.target.value})} className="field field-md">
-                  <option>Yes</option>
-                  <option>No</option>
-                </select>
-              </div>
 
-              <div>
-                <label className="label">Qty</label>
-                <input placeholder="0" inputMode="numeric" type="text" value={form.qty} onChange={e => setForm({...form, qty: e.target.value.replace(/[^0-9]/g, '')})} className="field field-md"/>
-              </div>
-              <div>
-                <label className="label">Buy Price</label>
-                <input placeholder="0.00" inputMode="decimal" type="text" value={form.buy} onChange={e => setForm({...form, buy: e.target.value.replace(/[^0-9.]/g, '')})} className="field field-md"/>
-                <p className="text-xs text-slate-500 mt-1">Average buy price per unit</p>
-              </div>
-              <div>
-                <label className="label">Sell Price</label>
-                <input placeholder="0.00" inputMode="decimal" type="text" value={form.sell} onChange={e => setForm({...form, sell: e.target.value.replace(/[^0-9.]/g, '')})} className="field field-md"/>
-                <p className="text-xs text-slate-500 mt-1">Average sell price per unit</p>
-              </div>
-
-              <div>
-                <label className="label">Setup</label>
-                <select value={form.setup || ''} onChange={e => setForm({...form, setup: e.target.value})} className="field field-md">
-                  <option value="">Select setup</option>
-                  <option>Breakout</option>
-                  <option>Breakdown</option>
-                  <option>Liquidity-Sweep</option>
-                  <option>Reversal</option>
-                  <option>Support</option>
-                  <option>Resistance</option>
-                  <option>Trendline</option>
-                  <option>Scalping</option>
-                  <option>Price Action</option>
-                  <option>M pattern</option>
-                  <option>W pattern</option>
-                  <option>Pin Bar</option>
-                  <option>Magic candle</option>
-                  <option>Retest</option>
-                  <option>Trap</option>
-                </select>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="label">Remarks</label>
-                <input placeholder="Notes, mistakes, improvements..." value={form.remarks} onChange={e => setForm({...form, remarks: e.target.value})} className="field field-md"/>
-              </div>
-              <div>
-                <label className="label">Emotion</label>
-                <select value={form.emotion || ''} onChange={e => setForm({...form, emotion: e.target.value})} className="field field-md">
-                  <option value="">Select emotion</option>
-                  <option>Calm</option>
-                  <option>Confident</option>
-                  <option>Fearful</option>
-                  <option>Greedy</option>
-                  <option>FOMO</option>
-                  <option>Revenge</option>
-                  <option>Stressed</option>
-                </select>
-              </div>
-              <div>
-                <label className="label">Risk:Reward</label>
-                <input placeholder="e.g. 1:2" value={form.riskReward} onChange={e => setForm({...form, riskReward: e.target.value})} className="field field-md"/>
-              </div>
-
-              <div className="sm:col-span-2">
-                <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/40 p-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                    <div className="section-title">Charges preview</div>
-                    <div className={(chargesPreview.net >= 0 ? 'badge badge-green' : 'badge badge-red') + ' capitalize'}>
-                      Net: {formatNumber(Math.abs(chargesPreview.net) < 0.015 ? 0 : chargesPreview.net)}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm">
-                    <div><span className="text-slate-500 dark:text-slate-300">Turnover</span><div className="font-medium">{formatNumber(chargesPreview.turnover)}</div></div>
-                    <div><span className="text-slate-500 dark:text-slate-300">Brokerage</span><div className="font-medium">{formatNumber(chargesPreview.brokerage)}</div></div>
-                    <div><span className="text-slate-500 dark:text-slate-300">STT</span><div className="font-medium">{formatNumber(chargesPreview.stt)}</div></div>
-                    <div><span className="text-slate-500 dark:text-slate-300">Exchange</span><div className="font-medium">{formatNumber(chargesPreview.exchangeCharges)}</div></div>
-                    <div><span className="text-slate-500 dark:text-slate-300">Stamp Duty</span><div className="font-medium">{formatNumber(chargesPreview.stampDuty)}</div></div>
-                    <div><span className="text-slate-500 dark:text-slate-300">SEBI</span><div className="font-medium">{formatNumber(chargesPreview.sebi)}</div></div>
-                    <div><span className="text-slate-500 dark:text-slate-300">GST</span><div className="font-medium">{formatNumber(chargesPreview.gst)}</div></div>
-                    <div><span className="text-slate-500 dark:text-slate-300">Total Charges</span><div className="font-medium">{formatNumber(chargesPreview.totalCharges)}</div></div>
-                  </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Basic Trade Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={form.date}
+                    onChange={(e) => setForm({...form, date: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Symbol
+                  </label>
+                  <input
+                    type="text"
+                    value={form.symbol}
+                    onChange={(e) => setForm({...form, symbol: e.target.value})}
+                    placeholder="e.g., RELIANCE, TCS"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
                 </div>
               </div>
 
-              {/* Screenshots Section */}
-              <div className="sm:col-span-2">
-                <ScreenshotManager 
+              {/* Trade Type and Quantity */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Trade Type
+                  </label>
+                  <select
+                    value={form.type}
+                    onChange={(e) => setForm({...form, type: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="Long">Long</option>
+                    <option value="Short">Short</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={form.qty}
+                    onChange={(e) => setForm({...form, qty: e.target.value})}
+                    placeholder="Number of shares"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Risk to Reward
+                  </label>
+                  <input
+                    type="number"
+                    value={form.riskReward}
+                    onChange={(e) => setForm({...form, riskReward: e.target.value})}
+                    placeholder="e.g., 1:2"
+                    step="0.1"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Buy and Sell Prices */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Buy Price
+                  </label>
+                  <input
+                    type="number"
+                    value={form.buy}
+                    onChange={(e) => setForm({...form, buy: e.target.value})}
+                    placeholder="Buy price per share"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Sell Price
+                  </label>
+                  <input
+                    type="number"
+                    value={form.sell}
+                    onChange={(e) => setForm({...form, sell: e.target.value})}
+                    placeholder="Sell price per share"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Analysis Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Trend
+                  </label>
+                  <select
+                    value={form.trend}
+                    onChange={(e) => setForm({...form, trend: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="Up">Up</option>
+                    <option value="Down">Down</option>
+                    <option value="Sideways">Sideways</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Rule Followed
+                  </label>
+                  <select
+                    value={form.rule}
+                    onChange={(e) => setForm({...form, rule: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                    <option value="Partially">Partially</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Emotion
+                  </label>
+                  <select
+                    value={form.emotion}
+                    onChange={(e) => setForm({...form, emotion: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">Select emotion...</option>
+                    <option value="Confident">Confident</option>
+                    <option value="Fearful">Fearful</option>
+                    <option value="Greedy">Greedy</option>
+                    <option value="Patient">Patient</option>
+                    <option value="Impatient">Impatient</option>
+                    <option value="FOMO">FOMO</option>
+                    <option value="Revenge">Revenge Trading</option>
+                    <option value="Calm">Calm</option>
+                    <option value="Excited">Excited</option>
+                    <option value="Stressed">Stressed</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Setup and Remarks */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Setup
+                  </label>
+                  <select
+                    value={form.setup}
+                    onChange={(e) => setForm({...form, setup: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">Select setup...</option>
+                    <option value="Breakout">Breakout</option>
+                    <option value="Breakdown">Breakdown</option>
+                    <option value="Pullback">Pullback</option>
+                    <option value="Support">Support</option>
+                    <option value="Resistance">Resistance</option>
+                    <option value="Gap">Gap</option>
+                    <option value="News">News</option>
+                    <option value="Earnings">Earnings</option>
+                    <option value="Technical">Technical</option>
+                    <option value="Fundamental">Fundamental</option>
+                    <option value="Scalping">Scalping</option>
+                    <option value="Swing">Swing</option>
+                    <option value="Intraday">Intraday</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Remarks
+                  </label>
+                  <input
+                    type="text"
+                    value={form.remarks}
+                    onChange={(e) => setForm({...form, remarks: e.target.value})}
+                    placeholder="Additional notes..."
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Screenshots */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Screenshots
+                </label>
+                <ScreenshotManager
                   screenshots={form.screenshots || []}
-                  onChange={(newScreenshots) => setForm({...form, screenshots: newScreenshots})}
+                  onChange={(screenshots) => setForm({...form, screenshots})}
                 />
               </div>
 
-              <div className="sm:col-span-2 flex flex-col sm:flex-row flex-wrap gap-2 pt-3">
-                <button type="submit" className="btn btn-primary">Save Trade</button>
-                <button type="button" onClick={() => setForm({ ...form, id: Date.now() + Math.random(), qty: '', buy: '', sell: '' })} className="btn btn-secondary">Clear</button>
-
-                <div className="relative">
-                  <button 
-                    type="button"
-                    onClick={() => setShowImportMenu(v => !v)} 
-                    className="btn btn-secondary flex items-center gap-1"
-                  >
-                    Import
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  
-                  {showImportMenu && (
-                    <div className="absolute left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-50">
-                      <div className="py-1">
-                        <label className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 cursor-pointer">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          Excel Only
-                          <span className="text-xs text-slate-500 ml-auto">Data only</span>
-                          <input 
-                            accept=".xlsx, .xls" 
-                            type="file" 
-                            onChange={e => {
-                              if (e.target.files?.[0]) {
-                                importExcel(e.target.files[0]);
-                                setShowImportMenu(false);
-                                e.target.value = '';
-                              }
-                            }} 
-                            className="hidden"
-                          />
-                        </label>
-                        <label className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 cursor-pointer">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          ZIP with Screenshots
-                          <span className="text-xs text-slate-500 ml-auto">Complete</span>
-                          <input 
-                            accept=".zip" 
-                            type="file" 
-                            onChange={e => {
-                              if (e.target.files?.[0]) {
-                                importZip(e.target.files[0]);
-                                setShowImportMenu(false);
-                                e.target.value = '';
-                              }
-                            }} 
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
+              {/* Charges Breakdown - Moved Inside Form */}
+              {chargesPreview && (
+                <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-900/20 dark:via-green-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <IconDollarSign className="w-5 h-5 text-white" />
                     </div>
-                  )}
+                    <div>
+                      <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">Charges Breakdown</h3>
+                      <p className="text-emerald-700 dark:text-emerald-300 text-sm">Real-time calculation preview</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-emerald-200 dark:border-emerald-700">
+                      <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                        ₹{formatNumber(chargesPreview.net)}
+                      </div>
+                      <div className="text-sm text-emerald-700 dark:text-emerald-300">Net P&L</div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-emerald-200 dark:border-emerald-700">
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        ₹{formatNumber(chargesPreview.brokerage)}
+                      </div>
+                      <div className="text-sm text-blue-700 dark:text-blue-300">Brokerage</div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-emerald-200 dark:border-emerald-700">
+                      <div className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                        ₹{formatNumber(chargesPreview.totalCharges)}
+                      </div>
+                      <div className="text-sm text-purple-700 dark:text-purple-300">Total Charges</div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-emerald-200 dark:border-emerald-700">
+                      <div className="text-xl font-bold text-orange-600 dark:text-orange-400">
+                        ₹{formatNumber(chargesPreview.breakeven)}
+                      </div>
+                      <div className="text-sm text-orange-700 dark:text-orange-300">Breakeven</div>
+                    </div>
+                  </div>
                 </div>
+              )}
+
+              {/* Form Actions */}
+              <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => { setShowModal(false); setEditingId(null); }}
+                  className="px-6 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                >
+                  {editingId ? 'Update Trade' : 'Add Trade'}
+                </button>
               </div>
             </form>
           </div>
@@ -494,4 +793,6 @@ export default function TradesTab({
       )}
     </div>
   );
-}
+};
+
+export default TradesTab;
