@@ -271,71 +271,71 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  async function deleteTrade(id) {
-    try {
-      await tradeService.deleteTrade(id);
-      setTrades(prev => prev.filter(t => t.id !== id));
-      
-      // Show success toast
-      const toastId = Date.now();
-      setToasts(prev => [...prev, {
-        id: toastId,
-        type: 'success',
-        message: 'Trade deleted successfully!',
-        icon: '🗑️'
-      }]);
-      
-      setTimeout(() => {
-        setToasts(prev => prev.filter(toast => toast.id !== toastId));
-      }, 3000);
-      
-    } catch (error) {
-      console.error('Error deleting trade:', error);
-      
-      // Show error toast
-      const toastId = Date.now();
-      setToasts(prev => [...prev, {
-        id: toastId,
-        type: 'error',
-        message: 'Failed to delete trade. Please try again.',
-        icon: '❌'
-      }]);
-      
-      setTimeout(() => {
-        setToasts(prev => prev.filter(toast => toast.id !== toastId));
-      }, 5000);
-    }
+
+
+  function showDeleteConfirmation(id) {
+    setDeleteTradeId(id);
+    setShowDeleteConfirm(true);
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (deleteTradeId) {
-      setTrades(prev => prev.filter(t => t.id !== deleteTradeId));
-      
-      // Show delete toast
-      const toastId = Date.now();
-      setToasts(prev => [...prev, {
-        id: toastId,
-        type: 'info',
-        message: 'Trade deleted successfully!',
-        icon: '🗑️'
-      }]);
-      
-      setTimeout(() => {
-        setToasts(prev => prev.filter(toast => toast.id !== toastId));
-      }, 3000);
+      try {
+        await tradeService.deleteTrade(deleteTradeId);
+        setTrades(prev => prev.filter(t => t.id !== deleteTradeId));
+        
+        // Show success toast
+        const toastId = Date.now();
+        setToasts(prev => [...prev, {
+          id: toastId,
+          type: 'success',
+          message: 'Trade deleted successfully!',
+          icon: '🗑️'
+        }]);
+        
+        setTimeout(() => {
+          setToasts(prev => prev.filter(toast => toast.id !== toastId));
+        }, 3000);
+        
+      } catch (error) {
+        console.error('Error deleting trade:', error);
+        
+        // Show error toast
+        const toastId = Date.now();
+        setToasts(prev => [...prev, {
+          id: toastId,
+          type: 'error',
+          message: 'Failed to delete trade. Please try again.',
+          icon: '❌'
+        }]);
+        
+        setTimeout(() => {
+          setToasts(prev => prev.filter(toast => toast.id !== toastId));
+        }, 5000);
+      }
     }
     setShowDeleteConfirm(false);
     setDeleteTradeId(null);
   }
 
-  function importExcel(file) {
+  async function importExcel(file) {
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
       try {
         const data = new Uint8Array(evt.target.result);
         const wb = XLSX.read(data, {type:"array"});
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet, {defval:""});
+        
+        // Show loading toast
+        const loadingToastId = Date.now();
+        setToasts(prev => [...prev, {
+          id: loadingToastId,
+          type: 'info',
+          message: `Importing ${json.length} trades...`,
+          icon: '⏳'
+        }]);
+        
         const mapped = json.map(r => {
           const t = {
             id: Date.now() + Math.random(),
@@ -356,14 +356,31 @@ export default function App() {
           t.meta = calcTradeCharges({ qty: t.qty, buy: t.buy, sell: t.sell, type: t.type});
           return t;
         });
-        setTrades(prev => [...mapped, ...prev]);
+        
+        // Save each trade to database
+        const savedTrades = [];
+        for (const trade of mapped) {
+          try {
+            const savedTrade = await tradeService.addTrade(trade);
+            savedTrades.push(savedTrade);
+          } catch (error) {
+            console.error('Error saving trade to database:', error);
+            // Continue with other trades even if one fails
+          }
+        }
+        
+        // Update UI state with saved trades
+        setTrades(prev => [...savedTrades, ...prev]);
+        
+        // Remove loading toast
+        setToasts(prev => prev.filter(toast => toast.id !== loadingToastId));
         
         // Show success toast
         const toastId = Date.now();
         setToasts(prev => [...prev, {
           id: toastId,
           type: 'success',
-          message: `Excel import successful! ${mapped.length} trades imported.`,
+          message: `Excel import successful! ${savedTrades.length} trades imported.`,
           icon: '📊'
         }]);
         
@@ -491,15 +508,40 @@ export default function App() {
         return t;
       });
       
-      setTrades(prev => [...mapped, ...prev]);
+      // Show loading toast
+      const loadingToastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: loadingToastId,
+        type: 'info',
+        message: `Importing ${mapped.length} trades with screenshots...`,
+        icon: '⏳'
+      }]);
+      
+      // Save each trade to database
+      const savedTrades = [];
+      for (const trade of mapped) {
+        try {
+          const savedTrade = await tradeService.addTrade(trade);
+          savedTrades.push(savedTrade);
+        } catch (error) {
+          console.error('Error saving trade to database:', error);
+          // Continue with other trades even if one fails
+        }
+      }
+      
+      // Update UI state with saved trades
+      setTrades(prev => [...savedTrades, ...prev]);
+      
+      // Remove loading toast
+      setToasts(prev => prev.filter(toast => toast.id !== loadingToastId));
       
       // Show success toast
-      const totalScreenshots = mapped.reduce((sum, t) => sum + t.screenshots.length, 0);
+      const totalScreenshots = savedTrades.reduce((sum, t) => sum + t.screenshots.length, 0);
       const toastId = Date.now();
       setToasts(prev => [...prev, {
         id: toastId,
         type: 'success',
-        message: `ZIP import successful! ${mapped.length} trades imported with ${totalScreenshots} screenshots restored.`,
+        message: `ZIP import successful! ${savedTrades.length} trades imported with ${totalScreenshots} screenshots restored.`,
         icon: '📥'
       }]);
       
@@ -1309,7 +1351,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 visibleTrades={visibleTrades}
                 editTrade={editTrade}
                 duplicateTrade={duplicateTrade}
-                deleteTrade={deleteTrade}
+                deleteTrade={showDeleteConfirmation}
                 filterText={filterText}
                 setFilterText={setFilterText}
                 filterStatus={filterStatus}
@@ -1438,23 +1480,43 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  localStorage.removeItem(STORAGE_KEY);
-                  setTrades([]);
-                  setShowResetConfirm(false);
-                  
-                  // Show reset toast
-                  const toastId = Date.now();
-                  setToasts(prev => [...prev, {
-                    id: toastId,
-                    type: 'info',
-                    message: 'All data has been reset!',
-                    icon: '🔄'
-                  }]);
-                  
-                  setTimeout(() => {
-                    setToasts(prev => prev.filter(toast => toast.id !== toastId));
-                  }, 3000);
+                onClick={async () => {
+                  try {
+                    // Clear database
+                    await tradeService.clearAllTrades();
+                    
+                    localStorage.removeItem(STORAGE_KEY);
+                    setTrades([]);
+                    setShowResetConfirm(false);
+                    
+                    // Show reset toast
+                    const toastId = Date.now();
+                    setToasts(prev => [...prev, {
+                      id: toastId,
+                      type: 'info',
+                      message: 'All data has been reset!',
+                      icon: '🔄'
+                    }]);
+                    
+                    setTimeout(() => {
+                      setToasts(prev => prev.filter(toast => toast.id !== toastId));
+                    }, 3000);
+                  } catch (error) {
+                    console.error('Error resetting data:', error);
+                    
+                    // Show error toast
+                    const toastId = Date.now();
+                    setToasts(prev => [...prev, {
+                      id: toastId,
+                      type: 'error',
+                      message: 'Failed to reset data. Please try again.',
+                      icon: '❌'
+                    }]);
+                    
+                    setTimeout(() => {
+                      setToasts(prev => prev.filter(toast => toast.id !== toastId));
+                    }, 5000);
+                  }
                 }}
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-medium hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
               >

@@ -156,7 +156,21 @@ class TradeService {
     }
   }
 
-
+  // Clear all trades (for reset functionality)
+  async clearAllTrades() {
+    try {
+      // Get all trades first
+      const trades = await tradesApi.getTrades()
+      
+      // Delete each trade
+      for (const trade of trades) {
+        await tradesApi.deleteTrade(trade.id)
+      }
+    } catch (error) {
+      console.error('Error clearing all trades:', error)
+      throw error
+    }
+  }
 
   // Get loading state
   getLoadingState() {
