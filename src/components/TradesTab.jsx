@@ -41,6 +41,8 @@ const TradesTab = ({
   const [editingId, setEditingId] = useState(null);
   const [showImportMenu, setShowImportMenu] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [tradesPerPage] = useState(10);
 
 
   // Keyboard shortcuts
@@ -130,8 +132,35 @@ const TradesTab = ({
     onSortChange(key);
   };
 
+  const goToPage = (page) => {
+    setCurrentPage(page);
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   // Use visible trades (already sorted from App.jsx)
   const tableTrades = visibleTrades;
+
+  // Pagination logic
+  const totalPages = Math.ceil(tableTrades.length / tradesPerPage);
+  const startIndex = (currentPage - 1) * tradesPerPage;
+  const endIndex = startIndex + tradesPerPage;
+  const paginatedTrades = tableTrades.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterText, filterStatus, fromDate, toDate, sortKey, sortDir]);
 
   // Update the current filtered trades for export
   useEffect(() => {
@@ -392,15 +421,15 @@ const TradesTab = ({
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Trade Log</h2>
             {tableTrades.length > 0 && (
               <span className="text-sm text-slate-600 dark:text-slate-400">
-                Showing {tableTrades.length} trades
+                Showing {startIndex + 1}-{Math.min(endIndex, tableTrades.length)} of {tableTrades.length} trades
               </span>
             )}
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="w-full">
-            <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800">
+            <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 sticky top-0 z-10">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
@@ -461,7 +490,7 @@ const TradesTab = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-              {tableTrades.map((trade, index) => (
+              {paginatedTrades.map((trade, index) => (
                 <tr key={trade.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg" style={{ animationDelay: `${index * 50}ms` }}>
                   <td className="px-6 py-4">
                     <div className="text-sm text-slate-500 dark:text-slate-400">
@@ -548,6 +577,77 @@ const TradesTab = ({
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {tableTrades.length > 0 && totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Page {currentPage} of {totalPages}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {/* Previous Page Button */}
+                <button
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-all duration-200 ${
+                    currentPage === 1
+                      ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700'
+                  }`}
+                  title="Previous page"
+                >
+                  <IconChevronUp className="w-4 h-4 transform rotate-90" />
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => goToPage(pageNum)}
+                        className={`px-3 py-1.5 text-sm rounded-lg transition-all duration-200 ${
+                          currentPage === pageNum
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Next Page Button */}
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-all duration-200 ${
+                    currentPage === totalPages
+                      ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700'
+                  }`}
+                  title="Next page"
+                >
+                  <IconChevronUp className="w-4 h-4 transform -rotate-90" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* No Trades Message */}
         {tableTrades.length === 0 && (
