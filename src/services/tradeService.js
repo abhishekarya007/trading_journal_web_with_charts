@@ -3,7 +3,6 @@ import { calcTradeCharges } from '../utils/calc.js'
 
 class TradeService {
   constructor() {
-    this.trades = []
     this.isLoading = false
     this.error = null
   }
@@ -17,7 +16,7 @@ class TradeService {
       const trades = await tradesApi.getTrades()
       
       // Transform data to match your current format
-      this.trades = trades.map(trade => ({
+      const transformedTrades = trades.map(trade => ({
         id: trade.id,
         date: trade.date,
         symbol: trade.symbol,
@@ -35,7 +34,7 @@ class TradeService {
         meta: trade.meta || {}
       }))
       
-      return this.trades
+      return transformedTrades
     } catch (error) {
       console.error('Error loading trades:', error)
       this.error = error.message
@@ -90,9 +89,6 @@ class TradeService {
         meta: newTrade.meta || {}
       }
 
-      // Add to local array
-      this.trades.unshift(transformedTrade)
-      
       return transformedTrade
     } catch (error) {
       console.error('Error adding trade:', error)
@@ -106,8 +102,7 @@ class TradeService {
       // Calculate charges if prices changed
       let meta = updates.meta
       if (updates.buy || updates.sell) {
-        const existingTrade = this.trades.find(t => t.id === id)
-        const tradeData = { ...existingTrade, ...updates }
+        const tradeData = { ...updates }
         meta = calcTradeCharges(tradeData)
       }
 
@@ -144,12 +139,6 @@ class TradeService {
         meta: updatedTrade.meta || {}
       }
 
-      // Update local array
-      const index = this.trades.findIndex(t => t.id === id)
-      if (index !== -1) {
-        this.trades[index] = transformedTrade
-      }
-      
       return transformedTrade
     } catch (error) {
       console.error('Error updating trade:', error)
@@ -161,24 +150,13 @@ class TradeService {
   async deleteTrade(id) {
     try {
       await tradesApi.deleteTrade(id)
-      
-      // Remove from local array
-      this.trades = this.trades.filter(t => t.id !== id)
     } catch (error) {
       console.error('Error deleting trade:', error)
       throw error
     }
   }
 
-  // Get all trades
-  getTrades() {
-    return this.trades
-  }
 
-  // Get trade by ID
-  getTrade(id) {
-    return this.trades.find(t => t.id === id)
-  }
 
   // Get loading state
   getLoadingState() {
