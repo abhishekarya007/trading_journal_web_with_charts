@@ -18,7 +18,8 @@ import {
   IconPlus,
   IconX,
   IconChevronUp,
-  IconChevronDown
+  IconChevronDown,
+  IconRefresh
 } from './icons';
 
 const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
@@ -27,6 +28,16 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
   const [selectedMonth, setSelectedMonth] = useState(null);
+
+  // Auto-select latest month when data changes
+  useEffect(() => {
+    if (growthData.length > 0 && !selectedMonth) {
+      const latestMonth = growthData.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      if (latestMonth) {
+        setSelectedMonth(latestMonth.id);
+      }
+    }
+  }, [growthData, selectedMonth]);
 
   // Generate dummy data for August
   const generateDummyData = () => {
@@ -390,6 +401,27 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
     });
   };
 
+  const handleRefresh = () => {
+    // Recalculate growth data from current trades
+    if (trades && trades.length > 0) {
+      const updatedData = calculateMissingDataFromTrades(growthData);
+      setGrowthData(updatedData);
+    } else {
+      // If no trades, reload from localStorage
+      const saved = localStorage.getItem('growth_calculator_data');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setGrowthData(parsed.data || []);
+        } catch (e) {
+          generateDummyData();
+        }
+      } else {
+        generateDummyData();
+      }
+    }
+  };
+
   const getSortIcon = (columnKey) => {
     if (sortKey !== columnKey) {
       return <IconChevronUp className="w-4 h-4 text-slate-400" />;
@@ -538,6 +570,16 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
             </div>
             
             <div className="flex items-center gap-3">
+              {/* Refresh Button */}
+              <button
+                onClick={handleRefresh}
+                className="btn btn-secondary flex items-center gap-2 bg-gradient-to-r from-blue-100 to-indigo-200 dark:from-blue-700 dark:to-indigo-600 hover:from-blue-200 hover:to-indigo-300 dark:hover:from-blue-600 dark:hover:to-indigo-500 text-blue-700 dark:text-blue-200 px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                title="Refresh data"
+              >
+                <IconRefresh className="w-4 h-4" />
+                <span>Refresh</span>
+              </button>
+
               {/* Import Button */}
               <div className="relative">
                 <button
