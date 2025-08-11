@@ -114,8 +114,6 @@ export default function App() {
   const [toDate, setToDate] = useState("");
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('desc'); // asc | desc
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -788,11 +786,8 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     });
   }, [trades, filterText, filterStatus, fromDate, toDate]);
 
-  // Pagination calculations
+  // Total trades count
   const totalTrades = filteredTrades.length;
-  const totalPages = Math.ceil(totalTrades / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
 
   const visibleTrades = useMemo(() => {
     const arr = [...filteredTrades];
@@ -817,9 +812,9 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
       // string compare
       return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
     });
-    // Apply pagination
-    return arr.slice(startIndex, endIndex);
-  }, [filteredTrades, sortKey, sortDir, startIndex, endIndex]);
+    // Return all sorted trades
+    return arr;
+  }, [filteredTrades, sortKey, sortDir]);
 
   const onSortChange = (key) => {
     setSortKey(prev => {
@@ -832,20 +827,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     });
   };
 
-  // Pagination handlers
-  const goToPage = (page) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  };
 
-  const goToFirstPage = () => setCurrentPage(1);
-  const goToLastPage = () => setCurrentPage(totalPages);
-  const goToPrevPage = () => setCurrentPage(prev => Math.max(1, prev - 1));
-  const goToNextPage = () => setCurrentPage(prev => Math.min(totalPages, prev + 1));
-
-  // Reset to first page when filters change
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [filterText, filterStatus, fromDate, toDate]);
 
   // Close export menu when clicking outside
   React.useEffect(() => {
@@ -1098,16 +1080,6 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 sortKey={sortKey}
                 sortDir={sortDir}
                 onSortChange={onSortChange}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalTrades={totalTrades}
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-                goToPage={goToPage}
-                goToFirstPage={goToFirstPage}
-                goToLastPage={goToLastPage}
-                goToPrevPage={goToPrevPage}
-                goToNextPage={goToNextPage}
                 setCurrentFilteredTrades={setCurrentFilteredTrades}
               />
             )}

@@ -35,8 +35,7 @@ const TradesTab = ({
   formatNumber, formatCurrency, visibleTrades, editTrade, duplicateTrade, 
   deleteTrade, filterText, setFilterText, filterStatus, setFilterStatus, 
   fromDate, setFromDate, toDate, setToDate, sortKey, sortDir, onSortChange, 
-  currentPage, totalPages, totalTrades, pageSize, setPageSize, goToPage, 
-  goToFirstPage, goToLastPage, goToPrevPage, goToNextPage, setCurrentFilteredTrades 
+  setCurrentFilteredTrades 
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -131,29 +130,13 @@ const TradesTab = ({
     onSortChange(key);
   };
 
-  // Use all visible trades since month/year filtering is removed
-  const selectedMonthTrades = visibleTrades;
-
-  // Use selected month trades for the table display
-  const tableTrades = useMemo(() => selectedMonthTrades, [selectedMonthTrades]);
-
-  // Calculate pagination for filtered data
-  const filteredTotalPages = Math.ceil(tableTrades.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, tableTrades.length);
-  const paginatedTrades = tableTrades.slice(startIndex, endIndex);
+  // Use visible trades (already sorted from App.jsx)
+  const tableTrades = visibleTrades;
 
   // Update the current filtered trades for export
   useEffect(() => {
     setCurrentFilteredTrades(tableTrades);
   }, [tableTrades]);
-
-  // Reset to first page when filtered data changes
-  useEffect(() => {
-    if (currentPage > filteredTotalPages && filteredTotalPages > 0) {
-      goToPage(1);
-    }
-  }, [tableTrades.length, currentPage, filteredTotalPages]);
   
   // Calculate latest month data for hero header (independent of table filters)
   const latestMonthData = useMemo(() => {
@@ -196,10 +179,10 @@ const TradesTab = ({
                      'July', 'August', 'September', 'October', 'November', 'December'];
 
   // Table data (can be filtered by search/status)
-  const selectedMonthWins = selectedMonthTrades.filter(t => (t.meta?.net || 0) > 0).length;
-  const selectedMonthLosses = selectedMonthTrades.filter(t => (t.meta?.net || 0) < 0).length;
-  const selectedMonthWinRate = selectedMonthTrades.length > 0 ? Math.round((selectedMonthWins / selectedMonthTrades.length) * 100) : 0;
-  const selectedMonthPnL = selectedMonthTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0);
+  const selectedMonthWins = tableTrades.filter(t => (t.meta?.net || 0) > 0).length;
+  const selectedMonthLosses = tableTrades.filter(t => (t.meta?.net || 0) < 0).length;
+  const selectedMonthWinRate = tableTrades.length > 0 ? Math.round((selectedMonthWins / tableTrades.length) * 100) : 0;
+  const selectedMonthPnL = tableTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0);
 
 
 
@@ -409,7 +392,7 @@ const TradesTab = ({
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Trade Log</h2>
             {tableTrades.length > 0 && (
               <span className="text-sm text-slate-600 dark:text-slate-400">
-                Showing {tableTrades.length > 0 ? startIndex + 1 : 0} to {endIndex} of {tableTrades.length} results
+                Showing {tableTrades.length} trades
               </span>
             )}
           </div>
@@ -478,7 +461,7 @@ const TradesTab = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-              {paginatedTrades.map((trade, index) => (
+              {tableTrades.map((trade, index) => (
                 <tr key={trade.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg" style={{ animationDelay: `${index * 50}ms` }}>
                   <td className="px-6 py-4">
                     <div className="text-sm text-slate-500 dark:text-slate-400">
@@ -588,75 +571,7 @@ const TradesTab = ({
           </div>
         )}
 
-        {/* Pagination */}
-        {tableTrades.length > 0 && (
-          <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-                <select
-                  value={pageSize}
-                  onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="px-2 py-1 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                >
-                  <option value={10}>10 per page</option>
-                  <option value={25}>25 per page</option>
-                  <option value={50}>50 per page</option>
-                </select>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={goToFirstPage}
-                  disabled={currentPage === 1}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
-                >
-                  <IconTrendingDown className="w-4 h-4 rotate-90" />
-                </button>
-                <button
-                  onClick={goToPrevPage}
-                  disabled={currentPage === 1}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
-                >
-                  <IconTrendingDown className="w-4 h-4 rotate-90" />
-                </button>
-                
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, filteredTotalPages) }, (_, i) => {
-                    const page = Math.max(1, Math.min(filteredTotalPages - 4, currentPage - 2)) + i;
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => goToPage(page)}
-                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                          page === currentPage
-                            ? 'bg-blue-500 text-white'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                </div>
-                
-                <button
-                  onClick={goToNextPage}
-                  disabled={currentPage === filteredTotalPages}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
-                >
-                  <IconTrendingDown className="w-4 h-4 -rotate-90" />
-                </button>
-                <button
-                  onClick={goToLastPage}
-                  disabled={currentPage === filteredTotalPages}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
-                >
-                  <IconTrendingDown className="w-4 h-4 -rotate-90" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        
       </div>
 
       {/* Add/Edit Trade Modal */}
