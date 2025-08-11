@@ -36,12 +36,14 @@ const TradesTab = ({
   deleteTrade, filterText, setFilterText, filterStatus, setFilterStatus, 
   fromDate, setFromDate, toDate, setToDate, sortKey, sortDir, onSortChange, 
   currentPage, totalPages, totalTrades, pageSize, setPageSize, goToPage, 
-  goToFirstPage, goToLastPage, goToPrevPage, goToNextPage 
+  goToFirstPage, goToLastPage, goToPrevPage, goToNextPage, setCurrentFilteredTrades 
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showImportMenu, setShowImportMenu] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -130,6 +132,44 @@ const TradesTab = ({
     onSortChange(key);
   };
 
+  // Calculate selected month data and filter trades for table
+  const selectedMonthTrades = visibleTrades.filter(trade => {
+    const tradeDate = new Date(trade.date);
+    if (selectedMonth === 'all') {
+      return tradeDate.getFullYear() === selectedYear;
+    }
+    return tradeDate.getMonth() === selectedMonth && tradeDate.getFullYear() === selectedYear;
+  });
+
+  // Use selected month trades for the table display
+  const tableTrades = selectedMonthTrades;
+
+  // Calculate pagination for filtered data
+  const filteredTotalPages = Math.ceil(tableTrades.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, tableTrades.length);
+  const paginatedTrades = tableTrades.slice(startIndex, endIndex);
+
+  // Update the current filtered trades for export
+  useEffect(() => {
+    setCurrentFilteredTrades(tableTrades);
+  }, [tableTrades, setCurrentFilteredTrades]);
+
+  // Reset to first page when filtered data changes
+  useEffect(() => {
+    if (currentPage > filteredTotalPages && filteredTotalPages > 0) {
+      goToPage(1);
+    }
+  }, [tableTrades.length, currentPage, filteredTotalPages, goToPage]);
+  
+  const selectedMonthWins = selectedMonthTrades.filter(t => (t.meta?.net || 0) > 0).length;
+  const selectedMonthLosses = selectedMonthTrades.filter(t => (t.meta?.net || 0) < 0).length;
+  const selectedMonthWinRate = selectedMonthTrades.length > 0 ? Math.round((selectedMonthWins / selectedMonthTrades.length) * 100) : 0;
+  const selectedMonthPnL = selectedMonthTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0);
+
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+
   return (
     <div className="space-y-6">
       {/* Hero Header */}
@@ -145,8 +185,12 @@ const TradesTab = ({
               <IconChartBar className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold mb-2">Trade Management</h1>
-              <p className="text-blue-100 text-lg">Track, analyze, and optimize your trading performance</p>
+              <h1 className="text-3xl font-bold mb-2">
+                {selectedMonth === 'all' ? `${selectedYear} Performance` : `${monthNames[selectedMonth]} ${selectedYear} Performance`}
+              </h1>
+              <p className="text-blue-100 text-lg">
+                {selectedMonth === 'all' ? 'Full year trading statistics and insights' : 'Selected month trading statistics and insights'}
+              </p>
             </div>
           </div>
 
@@ -157,8 +201,8 @@ const TradesTab = ({
                   <IconRocket className="w-5 h-5 text-emerald-300" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold animate-pulse">{totalTrades}</div>
-                  <div className="text-blue-100 text-sm">Total Trades</div>
+                  <div className="text-2xl font-bold animate-pulse">{selectedMonthTrades.length}</div>
+                  <div className="text-blue-100 text-sm">Month Trades</div>
                 </div>
               </div>
             </div>
@@ -170,9 +214,9 @@ const TradesTab = ({
                 </div>
                 <div>
                   <div className="text-2xl font-bold animate-pulse">
-                    {visibleTrades.filter(t => (t.meta?.net || 0) > 0).length}
+                    {selectedMonthWins}
                   </div>
-                  <div className="text-blue-100 text-sm">Winning Trades</div>
+                  <div className="text-blue-100 text-sm">Month Wins</div>
                 </div>
               </div>
             </div>
@@ -184,9 +228,9 @@ const TradesTab = ({
                 </div>
                 <div>
                   <div className="text-2xl font-bold animate-pulse">
-                    {visibleTrades.filter(t => (t.meta?.net || 0) < 0).length}
+                    {selectedMonthWinRate}%
                   </div>
-                  <div className="text-blue-100 text-sm">Losing Trades</div>
+                  <div className="text-blue-100 text-sm">Win Rate</div>
                 </div>
               </div>
             </div>
@@ -194,13 +238,13 @@ const TradesTab = ({
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center animate-spin">
-                  <IconStar className="w-5 h-5 text-orange-300" />
+                  <IconRupee className="w-5 h-5 text-orange-300" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold animate-pulse">
-                    {visibleTrades.filter(t => t.screenshots && t.screenshots.length > 0).length}
+                    {formatNumber(selectedMonthPnL)}
                   </div>
-                  <div className="text-blue-100 text-sm">With Screenshots</div>
+                  <div className="text-blue-100 text-sm">Month P&L</div>
                 </div>
               </div>
             </div>
@@ -231,6 +275,8 @@ const TradesTab = ({
                 <span>Import</span>
                 <IconTrendingDown className="w-4 h-4" />
               </button>
+
+
 
               {showImportMenu && (
                 <div className="absolute left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
@@ -280,35 +326,84 @@ const TradesTab = ({
                   </div>
                 </div>
               )}
+
+
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search trades..."
-                value={filterText}
-                onChange={(e) => setFilterText(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
-              />
+          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
+            {/* Date Filters Group */}
+            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 border border-slate-200 dark:border-slate-600">
+              <div className="flex items-center gap-2">
+                <IconCalendar className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Period:</span>
+              </div>
+              
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                className="px-3 py-1.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+              >
+                <option value="all">All Months</option>
+                {monthNames.map((month, index) => (
+                  <option key={index} value={index}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="px-3 py-1.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+              >
+                {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={() => {
+                  setSelectedMonth('all');
+                  setSelectedYear(new Date().getFullYear());
+                }}
+                className="px-2 py-1.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-105"
+                title="Show all trades"
+              >
+                Reset
+              </button>
             </div>
 
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
-              {['all', 'wins', 'losses'].map(status => (
-                <button
-                  key={status}
-                  onClick={() => setFilterStatus(status)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
-                    filterStatus === status
-                      ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  {status === 'all' ? 'All' : status === 'wins' ? 'Wins' : 'Losses'}
-                </button>
-              ))}
+            {/* Search and Status Filters Group */}
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search trades..."
+                  value={filterText}
+                  onChange={(e) => setFilterText(e.target.value)}
+                  className="pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm"
+                />
+              </div>
+
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
+                {['all', 'wins', 'losses'].map(status => (
+                  <button
+                    key={status}
+                    onClick={() => setFilterStatus(status)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
+                      filterStatus === status
+                        ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {status === 'all' ? 'All' : status === 'wins' ? 'Wins' : 'Losses'}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -321,9 +416,11 @@ const TradesTab = ({
         <div className="p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Trade Log</h2>
-            <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-              <span>Showing {visibleTrades.length} of {totalTrades} trades</span>
-            </div>
+            {tableTrades.length > 0 && (
+              <span className="text-sm text-slate-600 dark:text-slate-400">
+                Showing {tableTrades.length > 0 ? startIndex + 1 : 0} to {endIndex} of {tableTrades.length} results
+              </span>
+            )}
           </div>
         </div>
 
@@ -390,7 +487,7 @@ const TradesTab = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-              {visibleTrades.map((trade, index) => (
+              {paginatedTrades.map((trade, index) => (
                 <tr key={trade.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg" style={{ animationDelay: `${index * 50}ms` }}>
                   <td className="px-6 py-4">
                     <div className="text-sm text-slate-500 dark:text-slate-400">
@@ -478,12 +575,33 @@ const TradesTab = ({
           </table>
         </div>
 
+        {/* No Trades Message */}
+        {tableTrades.length === 0 && (
+          <div className="p-12 text-center">
+            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <IconChartBar className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No trades found</h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
+              No trades found for {selectedMonth === 'all' ? `${selectedYear}` : `${monthNames[selectedMonth]} ${selectedYear}`}
+            </p>
+            <button
+              onClick={() => {
+                setSelectedMonth('all');
+                setSelectedYear(new Date().getFullYear());
+              }}
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg font-medium transition-all duration-300"
+            >
+              View All Trades
+            </button>
+          </div>
+        )}
+
         {/* Pagination */}
-        {totalTrades > 0 && (
+        {tableTrades.length > 0 && (
           <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-                <span>Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalTrades)} of {totalTrades} results</span>
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
@@ -512,8 +630,8 @@ const TradesTab = ({
                 </button>
                 
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                  {Array.from({ length: Math.min(5, filteredTotalPages) }, (_, i) => {
+                    const page = Math.max(1, Math.min(filteredTotalPages - 4, currentPage - 2)) + i;
                     return (
                       <button
                         key={page}
@@ -532,14 +650,14 @@ const TradesTab = ({
                 
                 <button
                   onClick={goToNextPage}
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage === filteredTotalPages}
                   className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
                 >
                   <IconTrendingDown className="w-4 h-4 -rotate-90" />
                 </button>
                 <button
                   onClick={goToLastPage}
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage === filteredTotalPages}
                   className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
                 >
                   <IconTrendingDown className="w-4 h-4 -rotate-90" />

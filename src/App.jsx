@@ -120,6 +120,7 @@ export default function App() {
   const [toasts, setToasts] = useState([]);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [currentFilteredTrades, setCurrentFilteredTrades] = useState(trades);
   const [deleteTradeId, setDeleteTradeId] = useState(null);
 
   useEffect(() => {
@@ -392,8 +393,8 @@ export default function App() {
   }
 
   // Export Excel only
-  function exportExcel() {
-    const rows = trades.map(t => ({
+  function exportExcel(dataToExport = currentFilteredTrades) {
+    const rows = dataToExport.map(t => ({
       Date: t.date,
       Symbol: t.symbol,
       "Trade Type": t.type,
@@ -426,11 +427,11 @@ export default function App() {
   }
 
   // Export ZIP with Excel + Screenshots
-  async function exportZip() {
+  async function exportZip(dataToExport = currentFilteredTrades) {
     const zip = new JSZip();
     
     // Create Excel file data
-    const rows = trades.map(t => ({
+    const rows = dataToExport.map(t => ({
       Date: t.date,
       Symbol: t.symbol,
       "Trade Type": t.type,
@@ -470,7 +471,7 @@ export default function App() {
     const screenshotsFolder = zip.folder("screenshots");
     let hasScreenshots = false;
     
-    for (const trade of trades) {
+    for (const trade of dataToExport) {
       if (trade.screenshots && trade.screenshots.length > 0) {
         for (const screenshot of trade.screenshots) {
           try {
@@ -1107,6 +1108,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 goToLastPage={goToLastPage}
                 goToPrevPage={goToPrevPage}
                 goToNextPage={goToNextPage}
+                setCurrentFilteredTrades={setCurrentFilteredTrades}
               />
             )}
             
