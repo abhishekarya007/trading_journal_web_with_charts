@@ -21,8 +21,10 @@ import TradingRulesTab from "./components/TradingRulesTab";
 import GrowthCalculatorTab from "./components/GrowthCalculatorTab";
 import CooldownTimer from "./components/CooldownTimer";
 import Navigation from "./components/Navigation";
+import Auth from "./components/Auth";
 import { tradeService } from "./services/tradeService";
-import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX, IconAlertTriangle, IconTrash } from "./components/icons";
+import { authApi } from "./lib/supabase";
+import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX, IconAlertTriangle, IconTrash, IconLogOut, IconUser } from "./components/icons";
 
 ChartJS.register(
   CategoryScale,
@@ -121,30 +123,12 @@ export default function App() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [currentFilteredTrades, setCurrentFilteredTrades] = useState(trades);
   const [deleteTradeId, setDeleteTradeId] = useState(null);
+  
+  // Authentication state
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const loadTrades = async () => {
-      try {
-        const loadedTrades = await tradeService.loadTrades();
-        setTrades(loadedTrades);
-      } catch (error) {
-        console.error('Error loading trades from database:', error);
-        // Fallback to localStorage if database fails
-        const savedTrades = localStorage.getItem(STORAGE_KEY);
-        if (savedTrades) {
-          try {
-            const parsedTrades = JSON.parse(savedTrades);
-            setTrades(parsedTrades);
-          } catch (parseError) {
-            console.error('Error parsing saved trades:', parseError);
-            setTrades([]);
-          }
-        }
-      }
-    };
-    
-    loadTrades();
-  }, []);
+
 
   // Note: Trades are now saved to database automatically via tradeService
   // localStorage backup is only used as fallback if database fails
@@ -165,6 +149,101 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('ui_nav_collapsed', navCollapsed ? '1' : '0');
   }, [navCollapsed]);
+
+  // Authentication initialization
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        // Get current user
+        const currentUser = await authApi.getCurrentUser();
+        setUser(currentUser);
+        
+        // Listen for auth state changes
+        const { data: { subscription } } = authApi.onAuthStateChange((event, session) => {
+          setUser(session?.user || null);
+          
+          if (event === 'SIGNED_IN') {
+            // Reload trades when user signs in
+            loadTrades();
+          } else if (event === 'SIGNED_OUT') {
+            // Clear trades when user signs out
+            setTrades([]);
+          }
+        });
+        
+        return () => subscription.unsubscribe();
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    initializeAuth();
+  }, []);
+
+  // Load trades function (moved from useEffect for reuse)
+  const loadTrades = async () => {
+    try {
+      const loadedTrades = await tradeService.loadTrades();
+      setTrades(loadedTrades);
+    } catch (error) {
+      console.error('Error loading trades from database:', error);
+      // Fallback to localStorage if database fails
+      const savedTrades = localStorage.getItem(STORAGE_KEY);
+      if (savedTrades) {
+        try {
+          const parsedTrades = JSON.parse(savedTrades);
+          setTrades(parsedTrades);
+        } catch (parseError) {
+          console.error('Error parsing saved trades:', parseError);
+          setTrades([]);
+        }
+      }
+    }
+  };
+
+  // Authentication handlers
+  const handleAuthSuccess = (user) => {
+    setUser(user);
+    loadTrades();
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await authApi.signOut();
+      setUser(null);
+      setTrades([]);
+      
+      // Show success toast
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'success',
+        message: 'Signed out successfully!',
+        icon: '👋'
+      }]);
+      
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 3000);
+    } catch (error) {
+      console.error('Sign out error:', error);
+      
+      // Show error toast
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'error',
+        message: 'Failed to sign out. Please try again.',
+        icon: '❌'
+      }]);
+      
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 5000);
+    }
+  };
 
   async function addOrUpdateTrade(e) {
     e.preventDefault();
@@ -1124,6 +1203,26 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showExportMenu]);
 
+  // Show loading screen while initializing auth
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-slate-50 dark:bg-slate-900 items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <IconCandle className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Loading Trading Journal</h2>
+          <p className="text-slate-600 dark:text-slate-400">Please wait...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show authentication screen if not logged in
+  if (!user) {
+    return <Auth onAuthSuccess={handleAuthSuccess} />;
+  }
+
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
       {/* Navigation Sidebar */}
@@ -1251,6 +1350,28 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 )}
               </div>
 
+              {/* User Profile */}
+              <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <IconUser className="w-4 h-4 text-white" />
+                </div>
+                <div className="hidden sm:block">
+                  <div className="text-sm font-medium text-slate-900 dark:text-white">
+                    {user.email || 'Demo User'}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    {user.id === 'demo' ? 'Demo Mode' : 'Authenticated'}
+                  </div>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="p-1 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  title="Sign out"
+                >
+                  <IconLogOut className="w-4 h-4" />
+                </button>
+              </div>
+
               {/* Reset Button */}
               <button 
                 onClick={() => setShowResetConfirm(true)} 
@@ -1276,7 +1397,9 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                     <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
                       <IconCandle className="w-4 h-4 text-white" />
                     </div>
-                    <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Welcome back, Trader!</div>
+                    <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                      Welcome back, {user.email ? user.email.split('@')[0] : 'Trader'}!
+                    </div>
                   </div>
                   <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Your trading performance at a glance</div>
                   <p className="text-slate-600 dark:text-slate-400">Track your progress and optimize your strategy</p>
