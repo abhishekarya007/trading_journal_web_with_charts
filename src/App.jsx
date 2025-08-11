@@ -251,31 +251,64 @@ export default function App() {
   function importExcel(file) {
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const data = new Uint8Array(evt.target.result);
-      const wb = XLSX.read(data, {type:"array"});
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet, {defval:""});
-      const mapped = json.map(r => {
-        const t = {
-          id: Date.now() + Math.random(),
-          date: r.Date || r.date || new Date().toISOString().slice(0,10),
-          symbol: r.Symbol || r.symbol || r.SymbolName || "",
-          type: r["Trade Type"] || r.type || "Long",
-          trend: r.Trend || r.trend || "Up",
-          rule: r["Rule Followed"] || r.rule || "Yes",
-          emotion: r.Emotion || r.emotion || "",
-          riskReward: r["Risk Reward"] || r.riskReward || "",
-          qty: Number(r.Qty || r.qty || 0),
-          buy: Number(r["Buy Price"] || r.buy || 0),
-          sell: Number(r["Sell Price"] || r.sell || 0),
-          setup: r.Setup || r.setup || "",
-          remarks: r.Remarks || r.remarks || "",
-          screenshots: [] // Screenshots can't be imported from Excel, start with empty array
-        };
-        t.meta = calcTradeCharges({ qty: t.qty, buy: t.buy, sell: t.sell, type: t.type});
-        return t;
-      });
-      setTrades(prev => [...mapped, ...prev]);
+      try {
+        const data = new Uint8Array(evt.target.result);
+        const wb = XLSX.read(data, {type:"array"});
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet, {defval:""});
+        const mapped = json.map(r => {
+          const t = {
+            id: Date.now() + Math.random(),
+            date: r.Date || r.date || new Date().toISOString().slice(0,10),
+            symbol: r.Symbol || r.symbol || r.SymbolName || "",
+            type: r["Trade Type"] || r.type || "Long",
+            trend: r.Trend || r.trend || "Up",
+            rule: r["Rule Followed"] || r.rule || "Yes",
+            emotion: r.Emotion || r.emotion || "",
+            riskReward: r["Risk Reward"] || r.riskReward || "",
+            qty: Number(r.Qty || r.qty || 0),
+            buy: Number(r["Buy Price"] || r.buy || 0),
+            sell: Number(r["Sell Price"] || r.sell || 0),
+            setup: r.Setup || r.setup || "",
+            remarks: r.Remarks || r.remarks || "",
+            screenshots: [] // Screenshots can't be imported from Excel, start with empty array
+          };
+          t.meta = calcTradeCharges({ qty: t.qty, buy: t.buy, sell: t.sell, type: t.type});
+          return t;
+        });
+        setTrades(prev => [...mapped, ...prev]);
+        
+        // Show success toast
+        const toastId = Date.now();
+        setToasts(prev => [...prev, {
+          id: toastId,
+          type: 'success',
+          message: `Excel import successful! ${mapped.length} trades imported.`,
+          icon: '📊'
+        }]);
+        
+        // Remove toast after 4 seconds
+        setTimeout(() => {
+          setToasts(prev => prev.filter(toast => toast.id !== toastId));
+        }, 4000);
+        
+      } catch (error) {
+        // Show error toast
+        const toastId = Date.now();
+        setToasts(prev => [...prev, {
+          id: toastId,
+          type: 'error',
+          message: `Excel import failed: ${error.message}`,
+          icon: '❌'
+        }]);
+        
+        // Remove toast after 5 seconds
+        setTimeout(() => {
+          setToasts(prev => prev.filter(toast => toast.id !== toastId));
+        }, 5000);
+        
+        console.error('Excel import error:', error);
+      }
     };
     reader.readAsArrayBuffer(file);
   }
@@ -380,12 +413,36 @@ export default function App() {
       
       setTrades(prev => [...mapped, ...prev]);
       
-      // Show success message
+      // Show success toast
       const totalScreenshots = mapped.reduce((sum, t) => sum + t.screenshots.length, 0);
-      alert(`Import successful!\n${mapped.length} trades imported with ${totalScreenshots} screenshots restored.`);
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'success',
+        message: `ZIP import successful! ${mapped.length} trades imported with ${totalScreenshots} screenshots restored.`,
+        icon: '📥'
+      }]);
+      
+      // Remove toast after 4 seconds
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 4000);
       
     } catch (error) {
-      alert(`Import failed: ${error.message}`);
+      // Show error toast
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'error',
+        message: `ZIP import failed: ${error.message}`,
+        icon: '❌'
+      }]);
+      
+      // Remove toast after 5 seconds
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 5000);
+      
       console.error('ZIP import error:', error);
     }
   }
@@ -1119,24 +1176,52 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
       </div>
 
       {/* Toast Notifications */}
-      <div className="fixed bottom-4 right-4 z-50 space-y-2">
+      <div className="fixed bottom-4 right-4 z-50 space-y-3">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border backdrop-blur-sm transform transition-all duration-300 ${
+            className={`flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md transform transition-all duration-300 max-w-sm ${
               toast.type === 'success' 
-                ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-400' 
-                : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-400'
+                ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-400 shadow-emerald-500/25' 
+                : toast.type === 'error'
+                ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-red-400 shadow-red-500/25'
+                : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-400 shadow-blue-500/25'
             }`}
             style={{
-              animation: 'slideInRight 0.3s ease-out'
+              animation: 'slideInRight 0.4s ease-out'
             }}
           >
-            <span className="text-lg">{toast.icon}</span>
-            <span className="font-medium">{toast.message}</span>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              toast.type === 'success' 
+                ? 'bg-white/20' 
+                : toast.type === 'error'
+                ? 'bg-white/20'
+                : 'bg-white/20'
+            }`}>
+              <span className="text-xl">{toast.icon}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="font-semibold text-sm leading-tight">{toast.message}</span>
+              <div className="mt-2 w-full bg-white/20 rounded-full h-1">
+                <div 
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    toast.type === 'success' 
+                      ? 'bg-white' 
+                      : toast.type === 'error'
+                      ? 'bg-white'
+                      : 'bg-white'
+                  }`}
+                  style={{
+                    width: '100%',
+                    animation: 'shrink 4s linear forwards'
+                  }}
+                ></div>
+              </div>
+            </div>
             <button
               onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
-              className="ml-2 p-1 hover:bg-white/20 rounded-lg transition-colors"
+              className="ml-2 p-2 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
+              title="Dismiss"
             >
               <IconX className="w-4 h-4" />
             </button>
@@ -1241,6 +1326,15 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
           to {
             transform: translateX(0);
             opacity: 1;
+          }
+        }
+        
+        @keyframes shrink {
+          from {
+            width: 100%;
+          }
+          to {
+            width: 0%;
           }
         }
       `}</style>
