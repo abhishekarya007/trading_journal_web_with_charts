@@ -43,14 +43,28 @@ const TradesTab = ({
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [tradesPerPage] = useState(10);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedTrade, setSelectedTrade] = useState(null);
+  const [showScreenshotModal, setShowScreenshotModal] = useState(false);
+  const [selectedScreenshot, setSelectedScreenshot] = useState(null);
 
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && showModal) {
-        setShowModal(false);
-        setEditingId(null);
+      if (e.key === 'Escape') {
+        if (showModal) {
+          setShowModal(false);
+          setEditingId(null);
+        }
+        if (showDetailModal) {
+          setShowDetailModal(false);
+          setSelectedTrade(null);
+        }
+        if (showScreenshotModal) {
+          setShowScreenshotModal(false);
+          setSelectedScreenshot(null);
+        }
       }
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'n') {
@@ -64,7 +78,7 @@ const TradesTab = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showModal, setForm]);
+  }, [showModal, showDetailModal, setForm]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -84,6 +98,16 @@ const TradesTab = ({
     setForm(duplicatedTrade);
     setEditingId(null);
     setShowModal(true);
+  };
+
+  const handleTradeDetail = (trade) => {
+    setSelectedTrade(trade);
+    setShowDetailModal(true);
+  };
+
+  const handleScreenshotPreview = (screenshot, index) => {
+    setSelectedScreenshot({ url: screenshot, index: index + 1 });
+    setShowScreenshotModal(true);
   };
 
   const getTradeStatusColor = (net) => {
@@ -491,7 +515,12 @@ const TradesTab = ({
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
               {paginatedTrades.map((trade, index) => (
-                <tr key={trade.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg" style={{ animationDelay: `${index * 50}ms` }}>
+                <tr 
+                  key={trade.id} 
+                  className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg cursor-pointer" 
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  onClick={() => handleTradeDetail(trade)}
+                >
                   <td className="px-6 py-4">
                     <div className="text-sm text-slate-500 dark:text-slate-400">
                       {new Date(trade.date).toLocaleDateString()}
@@ -550,21 +579,21 @@ const TradesTab = ({
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-1">
                       <button
-                        onClick={() => handleEdit(trade)}
+                        onClick={(e) => { e.stopPropagation(); handleEdit(trade); }}
                         className="p-2 text-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 dark:hover:from-blue-900/30 dark:hover:to-blue-800/30 rounded-lg transition-all duration-300 transform hover:scale-110"
                         title="Edit trade"
                       >
                         <IconEdit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDuplicate(trade)}
+                        onClick={(e) => { e.stopPropagation(); handleDuplicate(trade); }}
                         className="p-2 text-green-600 hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 dark:hover:from-green-900/30 dark:hover:to-green-800/30 rounded-lg transition-all duration-300 transform hover:scale-110"
                         title="Duplicate trade"
                       >
                         <IconCopy className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => deleteTrade(trade.id)}
+                        onClick={(e) => { e.stopPropagation(); deleteTrade(trade.id); }}
                         className="p-2 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 dark:hover:from-red-900/30 dark:hover:to-red-800/30 rounded-lg transition-all duration-300 transform hover:scale-110"
                         title="Delete trade"
                       >
@@ -579,7 +608,7 @@ const TradesTab = ({
         </div>
 
         {/* Pagination Controls */}
-        {tableTrades.length > 0 && totalPages > 1 && (
+        {tableTrades.length > 0 && (
           <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
             <div className="flex items-center justify-between">
               <div className="text-sm text-slate-600 dark:text-slate-400">
@@ -602,34 +631,36 @@ const TradesTab = ({
                 </button>
 
                 {/* Page Numbers */}
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
 
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => goToPage(pageNum)}
-                        className={`px-3 py-1.5 text-sm rounded-lg transition-all duration-200 ${
-                          currentPage === pageNum
-                            ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                </div>
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => goToPage(pageNum)}
+                          className={`px-3 py-1.5 text-sm rounded-lg transition-all duration-200 ${
+                            currentPage === pageNum
+                              ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
+                              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Next Page Button */}
                 <button
@@ -676,8 +707,14 @@ const TradesTab = ({
 
       {/* Add/Edit Trade Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={() => { setShowModal(false); setEditingId(null); }}
+        >
+          <div 
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="sticky top-0 bg-white dark:bg-slate-800 p-6 border-b border-slate-200 dark:border-slate-700 rounded-t-2xl">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
@@ -970,6 +1007,375 @@ const TradesTab = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Trade Detail Modal */}
+      {showDetailModal && selectedTrade && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={() => { setShowDetailModal(false); setSelectedTrade(null); }}
+        >
+                      <div 
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 bg-white dark:bg-slate-800 p-6 border-b border-slate-200 dark:border-slate-700 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getTradeStatusColor(selectedTrade.meta?.net || 0)}`}>
+                    {getTradeStatusIcon(selectedTrade.meta?.net || 0)}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {selectedTrade.symbol} - {selectedTrade.type}
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400">
+                      {new Date(selectedTrade.date).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      handleEdit(selectedTrade);
+                      setShowDetailModal(false);
+                      setSelectedTrade(null);
+                    }}
+                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                    title="Edit trade"
+                  >
+                    <IconEdit className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => { setShowDetailModal(false); setSelectedTrade(null); }}
+                    className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition-colors"
+                    title="Close (Esc)"
+                  >
+                    <IconX className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-8">
+              {/* Performance Summary */}
+              <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Performance Summary</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+                    <div className={`text-2xl font-bold ${(selectedTrade.meta?.net || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                      ₹{formatNumber(selectedTrade.meta?.net || 0)}
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">Net P&L</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      ₹{formatNumber(selectedTrade.meta?.brokerage || 0)}
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">Brokerage</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      ₹{formatNumber(selectedTrade.meta?.totalCharges || 0)}
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">Total Charges</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+                    <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                      ₹{formatNumber(selectedTrade.meta?.breakeven || 0)}
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">Breakeven</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trade Details */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Basic Information */}
+                <div className="space-y-6">
+                  <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+                      <h4 className="font-semibold text-slate-900 dark:text-white">Basic Information</h4>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">Symbol:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">{selectedTrade.symbol}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">Type:</span>
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium text-white ${getTradeTypeColor(selectedTrade.type)}`}>
+                          {getTradeTypeIcon(selectedTrade.type)}
+                          {selectedTrade.type}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">Quantity:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">{selectedTrade.qty}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">Buy Price:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">₹{selectedTrade.buy}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">Sell Price:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">₹{selectedTrade.sell}</span>
+                      </div>
+                      {selectedTrade.riskReward && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600 dark:text-slate-400">Risk:Reward:</span>
+                          <span className="font-semibold text-slate-900 dark:text-white">{selectedTrade.riskReward}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Analysis */}
+                  <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20">
+                      <h4 className="font-semibold text-slate-900 dark:text-white">Analysis</h4>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      {selectedTrade.trend && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600 dark:text-slate-400">Trend:</span>
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-sm rounded-lg">
+                            {selectedTrade.trend}
+                          </span>
+                        </div>
+                      )}
+                      {selectedTrade.rule && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600 dark:text-slate-400">Rule Followed:</span>
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 text-sm rounded-lg font-medium ${
+                            selectedTrade.rule === 'Yes' 
+                              ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200'
+                              : selectedTrade.rule === 'No'
+                              ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
+                              : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200'
+                          }`}>
+                            {selectedTrade.rule}
+                          </span>
+                        </div>
+                      )}
+                      {selectedTrade.emotion && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600 dark:text-slate-400">Emotion:</span>
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 text-sm rounded-lg">
+                            {selectedTrade.emotion}
+                          </span>
+                        </div>
+                      )}
+                      {selectedTrade.setup && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-600 dark:text-slate-400">Setup:</span>
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-sm rounded-lg">
+                            {selectedTrade.setup}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Screenshots and Remarks */}
+                <div className="space-y-6">
+                  {/* Screenshots */}
+                  {selectedTrade.screenshots && selectedTrade.screenshots.length > 0 && (
+                    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                      <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20">
+                        <h4 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                          <IconEye className="w-4 h-4" />
+                          Screenshots ({selectedTrade.screenshots.length})
+                        </h4>
+                      </div>
+                      <div className="p-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          {selectedTrade.screenshots.map((screenshot, index) => {
+                            // Handle both old format (string URLs) and new format (objects)
+                            const screenshotUrl = typeof screenshot === 'string' ? screenshot : screenshot.thumbnail;
+                            const fullSizeUrl = typeof screenshot === 'string' ? screenshot : screenshot.fullSize;
+                            
+                            return (
+                              <div key={index} className="relative group">
+                                <img 
+                                  src={screenshotUrl} 
+                                  alt={`Screenshot ${index + 1}`}
+                                  className="w-full h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleScreenshotPreview(fullSizeUrl, index);
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                              <div 
+                                className="absolute inset-0 bg-slate-100 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hidden"
+                                style={{ display: 'none' }}
+                              >
+                                <div className="text-center">
+                                  <IconEye className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                                  <p className="text-sm text-slate-500 dark:text-slate-400">Image not available</p>
+                                </div>
+                              </div>
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center pointer-events-none">
+                                <IconEye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                            </div>
+                          );
+                        })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Remarks */}
+                  {selectedTrade.remarks && (
+                    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                      <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+                        <h4 className="font-semibold text-slate-900 dark:text-white">Remarks</h4>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+                          {selectedTrade.remarks}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Trade Statistics */}
+                  <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+                      <h4 className="font-semibold text-slate-900 dark:text-white">Trade Statistics</h4>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">Gross P&L:</span>
+                        <span className={`font-semibold ${(selectedTrade.meta?.gross || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                          ₹{formatNumber(selectedTrade.meta?.gross || 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">STT:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">₹{formatNumber(selectedTrade.meta?.stt || 0)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">Exchange Transaction Charges:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">₹{formatNumber(selectedTrade.meta?.exchangeTransactionCharges || 0)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">GST:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">₹{formatNumber(selectedTrade.meta?.gst || 0)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 dark:text-slate-400">SEBI Charges:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">₹{formatNumber(selectedTrade.meta?.sebiCharges || 0)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-center gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => {
+                    handleEdit(selectedTrade);
+                    setShowDetailModal(false);
+                    setSelectedTrade(null);
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                >
+                  <IconEdit className="w-4 h-4" />
+                  Edit Trade
+                </button>
+                <button
+                  onClick={() => {
+                    handleDuplicate(selectedTrade);
+                    setShowDetailModal(false);
+                    setSelectedTrade(null);
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                >
+                  <IconCopy className="w-4 h-4" />
+                  Duplicate Trade
+                </button>
+                <button
+                  onClick={() => {
+                    deleteTrade(selectedTrade.id);
+                    setShowDetailModal(false);
+                    setSelectedTrade(null);
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                >
+                  <IconTrash className="w-4 h-4" />
+                  Delete Trade
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Screenshot Preview Modal */}
+      {showScreenshotModal && selectedScreenshot && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => { setShowScreenshotModal(false); setSelectedScreenshot(null); }}
+        >
+                      <div 
+              className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+            <div className="absolute top-4 right-4 z-10">
+              <button
+                onClick={() => {
+                  setShowScreenshotModal(false);
+                  setSelectedScreenshot(null);
+                }}
+                className="p-3 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-sm transition-colors"
+                title="Close (Esc)"
+              >
+                <IconX className="w-6 h-6 text-white" />
+              </button>
+            </div>
+            
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img 
+                src={selectedScreenshot.url} 
+                alt={`Screenshot ${selectedScreenshot.index}`}
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextElementSibling.style.display = 'flex';
+                }}
+              />
+              <div 
+                className="absolute inset-0 bg-slate-800 rounded-lg flex items-center justify-center hidden"
+                style={{ display: 'none' }}
+              >
+                <div className="text-center text-white">
+                  <IconEye className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                  <p className="text-lg text-slate-300">Screenshot not available</p>
+                  <p className="text-sm text-slate-400 mt-2">The image could not be loaded</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2">
+              <p className="text-white text-sm font-medium">
+                Screenshot {selectedScreenshot.index}
+              </p>
+            </div>
           </div>
         </div>
       )}
