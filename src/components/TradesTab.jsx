@@ -42,8 +42,7 @@ const TradesTab = ({
   const [editingId, setEditingId] = useState(null);
   const [showImportMenu, setShowImportMenu] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -132,14 +131,8 @@ const TradesTab = ({
     onSortChange(key);
   };
 
-  // Calculate selected month data and filter trades for table
-  const selectedMonthTrades = visibleTrades.filter(trade => {
-    const tradeDate = new Date(trade.date);
-    if (selectedMonth === 'all') {
-      return tradeDate.getFullYear() === selectedYear;
-    }
-    return tradeDate.getMonth() === selectedMonth && tradeDate.getFullYear() === selectedYear;
-  });
+  // Use all visible trades since month/year filtering is removed
+  const selectedMonthTrades = visibleTrades;
 
   // Use selected month trades for the table display
   const tableTrades = useMemo(() => selectedMonthTrades, [selectedMonthTrades]);
@@ -162,13 +155,53 @@ const TradesTab = ({
     }
   }, [tableTrades.length, currentPage, filteredTotalPages]);
   
+  // Calculate latest month data for hero header (independent of table filters)
+  const latestMonthData = useMemo(() => {
+    if (visibleTrades.length === 0) return { month: null, year: null, trades: [], wins: 0, losses: 0, winRate: 0, pnl: 0 };
+    
+    // Find the latest month from all trades
+    const latestTrade = visibleTrades.reduce((latest, trade) => {
+      const tradeDate = new Date(trade.date);
+      const latestDate = new Date(latest.date);
+      return tradeDate > latestDate ? trade : latest;
+    });
+    
+    const latestDate = new Date(latestTrade.date);
+    const latestMonth = latestDate.getMonth();
+    const latestYear = latestDate.getFullYear();
+    
+    // Filter trades for the latest month
+    const latestMonthTrades = visibleTrades.filter(trade => {
+      const tradeDate = new Date(trade.date);
+      return tradeDate.getMonth() === latestMonth && tradeDate.getFullYear() === latestYear;
+    });
+    
+    const wins = latestMonthTrades.filter(t => (t.meta?.net || 0) > 0).length;
+    const losses = latestMonthTrades.filter(t => (t.meta?.net || 0) < 0).length;
+    const winRate = latestMonthTrades.length > 0 ? Math.round((wins / latestMonthTrades.length) * 100) : 0;
+    const pnl = latestMonthTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0);
+    
+    return {
+      month: latestMonth,
+      year: latestYear,
+      trades: latestMonthTrades,
+      wins,
+      losses,
+      winRate,
+      pnl
+    };
+  }, [visibleTrades]);
+
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Table data (can be filtered by search/status)
   const selectedMonthWins = selectedMonthTrades.filter(t => (t.meta?.net || 0) > 0).length;
   const selectedMonthLosses = selectedMonthTrades.filter(t => (t.meta?.net || 0) < 0).length;
   const selectedMonthWinRate = selectedMonthTrades.length > 0 ? Math.round((selectedMonthWins / selectedMonthTrades.length) * 100) : 0;
   const selectedMonthPnL = selectedMonthTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0);
 
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                     'July', 'August', 'September', 'October', 'November', 'December'];
+
 
   return (
     <div className="space-y-6">
@@ -186,10 +219,10 @@ const TradesTab = ({
             </div>
             <div>
               <h1 className="text-3xl font-bold mb-2">
-                {selectedMonth === 'all' ? `${selectedYear} Performance` : `${monthNames[selectedMonth]} ${selectedYear} Performance`}
+                {latestMonthData.month !== null ? `${monthNames[latestMonthData.month]} ${latestMonthData.year} Performance` : 'Overall Performance'}
               </h1>
               <p className="text-blue-100 text-lg">
-                {selectedMonth === 'all' ? 'Full year trading statistics and insights' : 'Selected month trading statistics and insights'}
+                {latestMonthData.month !== null ? 'Latest month trading statistics and insights' : 'Complete trading statistics and insights'}
               </p>
             </div>
           </div>
@@ -201,8 +234,8 @@ const TradesTab = ({
                   <IconRocket className="w-5 h-5 text-emerald-300" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold animate-pulse">{selectedMonthTrades.length}</div>
-                  <div className="text-blue-100 text-sm">Month Trades</div>
+                  <div className="text-2xl font-bold animate-pulse">{latestMonthData.trades.length}</div>
+                  <div className="text-blue-100 text-sm">Latest Month Trades</div>
                 </div>
               </div>
             </div>
@@ -214,9 +247,9 @@ const TradesTab = ({
                 </div>
                 <div>
                   <div className="text-2xl font-bold animate-pulse">
-                    {selectedMonthWins}
+                    {latestMonthData.wins}
                   </div>
-                  <div className="text-blue-100 text-sm">Month Wins</div>
+                  <div className="text-blue-100 text-sm">Latest Month Wins</div>
                 </div>
               </div>
             </div>
@@ -228,9 +261,9 @@ const TradesTab = ({
                 </div>
                 <div>
                   <div className="text-2xl font-bold animate-pulse">
-                    {selectedMonthWinRate}%
+                    {latestMonthData.winRate}%
                   </div>
-                  <div className="text-blue-100 text-sm">Win Rate</div>
+                  <div className="text-blue-100 text-sm">Latest Month Win Rate</div>
                 </div>
               </div>
             </div>
@@ -242,9 +275,9 @@ const TradesTab = ({
                 </div>
                 <div>
                   <div className="text-2xl font-bold animate-pulse">
-                    {formatNumber(selectedMonthPnL)}
+                    {formatNumber(latestMonthData.pnl)}
                   </div>
-                  <div className="text-blue-100 text-sm">Month P&L</div>
+                  <div className="text-blue-100 text-sm">Latest Month P&L</div>
                 </div>
               </div>
             </div>
@@ -332,49 +365,7 @@ const TradesTab = ({
           </div>
 
           <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
-            {/* Date Filters Group */}
-            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 border border-slate-200 dark:border-slate-600">
-              <div className="flex items-center gap-2">
-                <IconCalendar className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Period:</span>
-              </div>
-              
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-                className="px-3 py-1.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
-              >
-                <option value="all">All Months</option>
-                {monthNames.map((month, index) => (
-                  <option key={index} value={index}>
-                    {month}
-                  </option>
-                ))}
-              </select>
 
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="px-3 py-1.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
-              >
-                {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-
-              <button
-                onClick={() => {
-                  setSelectedMonth('all');
-                  setSelectedYear(new Date().getFullYear());
-                }}
-                className="px-2 py-1.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-105"
-                title="Show all trades"
-              >
-                Reset
-              </button>
-            </div>
 
             {/* Search and Status Filters Group */}
             <div className="flex items-center gap-3">
@@ -583,16 +574,16 @@ const TradesTab = ({
             </div>
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No trades found</h3>
             <p className="text-slate-600 dark:text-slate-400 mb-4">
-              No trades found for {selectedMonth === 'all' ? `${selectedYear}` : `${monthNames[selectedMonth]} ${selectedYear}`}
+              No trades found in your trading journal
             </p>
             <button
               onClick={() => {
-                setSelectedMonth('all');
-                setSelectedYear(new Date().getFullYear());
+                setFilterText('');
+                setFilterStatus('all');
               }}
               className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg font-medium transition-all duration-300"
             >
-              View All Trades
+              Clear Filters
             </button>
           </div>
         )}
