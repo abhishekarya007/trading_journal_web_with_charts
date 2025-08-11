@@ -21,6 +21,7 @@ import TradingRulesTab from "./components/TradingRulesTab";
 import GrowthCalculatorTab from "./components/GrowthCalculatorTab";
 import CooldownTimer from "./components/CooldownTimer";
 import Navigation from "./components/Navigation";
+import { tradeService } from "./services/tradeService";
 import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX, IconAlertTriangle, IconTrash } from "./components/icons";
 
 ChartJS.register(
@@ -122,13 +123,31 @@ export default function App() {
   const [deleteTradeId, setDeleteTradeId] = useState(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) setTrades(JSON.parse(raw));
+    const loadTrades = async () => {
+      try {
+        const loadedTrades = await tradeService.loadTrades();
+        setTrades(loadedTrades);
+      } catch (error) {
+        console.error('Error loading trades from database:', error);
+        // Fallback to localStorage if database fails
+        const savedTrades = localStorage.getItem(STORAGE_KEY);
+        if (savedTrades) {
+          try {
+            const parsedTrades = JSON.parse(savedTrades);
+            setTrades(parsedTrades);
+          } catch (parseError) {
+            console.error('Error parsing saved trades:', parseError);
+            setTrades([]);
+          }
+        }
+      }
+    };
+    
+    loadTrades();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(trades));
-  }, [trades]);
+  // Note: Trades are now saved to database automatically via tradeService
+  // localStorage backup is only used as fallback if database fails
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
@@ -147,51 +166,81 @@ export default function App() {
     localStorage.setItem('ui_nav_collapsed', navCollapsed ? '1' : '0');
   }, [navCollapsed]);
 
-  function addOrUpdateTrade(e) {
+  async function addOrUpdateTrade(e) {
     e.preventDefault();
-    // Coerce string inputs to numbers here to avoid the "0 not deletable" UX issue
-    const trade = {
-      ...form,
-      qty: Number(form.qty || 0),
-      buy: Number(form.buy || 0),
-      sell: Number(form.sell || 0),
-      trend: form.trend || 'Up',
-      rule: form.rule || 'Yes',
-      emotion: form.emotion || '',
-      riskReward: form.riskReward || '',
-      screenshots: form.screenshots || [],
-    };
-    const computed = calcTradeCharges({
-      qty: trade.qty, buy: trade.buy, sell: trade.sell, type: trade.type
-    });
-    trade.meta = computed;
-    setTrades(prev => {
-      const i = prev.findIndex(p => p.id === trade.id);
-      if (i >= 0) {
-        const copy = [...prev];
-        copy[i] = trade;
-        return copy;
+    
+    try {
+      // Coerce string inputs to numbers here to avoid the "0 not deletable" UX issue
+      const trade = {
+        ...form,
+        qty: Number(form.qty || 0),
+        buy: Number(form.buy || 0),
+        sell: Number(form.sell || 0),
+        trend: form.trend || 'Up',
+        rule: form.rule || 'Yes',
+        emotion: form.emotion || '',
+        riskReward: form.riskReward || '',
+        screenshots: form.screenshots || [],
+      };
+      
+      const computed = calcTradeCharges({
+        qty: trade.qty, buy: trade.buy, sell: trade.sell, type: trade.type
+      });
+      trade.meta = computed;
+      
+      // Check if this is an update or new trade
+      const existingTradeIndex = trades.findIndex(p => p.id === trade.id);
+      
+      if (existingTradeIndex >= 0) {
+        // Update existing trade
+        await tradeService.updateTrade(trade.id, trade);
+        setTrades(prev => {
+          const copy = [...prev];
+          copy[existingTradeIndex] = trade;
+          return copy;
+        });
+      } else {
+        // Add new trade
+        const newTrade = await tradeService.addTrade(trade);
+        setTrades(prev => [newTrade, ...prev]);
       }
-      return [trade, ...prev];
-    });
-    setForm(blankTrade());
-    
-    // Show success toast
-    const toastId = Date.now();
-    setToasts(prev => [...prev, {
-      id: toastId,
-      type: 'success',
-      message: 'Trade saved successfully!',
-      icon: '🎯'
-    }]);
-    
-    // Remove toast after 3 seconds
-    setTimeout(() => {
-      setToasts(prev => prev.filter(toast => toast.id !== toastId));
-    }, 3000);
+      
+      setForm(blankTrade());
+      
+      // Show success toast
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'success',
+        message: 'Trade saved successfully!',
+        icon: '🎯'
+      }]);
+      
+      // Remove toast after 3 seconds
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 3000);
 
-    // Play success sound
-    playSuccessSound();
+      // Play success sound
+      playSuccessSound();
+      
+    } catch (error) {
+      console.error('Error saving trade:', error);
+      
+      // Show error toast
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'error',
+        message: 'Failed to save trade. Please try again.',
+        icon: '❌'
+      }]);
+      
+      // Remove toast after 5 seconds
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 5000);
+    }
   }
 
   function editTrade(t) {
@@ -222,9 +271,40 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function deleteTrade(id) {
-    setDeleteTradeId(id);
-    setShowDeleteConfirm(true);
+  async function deleteTrade(id) {
+    try {
+      await tradeService.deleteTrade(id);
+      setTrades(prev => prev.filter(t => t.id !== id));
+      
+      // Show success toast
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'success',
+        message: 'Trade deleted successfully!',
+        icon: '🗑️'
+      }]);
+      
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error deleting trade:', error);
+      
+      // Show error toast
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'error',
+        message: 'Failed to delete trade. Please try again.',
+        icon: '❌'
+      }]);
+      
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 5000);
+    }
   }
 
   function confirmDelete() {
