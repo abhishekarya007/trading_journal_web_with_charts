@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ScreenshotManager from './ScreenshotManager';
 import { 
   IconTrendingUp, 
@@ -142,7 +142,7 @@ const TradesTab = ({
   });
 
   // Use selected month trades for the table display
-  const tableTrades = selectedMonthTrades;
+  const tableTrades = useMemo(() => selectedMonthTrades, [selectedMonthTrades]);
 
   // Calculate pagination for filtered data
   const filteredTotalPages = Math.ceil(tableTrades.length / pageSize);
@@ -153,14 +153,14 @@ const TradesTab = ({
   // Update the current filtered trades for export
   useEffect(() => {
     setCurrentFilteredTrades(tableTrades);
-  }, [tableTrades, setCurrentFilteredTrades]);
+  }, [tableTrades]);
 
   // Reset to first page when filtered data changes
   useEffect(() => {
     if (currentPage > filteredTotalPages && filteredTotalPages > 0) {
       goToPage(1);
     }
-  }, [tableTrades.length, currentPage, filteredTotalPages, goToPage]);
+  }, [tableTrades.length, currentPage, filteredTotalPages]);
   
   const selectedMonthWins = selectedMonthTrades.filter(t => (t.meta?.net || 0) > 0).length;
   const selectedMonthLosses = selectedMonthTrades.filter(t => (t.meta?.net || 0) < 0).length;

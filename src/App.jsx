@@ -1260,7 +1260,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes slideInRight {
           from {
             transform: translateX(100%);
