@@ -19,7 +19,7 @@ import {
   IconActivity
 } from './icons';
 
-export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, directionRows, emotionRows, monthlyChart, equityChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth }) {
+export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, directionRows, emotionRows, rrAnalysis, monthlyChart, equityChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [animateCharts, setAnimateCharts] = useState(false);
   const [hoveredMetric, setHoveredMetric] = useState(null);
@@ -505,6 +505,197 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                   <p>No emotion data yet</p>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Long vs Short Performance */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg flex items-center justify-center">
+                  <IconTrendingUp className="w-4 h-4 text-white" />
+                </div>
+                <h4 className="font-semibold text-slate-900 dark:text-white">Long vs Short Performance</h4>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Long Trades */}
+                <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-700">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg flex items-center justify-center">
+                      <IconTrendingUp className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <h6 className="font-semibold text-slate-900 dark:text-white">Long Trades</h6>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">{rrAnalysis.longAnalysis.trades} trades</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                        {rrAnalysis.longAnalysis.winRate}%
+                      </div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400">Win Rate</div>
+                    </div>
+                    <div className="min-w-0">
+                      <div className={`text-lg font-bold ${getPerformanceColor(rrAnalysis.longAnalysis.avgNet)} break-words`}>
+                        ₹{formatNumber(rrAnalysis.longAnalysis.avgNet)}
+                      </div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400">Avg Net</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-700">
+                    <div className={`text-sm font-semibold ${getPerformanceColor(rrAnalysis.longAnalysis.net)}`}>
+                      Total: ₹{formatNumber(rrAnalysis.longAnalysis.net)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Short Trades */}
+                <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-red-200 dark:border-red-700">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
+                      <IconTrendingDown className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <h6 className="font-semibold text-slate-900 dark:text-white">Short Trades</h6>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">{rrAnalysis.shortAnalysis.trades} trades</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-lg font-bold text-red-600 dark:text-red-400">
+                        {rrAnalysis.shortAnalysis.winRate}%
+                      </div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400">Win Rate</div>
+                    </div>
+                    <div className="min-w-0">
+                      <div className={`text-lg font-bold ${getPerformanceColor(rrAnalysis.shortAnalysis.avgNet)} break-words`}>
+                        ₹{formatNumber(rrAnalysis.shortAnalysis.avgNet)}
+                      </div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400">Avg Net</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-red-200 dark:border-red-700">
+                    <div className={`text-sm font-semibold ${getPerformanceColor(rrAnalysis.shortAnalysis.net)}`}>
+                      Total: ₹{formatNumber(rrAnalysis.shortAnalysis.net)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Risk-Reward Ratio Performance */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                  <IconTarget className="w-4 h-4 text-white" />
+                </div>
+                <h4 className="font-semibold text-slate-900 dark:text-white">Risk-Reward Ratio Performance</h4>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="max-h-80 overflow-y-auto">
+                {rrAnalysis.rrRows && rrAnalysis.rrRows.length > 0 ? rrAnalysis.rrRows.map((rr, index) => (
+                  <div 
+                    key={rr.rr} 
+                    className="mb-4 p-4 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-700/50 dark:to-gray-700/50 rounded-xl border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-all duration-300"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    {/* Overall RR Performance */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-slate-900 dark:text-white">{rr.rr}</span>
+                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs rounded-lg font-medium">
+                          {rr.trades} trades
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-lg font-bold ${getPerformanceColor(rr.avgNet)}`}>
+                          ₹{formatNumber(rr.avgNet)}
+                        </div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">Avg Net</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                          <IconTrophy className="w-4 h-4 text-emerald-500" />
+                          <span className="text-sm text-slate-600 dark:text-slate-400">{rr.wins} wins</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <IconFire className="w-4 h-4 text-red-500" />
+                          <span className="text-sm text-slate-600 dark:text-slate-400">{rr.losses} losses</span>
+                        </div>
+                      </div>
+                      <span className={`font-semibold ${getWinRateColor(rr.winRate)}`}>
+                        {rr.winRate}% win rate
+                      </span>
+                    </div>
+
+                    {/* Long vs Short Breakdown */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* Long Performance */}
+                      {rr.long.trades > 0 && (
+                        <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 border border-emerald-200 dark:border-emerald-700">
+                          <div className="flex items-center gap-2 mb-2">
+                            <IconTrendingUp className="w-3 h-3 text-emerald-600" />
+                            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">LONG</span>
+                            <span className="text-xs text-slate-500">({rr.long.trades} trades)</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <div className="font-semibold text-emerald-600">{rr.long.winRate}%</div>
+                              <div className="text-slate-500">Win Rate</div>
+                            </div>
+                            <div>
+                              <div className={`font-semibold ${getPerformanceColor(rr.long.avgNet)}`}>
+                                ₹{formatNumber(rr.long.avgNet)}
+                              </div>
+                              <div className="text-slate-500">Avg Net</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Short Performance */}
+                      {rr.short.trades > 0 && (
+                        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-200 dark:border-red-700">
+                          <div className="flex items-center gap-2 mb-2">
+                            <IconTrendingDown className="w-3 h-3 text-red-600" />
+                            <span className="text-xs font-semibold text-red-700 dark:text-red-300">SHORT</span>
+                            <span className="text-xs text-slate-500">({rr.short.trades} trades)</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <div className="font-semibold text-red-600">{rr.short.winRate}%</div>
+                              <div className="text-slate-500">Win Rate</div>
+                            </div>
+                            <div>
+                              <div className={`font-semibold ${getPerformanceColor(rr.short.avgNet)}`}>
+                                ₹{formatNumber(rr.short.avgNet)}
+                              </div>
+                              <div className="text-slate-500">Avg Net</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )) : (
+                  <div className="px-6 py-8 text-center text-slate-500">
+                    <IconTarget className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                    <p>No risk-reward data yet</p>
+                    <p className="text-sm text-slate-400 mt-1">Add risk-reward ratios to your trades to see analysis</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

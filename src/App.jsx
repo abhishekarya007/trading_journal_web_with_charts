@@ -781,6 +781,110 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     }));
   }, [scopedTrades]);
 
+  // Risk-Reward Analysis
+  const rrAnalysis = useMemo(() => {
+    // Parse RR ratios and categorize trades
+    const rrCategories = {
+      '1:1': { trades: 0, wins: 0, losses: 0, net: 0, long: { trades: 0, wins: 0, losses: 0, net: 0 }, short: { trades: 0, wins: 0, losses: 0, net: 0 } },
+      '1:2': { trades: 0, wins: 0, losses: 0, net: 0, long: { trades: 0, wins: 0, losses: 0, net: 0 }, short: { trades: 0, wins: 0, losses: 0, net: 0 } },
+      '1:3': { trades: 0, wins: 0, losses: 0, net: 0, long: { trades: 0, wins: 0, losses: 0, net: 0 }, short: { trades: 0, wins: 0, losses: 0, net: 0 } },
+      '1:4': { trades: 0, wins: 0, losses: 0, net: 0, long: { trades: 0, wins: 0, losses: 0, net: 0 }, short: { trades: 0, wins: 0, losses: 0, net: 0 } },
+      '1:5+': { trades: 0, wins: 0, losses: 0, net: 0, long: { trades: 0, wins: 0, losses: 0, net: 0 }, short: { trades: 0, wins: 0, losses: 0, net: 0 } },
+      'Other': { trades: 0, wins: 0, losses: 0, net: 0, long: { trades: 0, wins: 0, losses: 0, net: 0 }, short: { trades: 0, wins: 0, losses: 0, net: 0 } }
+    };
+
+    scopedTrades.forEach(trade => {
+      const rr = trade.riskReward || '';
+      const net = trade.meta?.net || 0;
+      const isWin = net > 0;
+      const tradeType = trade.type || 'Long';
+      
+      // Categorize RR ratio
+      let category = 'Other';
+      if (rr.includes('1:1') || rr.includes('1:2') || rr.includes('1:3') || rr.includes('1:4') || rr.includes('1:5')) {
+        if (rr.includes('1:1')) category = '1:1';
+        else if (rr.includes('1:2')) category = '1:2';
+        else if (rr.includes('1:3')) category = '1:3';
+        else if (rr.includes('1:4')) category = '1:4';
+        else if (rr.includes('1:5')) category = '1:5+';
+      }
+      
+      // Update overall stats
+      rrCategories[category].trades++;
+      if (isWin) rrCategories[category].wins++;
+      else rrCategories[category].losses++;
+      rrCategories[category].net += net;
+      
+      // Update type-specific stats
+      if (tradeType === 'Long') {
+        rrCategories[category].long.trades++;
+        if (isWin) rrCategories[category].long.wins++;
+        else rrCategories[category].long.losses++;
+        rrCategories[category].long.net += net;
+      } else {
+        rrCategories[category].short.trades++;
+        if (isWin) rrCategories[category].short.wins++;
+        else rrCategories[category].short.losses++;
+        rrCategories[category].short.net += net;
+      }
+    });
+
+    // Convert to array format
+    const rrRows = Object.entries(rrCategories)
+      .filter(([_, data]) => data.trades > 0)
+      .map(([rr, data]) => ({
+        rr,
+        trades: data.trades,
+        wins: data.wins,
+        losses: data.losses,
+        winRate: data.trades ? Math.round((data.wins / data.trades) * 100 * 100) / 100 : 0,
+        avgNet: data.trades ? Math.round((data.net / data.trades) * 100) / 100 : 0,
+        long: {
+          trades: data.long.trades,
+          wins: data.long.wins,
+          losses: data.long.losses,
+          winRate: data.long.trades ? Math.round((data.long.wins / data.long.trades) * 100 * 100) / 100 : 0,
+          avgNet: data.long.trades ? Math.round((data.long.net / data.long.trades) * 100) / 100 : 0
+        },
+        short: {
+          trades: data.short.trades,
+          wins: data.short.wins,
+          losses: data.short.losses,
+          winRate: data.short.trades ? Math.round((data.short.wins / data.short.trades) * 100 * 100) / 100 : 0,
+          avgNet: data.short.trades ? Math.round((data.short.net / data.short.trades) * 100) / 100 : 0
+        }
+      }));
+
+    // Long vs Short Analysis
+    const longTrades = scopedTrades.filter(t => t.type === 'Long');
+    const shortTrades = scopedTrades.filter(t => t.type === 'Short');
+    
+    const longAnalysis = {
+      trades: longTrades.length,
+      wins: longTrades.filter(t => (t.meta?.net || 0) > 0).length,
+      losses: longTrades.filter(t => (t.meta?.net || 0) <= 0).length,
+      net: longTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0),
+      winRate: longTrades.length ? Math.round((longTrades.filter(t => (t.meta?.net || 0) > 0).length / longTrades.length) * 100 * 100) / 100 : 0,
+      avgNet: longTrades.length ? Math.round((longTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0) / longTrades.length) * 100) / 100 : 0
+    };
+
+    const shortAnalysis = {
+      trades: shortTrades.length,
+      wins: shortTrades.filter(t => (t.meta?.net || 0) > 0).length,
+      losses: shortTrades.filter(t => (t.meta?.net || 0) <= 0).length,
+      net: shortTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0),
+      winRate: shortTrades.length ? Math.round((shortTrades.filter(t => (t.meta?.net || 0) > 0).length / shortTrades.length) * 100 * 100) / 100 : 0,
+      avgNet: shortTrades.length ? Math.round((shortTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0) / shortTrades.length) * 100) / 100 : 0
+    };
+
+    return {
+      rrRows,
+      longAnalysis,
+      shortAnalysis,
+      totalTrades: scopedTrades.length
+    };
+  }, [scopedTrades]);
+
   const scopedMonthly = useMemo(() => {
     if (analyticsScope === 'overall') return monthRows;
     const label = activeMonthLabel || monthLabelFromKey(selectedMonthKey);
@@ -1150,6 +1254,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 setupRows={scopedSetupRows}
                 directionRows={scopedDirectionRows}
                 emotionRows={scopedEmotionRows}
+                rrAnalysis={rrAnalysis}
                 monthlyChart={monthlyChart}
                 equityChart={scopedEquityChart}
                 commonChartOptions={commonChartOptions}
