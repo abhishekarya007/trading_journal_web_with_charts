@@ -1251,8 +1251,9 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full translate-y-12 -translate-x-12 animate-bounce"></div>
           
-          <div className="relative z-10 container-wrap flex flex-col sm:flex-row items-start sm:items-center justify-between min-h-16 py-4 gap-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+          <div className="relative z-10 container-wrap flex flex-col lg:flex-row items-start lg:items-center justify-between min-h-16 py-4 gap-4">
+            {/* Left Section - Logo and Timer */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full lg:w-auto">
               <div className="flex items-center gap-4">
                 {/* Mobile Menu Button */}
                 <button
@@ -1267,15 +1268,15 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                   )}
                 </button>
                 
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-                    <IconCandle className="w-6 h-6 text-white"/>
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <IconCandle className="w-5 h-5 lg:w-6 lg:h-6 text-white"/>
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-slate-900 dark:text-white">Trading Journal</h1>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Professional Trading Companion</p>
+                    <h1 className="text-lg lg:text-xl font-bold text-slate-900 dark:text-white">Trading Journal</h1>
+                    <p className="text-xs lg:text-sm text-slate-600 dark:text-slate-400">Professional Trading Companion</p>
                   </div>
-                  <div className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs font-bold rounded-full shadow-md">
+                  <div className="px-2 lg:px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs font-bold rounded-full shadow-md">
                     v1.0
                   </div>
                 </div>
@@ -1287,17 +1288,18 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            {/* Right Section - Controls */}
+            <div className="flex flex-wrap items-center gap-2 lg:gap-3 w-full lg:w-auto justify-center lg:justify-end">
 
 
               {/* Dark Mode Toggle */}
               <button 
                 onClick={() => setIsDark(v => !v)} 
                 type="button" 
-                className="w-10 h-10 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-md" 
+                className="w-9 h-9 lg:w-10 lg:h-10 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-md" 
                 title="Toggle dark mode"
               >
-                {isDark ? <IconSun className="w-5 h-5 text-slate-600 dark:text-slate-400"/> : <IconMoon className="w-5 h-5 text-slate-600 dark:text-slate-400"/>}
+                {isDark ? <IconSun className="w-4 h-4 lg:w-5 lg:h-5 text-slate-600 dark:text-slate-400"/> : <IconMoon className="w-4 h-4 lg:w-5 lg:h-5 text-slate-600 dark:text-slate-400"/>}
               </button>
 
               {/* Export Menu */}
@@ -1305,10 +1307,10 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 <button 
                   onClick={() => setShowExportMenu(v => !v)} 
                   type="button" 
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="flex items-center gap-1 lg:gap-2 px-3 lg:px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
                   <IconDownload className="w-4 h-4"/> 
-                  <span className="hidden sm:inline">Export</span>
+                  <span className="hidden md:inline">Export</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
@@ -1351,12 +1353,12 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
               </div>
 
               {/* User Profile */}
-              <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <IconUser className="w-4 h-4 text-white" />
+              <div className="flex items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl">
+                <div className="w-7 h-7 lg:w-8 lg:h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <IconUser className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
                 </div>
-                <div className="hidden sm:block">
-                  <div className="text-sm font-medium text-slate-900 dark:text-white">
+                <div className="hidden md:block">
+                  <div className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-32">
                     {user.email || 'Demo User'}
                   </div>
                   <div className="text-xs text-slate-600 dark:text-slate-400">
@@ -1376,10 +1378,10 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
               <button 
                 onClick={() => setShowResetConfirm(true)} 
                 type="button" 
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="flex items-center gap-1 lg:gap-2 px-3 lg:px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 <IconReset className="w-4 h-4"/> 
-                <span className="hidden sm:inline">Reset</span>
+                <span className="hidden md:inline">Reset</span>
               </button>
             </div>
           </div>
