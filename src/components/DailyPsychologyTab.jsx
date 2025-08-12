@@ -13,7 +13,7 @@ import {
   IconDownload
 } from './icons';
 
-const DailyPsychologyTab = ({ showToast }) => {
+const DailyPsychologyTab = ({ showToast, playSuccessSound, playDeleteSound }) => {
   const [entries, setEntries] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [psychology, setPsychology] = useState('');
@@ -100,6 +100,9 @@ const DailyPsychologyTab = ({ showToast }) => {
         } else {
           alert('Psychology entry updated successfully!');
         }
+        if (playSuccessSound) {
+          playSuccessSound();
+        }
       } catch (error) {
         console.error('Error updating entry:', error);
         if (showToast) {
@@ -118,6 +121,9 @@ const DailyPsychologyTab = ({ showToast }) => {
           showToast('Psychology entry saved successfully!', 'success');
         } else {
           alert('Psychology entry saved successfully!');
+        }
+        if (playSuccessSound) {
+          playSuccessSound();
         }
       } catch (error) {
         console.error('Error adding entry:', error);
@@ -174,6 +180,9 @@ const DailyPsychologyTab = ({ showToast }) => {
       } else {
         alert('Psychology entry deleted successfully!');
       }
+      if (playDeleteSound) {
+        playDeleteSound();
+      }
     } catch (error) {
       console.error('Error deleting entry:', error);
       if (showToast) {
@@ -202,6 +211,9 @@ const DailyPsychologyTab = ({ showToast }) => {
       setEntries(data);
       if (showToast) {
         showToast('Successfully synced with database!', 'success');
+      }
+      if (playSuccessSound) {
+        playSuccessSound();
       }
     } catch (error) {
       console.error('Error syncing with database:', error);

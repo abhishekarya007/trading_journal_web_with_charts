@@ -1729,7 +1729,11 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
             )}
             
             {activeTab === 'psychology' && (
-              <DailyPsychologyTab showToast={showToast} />
+              <DailyPsychologyTab 
+                showToast={showToast} 
+                playSuccessSound={playSuccessSound}
+                playDeleteSound={playDeleteSound}
+              />
             )}
             
             {activeTab === 'rules' && (
