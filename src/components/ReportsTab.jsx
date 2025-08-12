@@ -15,13 +15,22 @@ import {
   IconCheck,
   IconX,
   IconImage,
-  IconFilter
+  IconFilter,
+  IconEye,
+  IconChevronUp,
+  IconChevronDown
 } from './icons';
 
 const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [sortField, setSortField] = useState('date');
+  const [sortDirection, setSortDirection] = useState('desc');
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedTrade, setSelectedTrade] = useState(null);
+  const [showScreenshotModal, setShowScreenshotModal] = useState(false);
+  const [selectedScreenshot, setSelectedScreenshot] = useState(null);
 
   // Get unique years from trades
   const availableYears = useMemo(() => {
@@ -29,14 +38,59 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
     return years.sort((a, b) => b - a); // Sort descending
   }, [trades]);
 
-  // Filter trades by selected month and year
+  // Filter and sort trades by selected month and year
   const filteredTrades = useMemo(() => {
-    return trades.filter(trade => {
+    const filtered = trades.filter(trade => {
       const tradeDate = new Date(trade.date);
       return tradeDate.getFullYear() === selectedYear && 
              tradeDate.getMonth() + 1 === selectedMonth;
     });
-  }, [trades, selectedYear, selectedMonth]);
+
+    // Sort the filtered trades
+    return filtered.sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortField) {
+        case 'date':
+          aValue = new Date(a.date);
+          bValue = new Date(b.date);
+          break;
+        case 'symbol':
+          aValue = (a.symbol || '').toLowerCase();
+          bValue = (b.symbol || '').toLowerCase();
+          break;
+        case 'type':
+          aValue = (a.type || '').toLowerCase();
+          bValue = (b.type || '').toLowerCase();
+          break;
+        case 'qty':
+          aValue = parseFloat(a.qty) || 0;
+          bValue = parseFloat(b.qty) || 0;
+          break;
+        case 'buy':
+          aValue = parseFloat(a.buy) || 0;
+          bValue = parseFloat(b.buy) || 0;
+          break;
+        case 'sell':
+          aValue = parseFloat(a.sell) || 0;
+          bValue = parseFloat(b.sell) || 0;
+          break;
+        case 'netPnL':
+          aValue = a.meta?.net || 0;
+          bValue = b.meta?.net || 0;
+          break;
+        default:
+          aValue = new Date(a.date);
+          bValue = new Date(b.date);
+      }
+
+      if (sortDirection === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+  }, [trades, selectedYear, selectedMonth, sortField, sortDirection]);
 
   // Calculate metrics for filtered trades
   const metrics = useMemo(() => {
@@ -108,7 +162,27 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
     };
   }, [filteredTrades]);
 
+  // Handle sorting
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
 
+  // Handle trade detail view
+  const handleTradeClick = (trade) => {
+    setSelectedTrade(trade);
+    setShowDetailModal(true);
+  };
+
+  // Handle screenshot preview
+  const handleScreenshotClick = (screenshot) => {
+    setSelectedScreenshot(screenshot);
+    setShowScreenshotModal(true);
+  };
 
   // Generate PDF Report
   const generatePDFReport = async () => {
@@ -534,15 +608,86 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
           <table className="w-full">
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Symbol</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Qty</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Buy</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Sell</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Net P&L</th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  onClick={() => handleSort('date')}
+                >
+                  <div className="flex items-center gap-2">
+                    Date
+                    {sortField === 'date' && (
+                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  onClick={() => handleSort('symbol')}
+                >
+                  <div className="flex items-center gap-2">
+                    Symbol
+                    {sortField === 'symbol' && (
+                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  onClick={() => handleSort('type')}
+                >
+                  <div className="flex items-center gap-2">
+                    Type
+                    {sortField === 'type' && (
+                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  onClick={() => handleSort('qty')}
+                >
+                  <div className="flex items-center gap-2">
+                    Qty
+                    {sortField === 'qty' && (
+                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  onClick={() => handleSort('buy')}
+                >
+                  <div className="flex items-center gap-2">
+                    Buy
+                    {sortField === 'buy' && (
+                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  onClick={() => handleSort('sell')}
+                >
+                  <div className="flex items-center gap-2">
+                    Sell
+                    {sortField === 'sell' && (
+                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  onClick={() => handleSort('netPnL')}
+                >
+                  <div className="flex items-center gap-2">
+                    Net P&L
+                    {sortField === 'netPnL' && (
+                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Screenshots</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -611,6 +756,17 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
                           )}
                         </div>
                       </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleTradeClick(trade)}
+                            className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                            title="View Details"
+                          >
+                            <IconEye className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })
@@ -619,6 +775,176 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
           </table>
         </div>
       </div>
+
+      {/* Trade Detail Modal */}
+      {showDetailModal && selectedTrade && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Trade Details</h3>
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                  <IconX className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">Trade Information</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Date:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">
+                        {new Date(selectedTrade.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Symbol:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.symbol || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Type:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.type || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Quantity:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.qty || '-'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">Price Information</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Buy Price:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.buy || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Sell Price:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.sell || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Gross P&L:</span>
+                      <span className={`font-medium ${(selectedTrade.meta?.gross || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {formatCurrency(selectedTrade.meta?.gross || 0)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Net P&L:</span>
+                      <span className={`font-medium ${(selectedTrade.meta?.net || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {formatCurrency(selectedTrade.meta?.net || 0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">Trade Analysis</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Setup:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.setup || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Emotion:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.emotion || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Notes:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.notes || '-'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">Charges</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Brokerage:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{formatCurrency(selectedTrade.meta?.brokerage || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">STT:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{formatCurrency(selectedTrade.meta?.stt || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Exchange:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{formatCurrency(selectedTrade.meta?.exchange || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">GST:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{formatCurrency(selectedTrade.meta?.gst || 0)}</span>
+                    </div>
+                    <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-2">
+                      <span className="text-slate-600 dark:text-slate-400 font-semibold">Total Charges:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{formatCurrency(selectedTrade.meta?.totalCharges || 0)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Screenshots */}
+              {selectedTrade.screenshots && selectedTrade.screenshots.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">Screenshots</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {selectedTrade.screenshots.map((screenshot, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={screenshot.thumbnail || screenshot.fullSize}
+                          alt={screenshot.name || `Screenshot ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => handleScreenshotClick(screenshot)}
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                          <IconEye className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
+                          {screenshot.name || `Screenshot ${index + 1}`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Screenshot Preview Modal */}
+      {showScreenshotModal && selectedScreenshot && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              onClick={() => setShowScreenshotModal(false)}
+              className="absolute top-4 right-4 z-10 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+            >
+              <IconX className="w-6 h-6" />
+            </button>
+            <img
+              src={selectedScreenshot.fullSize || selectedScreenshot.thumbnail}
+              alt={selectedScreenshot.name || 'Screenshot'}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            />
+            {selectedScreenshot.name && (
+              <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-lg">
+                {selectedScreenshot.name}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
