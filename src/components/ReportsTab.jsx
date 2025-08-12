@@ -21,7 +21,7 @@ import {
   IconChevronDown
 } from './icons';
 
-const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
+const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -187,7 +187,12 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
   // Generate PDF Report
   const generatePDFReport = async () => {
     if (filteredTrades.length === 0) {
-      alert('No trades found for the selected month and year.');
+      // Show warning toast
+      if (showToast) {
+        showToast('No trades found for the selected month and year.', 'warning');
+      } else {
+        alert('No trades found for the selected month and year.');
+      }
       return;
     }
 
@@ -464,7 +469,12 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
       try {
         doc.save(fileName);
         console.log('PDF saved successfully');
-        alert(`PDF report generated successfully: ${fileName}`);
+        // Show success toast
+        if (showToast) {
+          showToast(`PDF report generated successfully: ${fileName}`, 'success');
+        } else {
+          alert(`PDF report generated successfully: ${fileName}`);
+        }
       } catch (saveError) {
         console.error('Error saving PDF:', saveError);
         throw new Error(`Failed to save PDF: ${saveError.message}`);
@@ -476,7 +486,12 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
         stack: error.stack,
         name: error.name
       });
-      alert(`Error generating PDF report: ${error.message}. Please try again.`);
+      // Show error toast
+      if (showToast) {
+        showToast(`Error generating PDF report: ${error.message}. Please try again.`, 'error');
+      } else {
+        alert(`Error generating PDF report: ${error.message}. Please try again.`);
+      }
     } finally {
       setIsGenerating(false);
     }

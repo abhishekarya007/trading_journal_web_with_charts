@@ -138,6 +138,29 @@ export default function App() {
   const [growthData, setGrowthData] = useState([]);
   const [growthDataLoaded, setGrowthDataLoaded] = useState(false);
 
+  // Toast functions
+  const showToast = (message, type = 'info') => {
+    const toastId = Date.now();
+    const icons = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️'
+    };
+    
+    setToasts(prev => [...prev, {
+      id: toastId,
+      type,
+      message,
+      icon: icons[type] || icons.info
+    }]);
+    
+    const duration = type === 'error' ? 5000 : 4000;
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== toastId));
+    }, duration);
+  };
+
 
 
   // Note: Trades are now saved to database automatically via tradeService
@@ -1666,6 +1689,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 trades={trades}
                 formatNumber={formatNumber}
                 formatCurrency={formatCurrency}
+                showToast={showToast}
               />
             )}
         </div>
