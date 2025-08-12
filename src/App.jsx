@@ -22,8 +22,9 @@ import GrowthCalculatorTab from "./components/GrowthCalculatorTab";
 import CooldownTimer from "./components/CooldownTimer";
 import Navigation from "./components/Navigation";
 import Auth from "./components/Auth";
+import Profile from "./components/Profile";
 import { tradeService } from "./services/tradeService";
-import { authApi } from "./lib/supabase";
+import { authApi, profileApi } from "./lib/supabase";
 import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX, IconAlertTriangle, IconTrash, IconLogOut, IconUser } from "./components/icons";
 
 ChartJS.register(
@@ -124,6 +125,8 @@ export default function App() {
   const [currentFilteredTrades, setCurrentFilteredTrades] = useState(trades);
   const [deleteTradeId, setDeleteTradeId] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
   
   // Authentication state
   const [user, setUser] = useState(null);
@@ -161,10 +164,11 @@ export default function App() {
         console.log('Current user:', currentUser ? currentUser.email : 'None');
         setUser(currentUser);
         
-        // If user is already authenticated, load their trades
+        // If user is already authenticated, load their trades and profile
         if (currentUser) {
-          console.log('User is authenticated, loading trades...');
+          console.log('User is authenticated, loading trades and profile...');
           await loadTrades();
+          await loadUserProfile(currentUser.id);
         } else {
           console.log('No authenticated user found');
         }
@@ -175,11 +179,15 @@ export default function App() {
           setUser(session?.user || null);
           
           if (event === 'SIGNED_IN') {
-            // Reload trades when user signs in
+            // Reload trades and profile when user signs in
             loadTrades();
+            if (session?.user) {
+              loadUserProfile(session.user.id);
+            }
           } else if (event === 'SIGNED_OUT') {
-            // Clear trades when user signs out
+            // Clear trades and profile when user signs out
             setTrades([]);
+            setUserProfile(null);
           }
         });
         
@@ -201,12 +209,26 @@ export default function App() {
         if (showLogoutConfirm) {
           setShowLogoutConfirm(false);
         }
+        if (showProfile) {
+          setShowProfile(false);
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showLogoutConfirm]);
+  }, [showLogoutConfirm, showProfile]);
+
+  // Load user profile function
+  const loadUserProfile = async (userId) => {
+    try {
+      const profile = await profileApi.getUserProfile(userId);
+      setUserProfile(profile);
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      setUserProfile(null);
+    }
+  };
 
   // Load trades function (moved from useEffect for reuse)
   const loadTrades = async () => {
@@ -239,6 +261,13 @@ export default function App() {
   const handleAuthSuccess = (user) => {
     setUser(user);
     loadTrades();
+    if (user.id !== 'demo') {
+      loadUserProfile(user.id);
+    }
+  };
+
+  const handleProfileUpdate = (updatedProfile) => {
+    setUserProfile(prev => ({ ...prev, ...updatedProfile }));
   };
 
   const handleSignOut = () => {
@@ -1409,17 +1438,33 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
 
               {/* User Profile */}
               <div className="flex items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl">
-                <div className="w-7 h-7 lg:w-8 lg:h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <IconUser className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
-                </div>
-                <div className="hidden md:block">
-                  <div className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-32">
-                    {user.email || 'Demo User'}
+                <button
+                  onClick={() => setShowProfile(true)}
+                  className="flex items-center gap-2 lg:gap-3 hover:opacity-80 transition-opacity"
+                  title="Profile Settings"
+                >
+                  {userProfile?.avatar_url ? (
+                    <img
+                      src={userProfile.avatar_url}
+                      alt="Profile"
+                      className="w-7 h-7 lg:w-8 lg:h-8 rounded-full object-cover border-2 border-white dark:border-slate-600"
+                    />
+                  ) : (
+                    <div className="w-7 h-7 lg:w-8 lg:h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <span className="text-xs lg:text-sm font-semibold text-white">
+                        {(userProfile?.display_name || user.email?.split('@')[0] || 'T').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="hidden md:block">
+                    <div className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-32">
+                      {userProfile?.display_name || user.email?.split('@')[0] || 'Demo User'}
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
+                      {user.id === 'demo' ? 'Demo Mode' : 'Authenticated'}
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">
-                    {user.id === 'demo' ? 'Demo Mode' : 'Authenticated'}
-                  </div>
-                </div>
+                </button>
                 <button
                   onClick={handleSignOut}
                   className="p-1 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
@@ -1455,7 +1500,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                       <IconCandle className="w-4 h-4 text-white" />
                     </div>
                     <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                      Welcome back, {user.email ? user.email.split('@')[0] : 'Trader'}!
+                      Welcome back, {userProfile?.display_name || user.email?.split('@')[0] || 'Trader'}!
                     </div>
                   </div>
                   <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Your trading performance at a glance</div>
@@ -1776,6 +1821,15 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
             </div>
           </div>
         </div>
+      )}
+
+      {/* Profile Modal */}
+      {showProfile && (
+        <Profile
+          user={user}
+          onClose={() => setShowProfile(false)}
+          onProfileUpdate={handleProfileUpdate}
+        />
       )}
 
       <style>{`
