@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { psychologyService } from '../services/psychologyService';
 import { 
   IconBrain, 
   IconCalendar, 
@@ -25,22 +26,22 @@ const DailyPsychologyTab = ({ showToast }) => {
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
 
-  // Load entries from localStorage on component mount
+  // Load entries from database on component mount
   useEffect(() => {
-    const savedEntries = localStorage.getItem('daily_psychology_entries');
-    if (savedEntries) {
+    const loadEntries = async () => {
       try {
-        setEntries(JSON.parse(savedEntries));
+        const data = await psychologyService.getAllEntries();
+        setEntries(data);
       } catch (error) {
         console.error('Error loading psychology entries:', error);
+        if (showToast) {
+          showToast('Failed to load psychology entries. Please try again.', 'error');
+        }
       }
-    }
-  }, []);
+    };
 
-  // Save entries to localStorage whenever entries change
-  useEffect(() => {
-    localStorage.setItem('daily_psychology_entries', JSON.stringify(entries));
-  }, [entries]);
+    loadEntries();
+  }, [showToast]);
 
   // Filter entries by month and year
   const filteredEntries = entries.filter(entry => {
@@ -51,7 +52,7 @@ const DailyPsychologyTab = ({ showToast }) => {
   // Get available years for filter
   const availableYears = [...new Set(entries.map(entry => new Date(entry.date).getFullYear()))].sort((a, b) => b - a);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!psychology.trim() && !emotions.trim() && !mistakes.trim()) {
@@ -63,36 +64,54 @@ const DailyPsychologyTab = ({ showToast }) => {
       return;
     }
 
-    const newEntry = {
-      id: Date.now(),
+    const entryData = {
       date: selectedDate,
       psychology: psychology.trim(),
       emotions: emotions.trim(),
-      mistakes: mistakes.trim(),
-      createdAt: new Date().toISOString()
+      mistakes: mistakes.trim()
     };
 
     if (isEditing) {
       // Update existing entry
-      setEntries(prev => prev.map(entry => 
-        entry.id === editingId ? { ...newEntry, id: editingId } : entry
-      ));
-      setIsEditing(false);
-      setEditingId(null);
-      
-      if (showToast) {
-        showToast('Psychology entry updated successfully!', 'success');
-      } else {
-        alert('Psychology entry updated successfully!');
+      try {
+        const updatedEntry = await psychologyService.updateEntry(editingId, entryData);
+        setEntries(prev => prev.map(entry => 
+          entry.id === editingId ? updatedEntry : entry
+        ));
+        setIsEditing(false);
+        setEditingId(null);
+        
+        if (showToast) {
+          showToast('Psychology entry updated successfully!', 'success');
+        } else {
+          alert('Psychology entry updated successfully!');
+        }
+      } catch (error) {
+        console.error('Error updating entry:', error);
+        if (showToast) {
+          showToast('Failed to update entry. Please try again.', 'error');
+        } else {
+          alert('Failed to update entry. Please try again.');
+        }
       }
     } else {
       // Add new entry
-      setEntries(prev => [newEntry, ...prev]);
-      
-      if (showToast) {
-        showToast('Psychology entry saved successfully!', 'success');
-      } else {
-        alert('Psychology entry saved successfully!');
+      try {
+        const newEntry = await psychologyService.addEntry(entryData);
+        setEntries(prev => [newEntry, ...prev]);
+        
+        if (showToast) {
+          showToast('Psychology entry saved successfully!', 'success');
+        } else {
+          alert('Psychology entry saved successfully!');
+        }
+      } catch (error) {
+        console.error('Error adding entry:', error);
+        if (showToast) {
+          showToast('Failed to save entry. Please try again.', 'error');
+        } else {
+          alert('Failed to save entry. Please try again.');
+        }
       }
     }
 
@@ -129,15 +148,25 @@ const DailyPsychologyTab = ({ showToast }) => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
-    setEntries(prev => prev.filter(entry => entry.id !== deleteId));
-    setShowDeleteConfirm(false);
-    setDeleteId(null);
-    
-    if (showToast) {
-      showToast('Psychology entry deleted successfully!', 'success');
-    } else {
-      alert('Psychology entry deleted successfully!');
+  const confirmDelete = async () => {
+    try {
+      await psychologyService.deleteEntry(deleteId);
+      setEntries(prev => prev.filter(entry => entry.id !== deleteId));
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
+      
+      if (showToast) {
+        showToast('Psychology entry deleted successfully!', 'success');
+      } else {
+        alert('Psychology entry deleted successfully!');
+      }
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      if (showToast) {
+        showToast('Failed to delete entry. Please try again.', 'error');
+      } else {
+        alert('Failed to delete entry. Please try again.');
+      }
     }
   };
 
@@ -276,7 +305,7 @@ const DailyPsychologyTab = ({ showToast }) => {
                       {formatDate(entry.date)}
                     </h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {new Date(entry.createdAt).toLocaleString()}
+                      {new Date(entry.created_at).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex gap-2">

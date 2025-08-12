@@ -27,6 +27,7 @@ import Auth from "./components/Auth";
 import Profile from "./components/Profile";
 import { tradeService } from "./services/tradeService";
 import { growthCalculatorService } from "./services/growthCalculatorService";
+import { psychologyService } from "./services/psychologyService";
 import { authApi, profileApi } from "./lib/supabase";
 import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX, IconAlertTriangle, IconTrash, IconLogOut, IconUser } from "./components/icons";
 
@@ -222,6 +223,8 @@ export default function App() {
             setUserProfile(null);
             setGrowthData([]);
             setGrowthDataLoaded(false);
+            // Clear psychology service cache
+            psychologyService.clearCache();
           }
         });
         
