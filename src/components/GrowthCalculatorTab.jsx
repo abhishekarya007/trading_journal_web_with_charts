@@ -32,7 +32,7 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [sortKey, setSortKey] = useState('date');
-  const [sortDir, setSortDir] = useState('desc');
+  const [sortDir, setSortDir] = useState('asc');
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -123,11 +123,11 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
       const calculatedData = growthCalculatorService.calculateGrowthMetrics(data, trades);
       setGrowthData(calculatedData);
       
-      // Auto-select latest month
+      // Auto-select earliest month (since we're sorting ascending)
       if (calculatedData.length > 0 && !selectedMonth) {
-        const latestMonth = calculatedData.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        if (latestMonth) {
-          setSelectedMonth(latestMonth.id);
+        const earliestMonth = calculatedData.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+        if (earliestMonth) {
+          setSelectedMonth(earliestMonth.id);
         }
       }
     } catch (error) {
@@ -494,16 +494,16 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
   const summaryMetrics = useMemo(() => {
     if (sortedData.length === 0) return null;
 
-    // Get the selected month data or the latest month if none selected
+    // Get the selected month data or the earliest month if none selected
     const selectedData = selectedMonth 
       ? sortedData.find(item => item.id === selectedMonth)
-      : sortedData[sortedData.length - 1];
+      : sortedData[0];
 
     if (!selectedData) return null;
 
     // Calculate totals for all data
     const totalPnL = sortedData.reduce((sum, item) => sum + item.pnl, 0);
-    const totalGrowth = ((sortedData[sortedData.length - 1]?.finalCapital || 20000) - 20000) / 20000 * 100;
+    const totalGrowth = ((sortedData[sortedData.length - 1]?.finalCapital || 20000) - (sortedData[0]?.initialCapital || 20000)) / (sortedData[0]?.initialCapital || 20000) * 100;
     const totalTrades = sortedData.reduce((sum, item) => sum + item.trades, 0);
 
     return {
@@ -556,7 +556,7 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
                     <button
                       onClick={() => setSelectedMonth(null)}
                       className="ml-2 p-1 hover:bg-white/20 rounded-lg transition-colors"
-                      title="Show latest month"
+                      title="Show earliest month"
                     >
                       <IconX className="w-4 h-4 text-indigo-200" />
                     </button>
