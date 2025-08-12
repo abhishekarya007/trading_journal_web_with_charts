@@ -24,6 +24,7 @@ import Navigation from "./components/Navigation";
 import Auth from "./components/Auth";
 import Profile from "./components/Profile";
 import { tradeService } from "./services/tradeService";
+import { growthCalculatorService } from "./services/growthCalculatorService";
 import { authApi, profileApi } from "./lib/supabase";
 import { IconCandle, IconDownload, IconReset, IconMoon, IconSun, IconMenu, IconX, IconAlertTriangle, IconTrash, IconLogOut, IconUser } from "./components/icons";
 
@@ -131,6 +132,10 @@ export default function App() {
   // Authentication state
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Growth calculator state
+  const [growthData, setGrowthData] = useState([]);
+  const [growthDataLoaded, setGrowthDataLoaded] = useState(false);
 
 
 
@@ -164,11 +169,12 @@ export default function App() {
         console.log('Current user:', currentUser ? currentUser.email : 'None');
         setUser(currentUser);
         
-        // If user is already authenticated, load their trades and profile
+        // If user is already authenticated, load their trades, profile, and growth data
         if (currentUser) {
-          console.log('User is authenticated, loading trades and profile...');
+          console.log('User is authenticated, loading trades, profile, and growth data...');
           await loadTrades();
           await loadUserProfile(currentUser.id);
+          await loadGrowthData();
         } else {
           console.log('No authenticated user found');
         }
@@ -179,15 +185,18 @@ export default function App() {
           setUser(session?.user || null);
           
           if (event === 'SIGNED_IN') {
-            // Reload trades and profile when user signs in
+            // Reload trades, profile, and growth data when user signs in
             loadTrades();
             if (session?.user) {
               loadUserProfile(session.user.id);
             }
+            loadGrowthData();
           } else if (event === 'SIGNED_OUT') {
-            // Clear trades and profile when user signs out
+            // Clear trades, profile, and growth data when user signs out
             setTrades([]);
             setUserProfile(null);
+            setGrowthData([]);
+            setGrowthDataLoaded(false);
           }
         });
         
@@ -254,6 +263,29 @@ export default function App() {
         console.log('No trades found in localStorage fallback');
         setTrades([]);
       }
+    }
+  };
+
+  // Load growth data from database
+  const loadGrowthData = async () => {
+    try {
+      console.log('Loading growth data from database...');
+      const data = await growthCalculatorService.loadGrowthData();
+      console.log(`Loaded ${data.length} growth records from database`);
+      setGrowthData(data);
+      setGrowthDataLoaded(true);
+    } catch (error) {
+      console.error('Error loading growth data:', error);
+      setGrowthData([]);
+      setGrowthDataLoaded(true);
+    }
+  };
+
+  // Recalculate growth metrics based on current trades
+  const recalculateGrowthMetrics = () => {
+    if (growthData.length > 0 && trades.length > 0) {
+      const calculatedData = growthCalculatorService.calculateGrowthMetrics(growthData, trades);
+      setGrowthData(calculatedData);
     }
   };
 
@@ -1619,6 +1651,10 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
             {activeTab === 'growth-calculator' && (
               <GrowthCalculatorTab
                 trades={trades}
+                growthData={growthData}
+                setGrowthData={setGrowthData}
+                recalculateMetrics={recalculateGrowthMetrics}
+                loadGrowthData={loadGrowthData}
                 formatNumber={formatNumber}
                 formatCurrency={formatCurrency}
               />

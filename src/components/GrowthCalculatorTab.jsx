@@ -25,8 +25,7 @@ import {
   IconTrash
 } from './icons';
 
-const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
-  const [growthData, setGrowthData] = useState([]);
+const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMetrics, loadGrowthData, formatNumber, formatCurrency }) => {
   const [showImportMenu, setShowImportMenu] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -34,7 +33,7 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('asc');
   const [selectedMonth, setSelectedMonth] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -107,46 +106,25 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
     setGrowthData(dummyData);
   };
 
-  // Load data from database
+  // Auto-select earliest month when growth data changes
   useEffect(() => {
-    loadGrowthData();
-  }, []);
-
-  const loadGrowthData = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-      
-      const data = await growthCalculatorService.loadGrowthData();
-      
-      // Calculate metrics based on trades
-      const calculatedData = growthCalculatorService.calculateGrowthMetrics(data, trades);
-      setGrowthData(calculatedData);
-      
-      // Auto-select earliest month (since we're sorting ascending)
-      if (calculatedData.length > 0 && !selectedMonth) {
-        const earliestMonth = calculatedData.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
-        if (earliestMonth) {
-          setSelectedMonth(earliestMonth.id);
-        }
+    if (growthData.length > 0 && !selectedMonth) {
+      const earliestMonth = growthData.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+      if (earliestMonth) {
+        setSelectedMonth(earliestMonth.id);
       }
-    } catch (error) {
-      console.error('Error loading growth data:', error);
-      setError('Failed to load growth data. Please try again.');
-      // Fallback to dummy data
-      generateDummyData();
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [growthData, selectedMonth]);
 
-  // Reload data when trades change
+  // Recalculate metrics whenever component mounts (when user navigates to this tab)
   useEffect(() => {
-    if (trades.length > 0) {
-      const calculatedData = growthCalculatorService.calculateGrowthMetrics(growthData, trades);
-      setGrowthData(calculatedData);
+    if (growthData.length > 0 && trades.length > 0) {
+      console.log('🔄 GrowthCalculatorTab: Auto-recalculating metrics on tab visit');
+      recalculateMetrics();
     }
-  }, [trades]);
+  }, []); // Empty dependency array means it runs once when component mounts
+
+
 
   // Sort data
   const sortedData = useMemo(() => {
@@ -243,7 +221,7 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
         formData.capitalUsed
       );
       
-      // Reload data
+      // Reload data from parent
       await loadGrowthData();
       
       // Reset form
@@ -280,7 +258,7 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
         formData.capitalUsed
       );
       
-      // Reload data
+      // Reload data from parent
       await loadGrowthData();
       
       // Reset form
@@ -315,7 +293,7 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
       
       await growthCalculatorService.deleteGrowthData(id);
       
-      // Reload data
+      // Reload data from parent
       await loadGrowthData();
       
       setSuccess('Growth data deleted successfully!');
@@ -422,7 +400,7 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
           }
         }
 
-        // Reload data from database
+        // Reload data from parent
         await loadGrowthData();
         
         setShowImportMenu(false);
@@ -458,19 +436,23 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
       setIsLoading(true);
       setError('');
       
-      // Reload data from database
-      await loadGrowthData();
+      // Use parent's recalculate function
+      recalculateMetrics();
       
-      setSuccess('Data refreshed successfully!');
+      setSuccess('Metrics recalculated successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
-      console.error('Error refreshing data:', error);
-      setError('Failed to refresh data. Please try again.');
+      console.error('Error recalculating metrics:', error);
+      setError('Failed to recalculate metrics. Please try again.');
       setTimeout(() => setError(''), 5000);
     } finally {
       setIsLoading(false);
     }
   };
+
+
+
+
 
   const getSortIcon = (columnKey) => {
     if (sortKey !== columnKey) {
@@ -631,12 +613,12 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
 
               {/* Refresh Button */}
               <button
-                onClick={loadGrowthData}
+                onClick={handleRefresh}
                 className="btn btn-secondary flex items-center gap-2 bg-gradient-to-r from-blue-100 to-indigo-200 dark:from-blue-700 dark:to-indigo-600 hover:from-blue-200 hover:to-indigo-300 dark:hover:from-blue-600 dark:hover:to-indigo-500 text-blue-700 dark:text-blue-200 px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
-                title="Refresh data"
+                title="Recalculate metrics based on current trades"
               >
                 <IconRefresh className="w-4 h-4" />
-                <span>Refresh</span>
+                <span>Recalculate Metrics</span>
               </button>
 
               {/* Import Button */}
