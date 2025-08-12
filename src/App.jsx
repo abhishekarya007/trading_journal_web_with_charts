@@ -19,6 +19,7 @@ import AnalyticsTab from "./components/AnalyticsTab";
 import TradesTab from "./components/TradesTab";
 import TradingRulesTab from "./components/TradingRulesTab";
 import GrowthCalculatorTab from "./components/GrowthCalculatorTab";
+import ReportsTab from "./components/ReportsTab";
 import CooldownTimer from "./components/CooldownTimer";
 import Navigation from "./components/Navigation";
 import Auth from "./components/Auth";
@@ -1655,6 +1656,14 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 setGrowthData={setGrowthData}
                 recalculateMetrics={recalculateGrowthMetrics}
                 loadGrowthData={loadGrowthData}
+                formatNumber={formatNumber}
+                formatCurrency={formatCurrency}
+              />
+            )}
+            
+            {activeTab === 'reports' && (
+              <ReportsTab
+                trades={trades}
                 formatNumber={formatNumber}
                 formatCurrency={formatCurrency}
               />

@@ -10,7 +10,8 @@ import {
   IconStar,
   IconHeart,
   IconSparkles,
-  IconTarget
+  IconTarget,
+  IconFileText
 } from './icons';
 
 const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }) => {
@@ -52,6 +53,10 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
           case '4':
             e.preventDefault();
             setActiveTab('growth-calculator');
+            break;
+          case '5':
+            e.preventDefault();
+            setActiveTab('reports');
             break;
           case 'b':
             e.preventDefault();
@@ -101,6 +106,15 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       color: 'from-indigo-500 to-purple-500',
       bgColor: 'from-indigo-50 to-purple-50',
       darkBgColor: 'from-indigo-900/20 to-purple-900/20'
+    },
+    {
+      id: 'reports',
+      label: 'Reports',
+      icon: IconFileText,
+      description: 'Generate detailed reports',
+      color: 'from-indigo-500 to-blue-500',
+      bgColor: 'from-indigo-50 to-blue-50',
+      darkBgColor: 'from-indigo-900/20 to-blue-900/20'
     }
   ];
 
