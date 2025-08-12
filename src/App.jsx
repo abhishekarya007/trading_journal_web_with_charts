@@ -798,15 +798,22 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     acc[m].net += net;
     return acc;
   }, {});
-  const monthRows = Object.entries(monthly).map(([m, v]) => ({
-    month: m,
-    total: v.trades,
-    wins: v.wins,
-    losses: v.losses,
-    winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
-    totalNet: Math.round(v.net*100)/100,
-    avg: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
-  }));
+  const monthRows = Object.entries(monthly)
+    .map(([m, v]) => ({
+      month: m,
+      total: v.trades,
+      wins: v.wins,
+      losses: v.losses,
+      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+      totalNet: Math.round(v.net*100)/100,
+      avg: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+    }))
+    .sort((a, b) => {
+      // Sort by month in ascending order (chronological)
+      const dateA = new Date(a.month + '-01');
+      const dateB = new Date(b.month + '-01');
+      return dateA - dateB;
+    });
 
 
 
@@ -930,14 +937,16 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
       acc[s].net += net;
       return acc;
     }, {});
-    return Object.entries(setupMap).map(([s, v]) => ({
-      setup: s,
-      trades: v.trades,
-      wins: v.wins,
-      losses: v.losses,
-      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
-      avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
-    }));
+    return Object.entries(setupMap)
+      .map(([s, v]) => ({
+        setup: s,
+        trades: v.trades,
+        wins: v.wins,
+        losses: v.losses,
+        winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+        avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+      }))
+      .sort((a, b) => b.trades - a.trades); // Sort by number of trades (descending)
   }, [scopedTrades]);
 
   // Scoped Direction Analytics (Type + Trend combinations)
@@ -951,14 +960,16 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
       acc[combo].net += net;
       return acc;
     }, {});
-    return Object.entries(directionMap).map(([combo, v]) => ({
-      combo,
-      trades: v.trades,
-      wins: v.wins,
-      losses: v.losses,
-      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
-      avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
-    }));
+    return Object.entries(directionMap)
+      .map(([combo, v]) => ({
+        combo,
+        trades: v.trades,
+        wins: v.wins,
+        losses: v.losses,
+        winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+        avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+      }))
+      .sort((a, b) => b.trades - a.trades); // Sort by number of trades (descending)
   }, [scopedTrades]);
 
   // Scoped Emotion Analytics
@@ -972,14 +983,16 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
       acc[emotion].net += net;
       return acc;
     }, {});
-    return Object.entries(emotionMap).map(([emotion, v]) => ({
-      emotion,
-      trades: v.trades,
-      wins: v.wins,
-      losses: v.losses,
-      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
-      avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
-    }));
+    return Object.entries(emotionMap)
+      .map(([emotion, v]) => ({
+        emotion,
+        trades: v.trades,
+        wins: v.wins,
+        losses: v.losses,
+        winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+        avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+      }))
+      .sort((a, b) => b.trades - a.trades); // Sort by number of trades (descending)
   }, [scopedTrades]);
 
   // Risk-Reward Analysis
@@ -1054,7 +1067,12 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
           winRate: data.short.trades ? Math.round((data.short.wins / data.short.trades) * 100 * 100) / 100 : 0,
           avgNet: data.short.trades ? Math.round((data.short.net / data.short.trades) * 100) / 100 : 0
         }
-      }));
+      }))
+      .sort((a, b) => {
+        // Sort by predefined RR order: 1:1, 1:2, 1:3, 1:4, 1:5+, Other
+        const rrOrder = { '1:1': 1, '1:2': 2, '1:3': 3, '1:4': 4, '1:5+': 5, 'Other': 6 };
+        return (rrOrder[a.rr] || 999) - (rrOrder[b.rr] || 999);
+      });
 
     // Long vs Short Analysis
     const longTrades = scopedTrades.filter(t => t.type === 'Long');
