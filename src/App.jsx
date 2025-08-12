@@ -1713,6 +1713,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 loadGrowthData={loadGrowthData}
                 formatNumber={formatNumber}
                 formatCurrency={formatCurrency}
+                showToast={showToast}
               />
             )}
             

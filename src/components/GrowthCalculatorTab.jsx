@@ -25,17 +25,17 @@ import {
   IconTrash
 } from './icons';
 
-const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMetrics, loadGrowthData, formatNumber, formatCurrency }) => {
+const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMetrics, loadGrowthData, formatNumber, formatCurrency, showToast }) => {
   const [showImportMenu, setShowImportMenu] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('asc');
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   // Form state for add/edit
   const [formData, setFormData] = useState({
@@ -213,7 +213,6 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
     
     try {
       setIsLoading(true);
-      setError('');
       
       await growthCalculatorService.addGrowthData(
         formData.year,
@@ -232,12 +231,14 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
       });
       
       setShowAddModal(false);
-      setSuccess('Growth data added successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      if (showToast) {
+        showToast('Growth data added successfully!', 'success');
+      }
     } catch (error) {
       console.error('Error adding growth data:', error);
-      setError('Failed to add growth data. Please try again.');
-      setTimeout(() => setError(''), 5000);
+      if (showToast) {
+        showToast('Failed to add growth data. Please try again.', 'error');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -249,7 +250,6 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
     
     try {
       setIsLoading(true);
-      setError('');
       
       await growthCalculatorService.updateGrowthData(
         editingItem.id,
@@ -270,40 +270,49 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
       
       setShowEditModal(false);
       setEditingItem(null);
-      setSuccess('Growth data updated successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      if (showToast) {
+        showToast('Growth data updated successfully!', 'success');
+      }
     } catch (error) {
       console.error('Error updating growth data:', error);
-      setError('Failed to update growth data. Please try again.');
-      setTimeout(() => setError(''), 5000);
+      if (showToast) {
+        showToast('Failed to update growth data. Please try again.', 'error');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Delete growth data
-  const handleDeleteGrowthData = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this growth data?')) {
-      return;
-    }
+  // Show delete confirmation
+  const showDeleteConfirmation = (id) => {
+    setDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  // Confirm delete
+  const confirmDelete = async () => {
+    if (!deleteId) return;
     
     try {
       setIsLoading(true);
-      setError('');
       
-      await growthCalculatorService.deleteGrowthData(id);
+      await growthCalculatorService.deleteGrowthData(deleteId);
       
       // Reload data from parent
       await loadGrowthData();
       
-      setSuccess('Growth data deleted successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      if (showToast) {
+        showToast('Growth data deleted successfully!', 'success');
+      }
     } catch (error) {
       console.error('Error deleting growth data:', error);
-      setError('Failed to delete growth data. Please try again.');
-      setTimeout(() => setError(''), 5000);
+      if (showToast) {
+        showToast('Failed to delete growth data. Please try again.', 'error');
+      }
     } finally {
       setIsLoading(false);
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
     }
   };
 
@@ -324,7 +333,6 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
     reader.onload = async (e) => {
       try {
         setIsLoading(true);
-        setError('');
         
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
@@ -404,12 +412,14 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
         await loadGrowthData();
         
         setShowImportMenu(false);
-        setSuccess(`Successfully imported ${importedData.length} growth records!`);
-        setTimeout(() => setSuccess(''), 3000);
+        if (showToast) {
+          showToast(`Successfully imported ${importedData.length} growth records!`, 'success');
+        }
       } catch (error) {
         console.error('Error importing Excel file:', error);
-        setError('Error importing file. Please check the format. Expected columns: Year, Month, Capital');
-        setTimeout(() => setError(''), 5000);
+        if (showToast) {
+          showToast('Error importing file. Please check the format. Expected columns: Year, Month, Capital', 'error');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -434,17 +444,18 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
   const handleRefresh = async () => {
     try {
       setIsLoading(true);
-      setError('');
       
       // Use parent's recalculate function
       recalculateMetrics();
       
-      setSuccess('Metrics recalculated successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      if (showToast) {
+        showToast('Metrics recalculated successfully!', 'success');
+      }
     } catch (error) {
       console.error('Error recalculating metrics:', error);
-      setError('Failed to recalculate metrics. Please try again.');
-      setTimeout(() => setError(''), 5000);
+      if (showToast) {
+        showToast('Failed to recalculate metrics. Please try again.', 'error');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -795,7 +806,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                         <IconEdit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDeleteGrowthData(item.id)}
+                        onClick={() => showDeleteConfirmation(item.id)}
                         className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                         title="Delete"
                       >
@@ -888,18 +899,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
         </div>
       </div>
 
-      {/* Messages */}
-      {error && (
-        <div className="fixed top-4 right-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 shadow-lg z-50">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
-      
-      {success && (
-        <div className="fixed top-4 right-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 shadow-lg z-50">
-          <p className="text-sm text-green-600 dark:text-green-400">{success}</p>
-        </div>
-      )}
+
 
       {/* Add Growth Data Modal */}
       {showAddModal && (
@@ -1081,6 +1081,46 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <IconTrash className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Delete Growth Data</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">This action cannot be undone</p>
+              </div>
+            </div>
+            
+            <p className="text-slate-700 dark:text-slate-300 mb-6">
+              Are you sure you want to delete this growth data? This will permanently remove the record and all associated calculations.
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteId(null);
+                }}
+                className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg font-medium hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {isLoading ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}
