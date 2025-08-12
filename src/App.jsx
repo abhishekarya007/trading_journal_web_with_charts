@@ -154,12 +154,23 @@ export default function App() {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log('Initializing authentication...');
         // Get current user
         const currentUser = await authApi.getCurrentUser();
+        console.log('Current user:', currentUser ? currentUser.email : 'None');
         setUser(currentUser);
+        
+        // If user is already authenticated, load their trades
+        if (currentUser) {
+          console.log('User is authenticated, loading trades...');
+          await loadTrades();
+        } else {
+          console.log('No authenticated user found');
+        }
         
         // Listen for auth state changes
         const { data: { subscription } } = authApi.onAuthStateChange((event, session) => {
+          console.log('Auth state change:', event, session?.user?.email);
           setUser(session?.user || null);
           
           if (event === 'SIGNED_IN') {
@@ -185,7 +196,9 @@ export default function App() {
   // Load trades function (moved from useEffect for reuse)
   const loadTrades = async () => {
     try {
+      console.log('Loading trades from database...');
       const loadedTrades = await tradeService.loadTrades();
+      console.log(`Loaded ${loadedTrades.length} trades from database`);
       setTrades(loadedTrades);
     } catch (error) {
       console.error('Error loading trades from database:', error);
@@ -194,11 +207,15 @@ export default function App() {
       if (savedTrades) {
         try {
           const parsedTrades = JSON.parse(savedTrades);
+          console.log(`Loaded ${parsedTrades.length} trades from localStorage fallback`);
           setTrades(parsedTrades);
         } catch (parseError) {
           console.error('Error parsing saved trades:', parseError);
           setTrades([]);
         }
+      } else {
+        console.log('No trades found in localStorage fallback');
+        setTrades([]);
       }
     }
   };
