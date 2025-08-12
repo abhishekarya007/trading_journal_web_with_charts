@@ -106,17 +106,30 @@ class TradeService {
         meta = calcTradeCharges(tradeData)
       }
 
-      // Prepare data for Supabase
+      // Prepare data for Supabase - convert camelCase to snake_case
       const updatesForDb = {
-        ...updates,
+        date: updates.date,
+        symbol: updates.symbol,
+        type: updates.type,
+        qty: updates.qty,
+        buy: updates.buy,
+        sell: updates.sell,
+        trend: updates.trend,
+        rule: updates.rule,
+        emotion: updates.emotion,
+        risk_reward: updates.riskReward,
+        setup: updates.setup,
+        remarks: updates.remarks,
+        screenshots: updates.screenshots,
         meta: meta
       }
 
-      // Convert camelCase to snake_case for database
-      if (updates.riskReward) {
-        updatesForDb.risk_reward = updates.riskReward
-        delete updatesForDb.riskReward
-      }
+      // Remove undefined values
+      Object.keys(updatesForDb).forEach(key => {
+        if (updatesForDb[key] === undefined) {
+          delete updatesForDb[key]
+        }
+      })
 
       const updatedTrade = await tradesApi.updateTrade(id, updatesForDb)
       

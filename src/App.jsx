@@ -83,6 +83,35 @@ function playSuccessSound() {
   }
 }
 
+// Delete sound function
+function playDeleteSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Create a delete sound with lower frequencies for a "thud" effect
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Set frequency for delete sound (lower, more ominous)
+    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.2);
+    
+    // Create a delete-like envelope
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+    
+  } catch (error) {
+    console.log('Audio not supported:', error);
+  }
+}
+
 function blankTrade() {
   return {
     id: Date.now() + Math.random(),
@@ -488,6 +517,9 @@ export default function App() {
       try {
         await tradeService.deleteTrade(deleteTradeId);
         setTrades(prev => prev.filter(t => t.id !== deleteTradeId));
+        
+        // Play delete sound
+        playDeleteSound();
         
         // Show success toast
         const toastId = Date.now();
