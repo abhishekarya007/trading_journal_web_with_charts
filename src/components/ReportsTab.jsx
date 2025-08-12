@@ -226,6 +226,46 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
         }
       };
 
+      // Helper function to add section header
+      const addSectionHeader = (title) => {
+        checkNewPage(30);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title, margin, yPosition);
+        yPosition += 15;
+      };
+
+      // Helper function to add image to PDF
+      const addImageToPDF = async (imageData, x, y, maxWidth, maxHeight) => {
+        try {
+          const img = new Image();
+          img.src = imageData;
+          
+          return new Promise((resolve) => {
+            img.onload = () => {
+              const aspectRatio = img.width / img.height;
+              let width = maxWidth;
+              let height = width / aspectRatio;
+              
+              if (height > maxHeight) {
+                height = maxHeight;
+                width = height * aspectRatio;
+              }
+              
+              doc.addImage(img, 'JPEG', x, y, width, height);
+              resolve(height);
+            };
+            img.onerror = () => {
+              console.log('Failed to load image');
+              resolve(0);
+            };
+          });
+        } catch (error) {
+          console.log('Error adding image:', error);
+          return 0;
+        }
+      };
+
       // Title
       doc.setFontSize(24);
       doc.setFont('helvetica', 'bold');
@@ -244,11 +284,8 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
       yPosition += 20;
 
       // Summary Metrics
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Summary Metrics', margin, yPosition);
-      yPosition += 10;
-
+      addSectionHeader('Summary Metrics');
+      
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       
@@ -274,12 +311,8 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
       yPosition += 10;
 
       // Setup Analysis
-      checkNewPage(50);
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Setup Analysis', margin, yPosition);
-      yPosition += 10;
-
+      addSectionHeader('Setup Analysis');
+      
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       
@@ -294,12 +327,8 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
       yPosition += 10;
 
       // Emotion Analysis
-      checkNewPage(50);
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Emotion Analysis', margin, yPosition);
-      yPosition += 10;
-
+      addSectionHeader('Emotion Analysis');
+      
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       
@@ -314,12 +343,8 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
       yPosition += 10;
 
       // Symbol Analysis
-      checkNewPage(50);
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Symbol Analysis', margin, yPosition);
-      yPosition += 10;
-
+      addSectionHeader('Symbol Analysis');
+      
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       
@@ -334,12 +359,8 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
       yPosition += 15;
 
       // Detailed Trades Table
-      checkNewPage(100);
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Detailed Trades', margin, yPosition);
-      yPosition += 10;
-
+      addSectionHeader('Detailed Trades');
+      
       // Table headers
       const headers = ['Date', 'Symbol', 'Type', 'Qty', 'Buy', 'Sell', 'Net P&L', 'Status'];
       const columnWidths = [25, 25, 20, 15, 20, 20, 25, 20];
@@ -381,30 +402,50 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency }) => {
         yPosition += 6;
       });
 
+      yPosition += 20;
+      
       // Add screenshots section if available
       const tradesWithScreenshots = filteredTrades.filter(t => t.screenshots && t.screenshots.length > 0);
       if (tradesWithScreenshots.length > 0) {
-        yPosition += 15;
-        checkNewPage(50);
+        addSectionHeader('Trade Screenshots');
         
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Screenshots Summary', margin, yPosition);
-        yPosition += 10;
-
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        
-        tradesWithScreenshots.forEach(trade => {
-          const screenshotCount = trade.screenshots.length;
-          const screenshotNames = trade.screenshots.map(s => s.name).join(', ');
-          const text = `${String(trade.date)} - ${String(trade.symbol || 'Unknown')}: ${String(screenshotCount)} screenshot(s) - ${String(screenshotNames)}`;
+        for (const trade of tradesWithScreenshots) {
+          checkNewPage(100);
           
-          const heightUsed = addWrappedText(text, margin, yPosition, contentWidth, 10);
-          yPosition += heightUsed + 3;
+          // Trade info
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${new Date(trade.date).toLocaleDateString()} - ${trade.symbol}`, margin, yPosition);
+          yPosition += 8;
           
-          checkNewPage(20);
-        });
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Type: ${trade.type || 'N/A'} | Qty: ${trade.qty || 'N/A'} | Net P&L: ${formatCurrency(trade.meta?.net || 0)}`, margin, yPosition);
+          yPosition += 15;
+          
+          // Screenshots
+          for (const screenshot of trade.screenshots) {
+            try {
+              const imageHeight = await addImageToPDF(screenshot.fullSize || screenshot.thumbnail, margin, yPosition, contentWidth, 120);
+              if (imageHeight > 0) {
+                yPosition += imageHeight + 10;
+                
+                // Screenshot name
+                if (screenshot.name) {
+                  doc.setFontSize(8);
+                  doc.text(`Screenshot: ${screenshot.name}`, margin, yPosition);
+                  yPosition += 5;
+                }
+              }
+            } catch (error) {
+              console.log('Error adding screenshot:', error);
+            }
+            
+            checkNewPage(50);
+          }
+          
+          yPosition += 20;
+        }
       }
 
       // Footer
