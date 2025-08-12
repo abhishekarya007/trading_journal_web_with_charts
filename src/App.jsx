@@ -20,6 +20,7 @@ import TradesTab from "./components/TradesTab";
 import TradingRulesTab from "./components/TradingRulesTab";
 import GrowthCalculatorTab from "./components/GrowthCalculatorTab";
 import ReportsTab from "./components/ReportsTab";
+import DailyPsychologyTab from "./components/DailyPsychologyTab";
 import CooldownTimer from "./components/CooldownTimer";
 import Navigation from "./components/Navigation";
 import Auth from "./components/Auth";
@@ -1687,6 +1688,10 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 formatCurrency={formatCurrency}
                 showToast={showToast}
               />
+            )}
+            
+            {activeTab === 'psychology' && (
+              <DailyPsychologyTab showToast={showToast} />
             )}
             
             {activeTab === 'rules' && (

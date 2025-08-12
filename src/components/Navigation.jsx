@@ -11,7 +11,8 @@ import {
   IconHeart,
   IconSparkles,
   IconTarget,
-  IconFileText
+  IconFileText,
+  IconBrain
 } from './icons';
 
 const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }) => {
@@ -48,15 +49,19 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
             break;
           case '3':
             e.preventDefault();
-            setActiveTab('rules');
+            setActiveTab('growth-calculator');
             break;
           case '4':
             e.preventDefault();
-            setActiveTab('growth-calculator');
+            setActiveTab('reports');
             break;
           case '5':
             e.preventDefault();
-            setActiveTab('reports');
+            setActiveTab('psychology');
+            break;
+          case '6':
+            e.preventDefault();
+            setActiveTab('rules');
             break;
           case 'b':
             e.preventDefault();
@@ -108,13 +113,22 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       darkBgColor: 'from-indigo-900/20 to-blue-900/20'
     },
     {
+      id: 'psychology',
+      label: 'Daily Psychology',
+      icon: IconBrain,
+      description: 'Track your trading mindset',
+      color: 'from-purple-500 to-pink-500',
+      bgColor: 'from-purple-50 to-pink-50',
+      darkBgColor: 'from-purple-900/20 to-pink-900/20'
+    },
+    {
       id: 'rules',
       label: 'Trading Rules',
       icon: IconBookOpen,
       description: 'Essential trading principles',
-      color: 'from-purple-500 to-pink-500',
-      bgColor: 'from-purple-50 to-pink-50',
-      darkBgColor: 'from-purple-900/20 to-pink-900/20'
+      color: 'from-orange-500 to-red-500',
+      bgColor: 'from-orange-50 to-red-50',
+      darkBgColor: 'from-orange-900/20 to-red-900/20'
     }
   ];
 
