@@ -25,7 +25,7 @@ import {
   IconTrash
 } from './icons';
 
-const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMetrics, loadGrowthData, formatNumber, formatCurrency, showToast }) => {
+const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMetrics, loadGrowthData, formatNumber, formatCurrency, showToast, playSuccessSound, playDeleteSound }) => {
   const [showImportMenu, setShowImportMenu] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -234,6 +234,9 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
       if (showToast) {
         showToast('Growth data added successfully!', 'success');
       }
+      if (playSuccessSound) {
+        playSuccessSound();
+      }
     } catch (error) {
       console.error('Error adding growth data:', error);
       if (showToast) {
@@ -273,6 +276,9 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
       if (showToast) {
         showToast('Growth data updated successfully!', 'success');
       }
+      if (playSuccessSound) {
+        playSuccessSound();
+      }
     } catch (error) {
       console.error('Error updating growth data:', error);
       if (showToast) {
@@ -303,6 +309,9 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
       
       if (showToast) {
         showToast('Growth data deleted successfully!', 'success');
+      }
+      if (playDeleteSound) {
+        playDeleteSound();
       }
     } catch (error) {
       console.error('Error deleting growth data:', error);
@@ -415,6 +424,9 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
         if (showToast) {
           showToast(`Successfully imported ${importedData.length} growth records!`, 'success');
         }
+        if (playSuccessSound) {
+          playSuccessSound();
+        }
       } catch (error) {
         console.error('Error importing Excel file:', error);
         if (showToast) {
@@ -450,6 +462,9 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
       
       if (showToast) {
         showToast('Metrics recalculated successfully!', 'success');
+      }
+      if (playSuccessSound) {
+        playSuccessSound();
       }
     } catch (error) {
       console.error('Error recalculating metrics:', error);

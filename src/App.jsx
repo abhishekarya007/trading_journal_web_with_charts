@@ -1714,6 +1714,8 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 formatNumber={formatNumber}
                 formatCurrency={formatCurrency}
                 showToast={showToast}
+                playSuccessSound={playSuccessSound}
+                playDeleteSound={playDeleteSound}
               />
             )}
             
