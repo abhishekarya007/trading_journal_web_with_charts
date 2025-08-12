@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import * as XLSX from 'xlsx';
+import { growthCalculatorService } from '../services/growthCalculatorService.js';
 import { 
   IconTrendingUp, 
   IconTrendingDown, 
@@ -19,15 +20,30 @@ import {
   IconX,
   IconChevronUp,
   IconChevronDown,
-  IconRefresh
+  IconRefresh,
+  IconEdit,
+  IconTrash
 } from './icons';
 
 const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
   const [growthData, setGrowthData] = useState([]);
   const [showImportMenu, setShowImportMenu] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
   const [selectedMonth, setSelectedMonth] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  // Form state for add/edit
+  const [formData, setFormData] = useState({
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+    capitalUsed: ''
+  });
 
   // Auto-select latest month when data changes
   useEffect(() => {
@@ -91,27 +107,46 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
     setGrowthData(dummyData);
   };
 
-  // Load data from localStorage
+  // Load data from database
   useEffect(() => {
-    const saved = localStorage.getItem('growth_calculator_data');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setGrowthData(parsed.data || []);
-      } catch (e) {
-        generateDummyData();
-      }
-    } else {
-      generateDummyData();
-    }
+    loadGrowthData();
   }, []);
 
-  // Save data to localStorage
+  const loadGrowthData = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      const data = await growthCalculatorService.loadGrowthData();
+      
+      // Calculate metrics based on trades
+      const calculatedData = growthCalculatorService.calculateGrowthMetrics(data, trades);
+      setGrowthData(calculatedData);
+      
+      // Auto-select latest month
+      if (calculatedData.length > 0 && !selectedMonth) {
+        const latestMonth = calculatedData.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+        if (latestMonth) {
+          setSelectedMonth(latestMonth.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading growth data:', error);
+      setError('Failed to load growth data. Please try again.');
+      // Fallback to dummy data
+      generateDummyData();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reload data when trades change
   useEffect(() => {
-    localStorage.setItem('growth_calculator_data', JSON.stringify({
-      data: growthData
-    }));
-  }, [growthData]);
+    if (trades.length > 0) {
+      const calculatedData = growthCalculatorService.calculateGrowthMetrics(growthData, trades);
+      setGrowthData(calculatedData);
+    }
+  }, [trades]);
 
   // Sort data
   const sortedData = useMemo(() => {
@@ -194,11 +229,125 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
     XLSX.writeFile(wb, 'growth_calculator_data.xlsx');
   };
 
+  // Add new growth data
+  const handleAddGrowthData = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      await growthCalculatorService.addGrowthData(
+        formData.year,
+        formData.month,
+        formData.capitalUsed
+      );
+      
+      // Reload data
+      await loadGrowthData();
+      
+      // Reset form
+      setFormData({
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+        capitalUsed: ''
+      });
+      
+      setShowAddModal(false);
+      setSuccess('Growth data added successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error('Error adding growth data:', error);
+      setError('Failed to add growth data. Please try again.');
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Edit growth data
+  const handleEditGrowthData = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      await growthCalculatorService.updateGrowthData(
+        editingItem.id,
+        formData.year,
+        formData.month,
+        formData.capitalUsed
+      );
+      
+      // Reload data
+      await loadGrowthData();
+      
+      // Reset form
+      setFormData({
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+        capitalUsed: ''
+      });
+      
+      setShowEditModal(false);
+      setEditingItem(null);
+      setSuccess('Growth data updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error('Error updating growth data:', error);
+      setError('Failed to update growth data. Please try again.');
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Delete growth data
+  const handleDeleteGrowthData = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this growth data?')) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      await growthCalculatorService.deleteGrowthData(id);
+      
+      // Reload data
+      await loadGrowthData();
+      
+      setSuccess('Growth data deleted successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error('Error deleting growth data:', error);
+      setError('Failed to delete growth data. Please try again.');
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Open edit modal
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setFormData({
+      year: item.year,
+      month: item.monthNum,
+      capitalUsed: item.initialCapital.toString()
+    });
+    setShowEditModal(true);
+  };
+
   // Import functionality
-  const importExcel = (file) => {
+  const importExcel = async (file) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
+        setIsLoading(true);
+        setError('');
+        
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
@@ -251,143 +400,46 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
           }
           
           return {
-            id: index + 1,
             year,
-            month: monthName,
             monthNum,
-            date: `${year}-${monthNum.toString().padStart(2, '0')}-01`,
-            initialCapital: capital,
-            pnl: 0, // Will be calculated from trades
-            finalCapital: capital, // Will be calculated
-            growthPercentage: 0, // Will be calculated
-            trades: 0, // Will be calculated from trades
-            wins: 0, // Will be calculated from trades
-            losses: 0, // Will be calculated from trades
-            winRate: 0 // Will be calculated from trades
+            capitalUsed: capital
           };
         });
 
-        // Calculate missing data from trades
-        const enrichedData = calculateMissingDataFromTrades(importedData);
-        setGrowthData(enrichedData);
+        // Save each imported record to database
+        console.log('Importing growth data to database:', importedData);
+        
+        for (const record of importedData) {
+          try {
+            await growthCalculatorService.addGrowthData(
+              record.year,
+              record.monthNum,
+              record.capitalUsed
+            );
+          } catch (error) {
+            console.error('Error importing record:', record, error);
+            // Continue with other records even if one fails
+          }
+        }
+
+        // Reload data from database
+        await loadGrowthData();
+        
         setShowImportMenu(false);
+        setSuccess(`Successfully imported ${importedData.length} growth records!`);
+        setTimeout(() => setSuccess(''), 3000);
       } catch (error) {
         console.error('Error importing Excel file:', error);
-        alert('Error importing file. Please check the format. Expected columns: Year, Month, Capital');
+        setError('Error importing file. Please check the format. Expected columns: Year, Month, Capital');
+        setTimeout(() => setError(''), 5000);
+      } finally {
+        setIsLoading(false);
       }
     };
     reader.readAsArrayBuffer(file);
   };
 
-  // Calculate missing data from trades for imported Excel data
-  const calculateMissingDataFromTrades = (importedData) => {
-    if (!trades || trades.length === 0) {
-      // If no trades data, return imported data as is
-      return importedData;
-    }
 
-    // Group trades by month
-    const monthlyTrades = {};
-    trades.forEach(trade => {
-      const date = new Date(trade.date);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const monthName = date.toLocaleDateString('en-US', { month: 'long' });
-      const key = `${year}-${month}`;
-      
-      if (!monthlyTrades[key]) {
-        monthlyTrades[key] = {
-          year,
-          month: monthName,
-          monthNum: month,
-          trades: [],
-          pnl: 0,
-          wins: 0,
-          losses: 0
-        };
-      }
-      
-      const netPnl = trade.meta?.net || 0;
-      monthlyTrades[key].trades.push(trade);
-      monthlyTrades[key].pnl += netPnl;
-      
-      if (netPnl > 0) {
-        monthlyTrades[key].wins++;
-      } else if (netPnl < 0) {
-        monthlyTrades[key].losses++;
-      }
-    });
-
-    // Enrich imported data with trades data
-    const enrichedData = importedData.map(item => {
-      const key = `${item.year}-${item.monthNum}`;
-      const tradeData = monthlyTrades[key];
-      
-      if (tradeData) {
-        // Month has trades data
-        return {
-          ...item,
-          pnl: tradeData.pnl,
-          finalCapital: item.initialCapital + tradeData.pnl,
-          growthPercentage: item.initialCapital > 0 ? (tradeData.pnl / item.initialCapital) * 100 : 0,
-          trades: tradeData.trades.length,
-          wins: tradeData.wins,
-          losses: tradeData.losses,
-          winRate: tradeData.trades.length > 0 ? (tradeData.wins / tradeData.trades.length) * 100 : 0
-        };
-      } else {
-        // Month has no trades data - keep as imported
-        return {
-          ...item,
-          pnl: 0,
-          finalCapital: item.initialCapital,
-          growthPercentage: 0,
-          trades: 0,
-          wins: 0,
-          losses: 0,
-          winRate: 0
-        };
-      }
-    });
-
-    // Add any months that have trades but weren't in the Excel import
-    const importedKeys = new Set(importedData.map(item => `${item.year}-${item.monthNum}`));
-    const missingMonths = Object.keys(monthlyTrades).filter(key => !importedKeys.has(key));
-    
-    missingMonths.forEach(key => {
-      const tradeData = monthlyTrades[key];
-      const [year, month] = key.split('-');
-      const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' });
-      
-      // Find the previous month's final capital or use initial capital
-      const previousMonth = enrichedData.find(item => 
-        item.year === parseInt(year) && item.monthNum === parseInt(month) - 1
-      ) || enrichedData.find(item => 
-        item.year === parseInt(year) - 1 && item.monthNum === 12
-      );
-      
-      const initialCapital = previousMonth ? previousMonth.finalCapital : 20000; // Default to 20000 if no previous month
-      
-      enrichedData.push({
-        id: enrichedData.length + 1,
-        year: parseInt(year),
-        month: monthName,
-        monthNum: parseInt(month),
-        date: `${year}-${month.padStart(2, '0')}-01`,
-        initialCapital,
-        pnl: tradeData.pnl,
-        finalCapital: initialCapital + tradeData.pnl,
-        growthPercentage: initialCapital > 0 ? (tradeData.pnl / initialCapital) * 100 : 0,
-        trades: tradeData.trades.length,
-        wins: tradeData.wins,
-        losses: tradeData.losses,
-        winRate: tradeData.trades.length > 0 ? (tradeData.wins / tradeData.trades.length) * 100 : 0
-      });
-    });
-
-    // Sort by date
-    return enrichedData.sort((a, b) => new Date(a.date) - new Date(b.date));
-  };
 
   // Sort handlers
   const handleSort = (key) => {
@@ -401,24 +453,22 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
     });
   };
 
-  const handleRefresh = () => {
-    // Recalculate growth data from current trades
-    if (trades && trades.length > 0) {
-      const updatedData = calculateMissingDataFromTrades(growthData);
-      setGrowthData(updatedData);
-    } else {
-      // If no trades, reload from localStorage
-      const saved = localStorage.getItem('growth_calculator_data');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setGrowthData(parsed.data || []);
-        } catch (e) {
-          generateDummyData();
-        }
-      } else {
-        generateDummyData();
-      }
+  const handleRefresh = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      // Reload data from database
+      await loadGrowthData();
+      
+      setSuccess('Data refreshed successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      setError('Failed to refresh data. Please try again.');
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -570,9 +620,18 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
             </div>
             
             <div className="flex items-center gap-3">
+              {/* Add New Button */}
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                <IconPlus className="w-4 h-4" />
+                <span>Add New</span>
+              </button>
+
               {/* Refresh Button */}
               <button
-                onClick={handleRefresh}
+                onClick={loadGrowthData}
                 className="btn btn-secondary flex items-center gap-2 bg-gradient-to-r from-blue-100 to-indigo-200 dark:from-blue-700 dark:to-indigo-600 hover:from-blue-200 hover:to-indigo-300 dark:hover:from-blue-600 dark:hover:to-indigo-500 text-blue-700 dark:text-blue-200 px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
                 title="Refresh data"
               >
@@ -704,6 +763,9 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
                     {getSortIcon('winRate')}
                   </button>
                 </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -740,6 +802,24 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-slate-600 dark:text-slate-400">{formatNumber(item.winRate)}%</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => openEditModal(item)}
+                        className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <IconEdit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteGrowthData(item.id)}
+                        className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="Delete"
+                      >
+                        <IconTrash className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -825,6 +905,203 @@ const GrowthCalculatorTab = ({ trades, formatNumber, formatCurrency }) => {
           </div>
         </div>
       </div>
+
+      {/* Messages */}
+      {error && (
+        <div className="fixed top-4 right-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 shadow-lg z-50">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      )}
+      
+      {success && (
+        <div className="fixed top-4 right-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 shadow-lg z-50">
+          <p className="text-sm text-green-600 dark:text-green-400">{success}</p>
+        </div>
+      )}
+
+      {/* Add Growth Data Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Add Growth Data</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              >
+                <IconX className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddGrowthData} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Year
+                </label>
+                <input
+                  type="number"
+                  value={formData.year}
+                  onChange={(e) => setFormData(prev => ({ ...prev, year: parseInt(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  min="2020"
+                  max="2030"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Month
+                </label>
+                <select
+                  value={formData.month}
+                  onChange={(e) => setFormData(prev => ({ ...prev, month: parseInt(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value={1}>January</option>
+                  <option value={2}>February</option>
+                  <option value={3}>March</option>
+                  <option value={4}>April</option>
+                  <option value={5}>May</option>
+                  <option value={6}>June</option>
+                  <option value={7}>July</option>
+                  <option value={8}>August</option>
+                  <option value={9}>September</option>
+                  <option value={10}>October</option>
+                  <option value={11}>November</option>
+                  <option value={12}>December</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Capital Used
+                </label>
+                <input
+                  type="number"
+                  value={formData.capitalUsed}
+                  onChange={(e) => setFormData(prev => ({ ...prev, capitalUsed: e.target.value }))}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter capital amount"
+                  step="0.01"
+                  min="0"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isLoading ? 'Adding...' : 'Add Data'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Growth Data Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Edit Growth Data</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              >
+                <IconX className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditGrowthData} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Year
+                </label>
+                <input
+                  type="number"
+                  value={formData.year}
+                  onChange={(e) => setFormData(prev => ({ ...prev, year: parseInt(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  min="2020"
+                  max="2030"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Month
+                </label>
+                <select
+                  value={formData.month}
+                  onChange={(e) => setFormData(prev => ({ ...prev, month: parseInt(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value={1}>January</option>
+                  <option value={2}>February</option>
+                  <option value={3}>March</option>
+                  <option value={4}>April</option>
+                  <option value={5}>May</option>
+                  <option value={6}>June</option>
+                  <option value={7}>July</option>
+                  <option value={8}>August</option>
+                  <option value={9}>September</option>
+                  <option value={10}>October</option>
+                  <option value={11}>November</option>
+                  <option value={12}>December</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Capital Used
+                </label>
+                <input
+                  type="number"
+                  value={formData.capitalUsed}
+                  onChange={(e) => setFormData(prev => ({ ...prev, capitalUsed: e.target.value }))}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter capital amount"
+                  step="0.01"
+                  min="0"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isLoading ? 'Updating...' : 'Update Data'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

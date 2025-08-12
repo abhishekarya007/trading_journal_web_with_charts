@@ -205,3 +205,83 @@ export const profileApi = {
     }
   }
 }
+
+// Helper functions for growth calculator
+export const growthCalculatorApi = {
+  // Get all growth data for current user
+  async getGrowthData() {
+    // Get current user or use null for demo mode
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    let query = supabase
+      .from('growth_calculator')
+      .select('*')
+      .order('year', { ascending: false })
+      .order('month', { ascending: false })
+    
+    // If user is logged in, filter by user_id, otherwise get demo data (user_id is null)
+    if (user) {
+      query = query.eq('user_id', user.id)
+    } else {
+      query = query.is('user_id', null)
+    }
+    
+    const { data, error } = await query
+    
+    if (error) throw error
+    return data || []
+  },
+
+  // Add new growth data
+  async addGrowthData(growthData) {
+    // Get current user or use null for demo mode
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    const data = {
+      ...growthData,
+      user_id: user?.id || null // Allow null for demo mode
+    }
+    
+    const { data: result, error } = await supabase
+      .from('growth_calculator')
+      .insert([data])
+      .select()
+    
+    if (error) throw error
+    return result[0]
+  },
+
+  // Update growth data
+  async updateGrowthData(id, updates) {
+    const { data, error } = await supabase
+      .from('growth_calculator')
+      .update(updates)
+      .eq('id', id)
+      .select()
+    
+    if (error) throw error
+    return data[0]
+  },
+
+  // Delete growth data
+  async deleteGrowthData(id) {
+    const { error } = await supabase
+      .from('growth_calculator')
+      .delete()
+      .eq('id', id)
+    
+    if (error) throw error
+  },
+
+  // Get growth data by ID
+  async getGrowthDataById(id) {
+    const { data, error } = await supabase
+      .from('growth_calculator')
+      .select('*')
+      .eq('id', id)
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+}
