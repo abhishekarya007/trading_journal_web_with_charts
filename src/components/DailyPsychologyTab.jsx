@@ -9,7 +9,8 @@ import {
   IconMood,
   IconAlertTriangle,
   IconCheck,
-  IconX
+  IconX,
+  IconDownload
 } from './icons';
 
 const DailyPsychologyTab = ({ showToast }) => {
@@ -25,6 +26,7 @@ const DailyPsychologyTab = ({ showToast }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Load entries from database on component mount
   useEffect(() => {
@@ -34,8 +36,20 @@ const DailyPsychologyTab = ({ showToast }) => {
         setEntries(data);
       } catch (error) {
         console.error('Error loading psychology entries:', error);
-        if (showToast) {
-          showToast('Failed to load psychology entries. Please try again.', 'error');
+        
+        // Try to load from localStorage as fallback
+        try {
+          const localData = psychologyService.loadFromLocalStorage();
+          setEntries(localData);
+          if (showToast) {
+            showToast('Loaded entries from local storage. Some features may be limited.', 'warning');
+          }
+        } catch (localError) {
+          console.error('Error loading from localStorage:', localError);
+          setEntries([]);
+          if (showToast) {
+            showToast('Failed to load psychology entries. Please refresh the page.', 'error');
+          }
         }
       }
     };
@@ -180,6 +194,25 @@ const DailyPsychologyTab = ({ showToast }) => {
     setShowAddModal(true);
   };
 
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      await psychologyService.syncWithDatabase();
+      const data = await psychologyService.getAllEntries();
+      setEntries(data);
+      if (showToast) {
+        showToast('Successfully synced with database!', 'success');
+      }
+    } catch (error) {
+      console.error('Error syncing with database:', error);
+      if (showToast) {
+        showToast('Failed to sync with database. Please try again.', 'error');
+      }
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -267,6 +300,17 @@ const DailyPsychologyTab = ({ showToast }) => {
                 )}
               </select>
             </div>
+
+            {/* Sync Button */}
+            <button
+              onClick={handleSync}
+              disabled={isSyncing}
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Sync with database"
+            >
+              <IconDownload className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+              {isSyncing ? 'Syncing...' : 'Sync'}
+            </button>
 
             {/* Add New Entry Button */}
             <button
