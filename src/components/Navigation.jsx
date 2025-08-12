@@ -90,15 +90,6 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       darkBgColor: 'from-blue-900/20 to-cyan-900/20'
     },
     {
-      id: 'rules',
-      label: 'Trading Rules',
-      icon: IconBookOpen,
-      description: 'Essential trading principles',
-      color: 'from-purple-500 to-pink-500',
-      bgColor: 'from-purple-50 to-pink-50',
-      darkBgColor: 'from-purple-900/20 to-pink-900/20'
-    },
-    {
       id: 'growth-calculator',
       label: 'Growth Calculator',
       icon: IconTarget,
@@ -115,6 +106,15 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       color: 'from-indigo-500 to-blue-500',
       bgColor: 'from-indigo-50 to-blue-50',
       darkBgColor: 'from-indigo-900/20 to-blue-900/20'
+    },
+    {
+      id: 'rules',
+      label: 'Trading Rules',
+      icon: IconBookOpen,
+      description: 'Essential trading principles',
+      color: 'from-purple-500 to-pink-500',
+      bgColor: 'from-purple-50 to-pink-50',
+      darkBgColor: 'from-purple-900/20 to-pink-900/20'
     }
   ];
 

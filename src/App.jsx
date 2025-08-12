@@ -1668,10 +1668,6 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
               />
             )}
             
-            {activeTab === 'rules' && (
-              <TradingRulesTab />
-            )}
-            
             {activeTab === 'growth-calculator' && (
               <GrowthCalculatorTab
                 trades={trades}
@@ -1691,6 +1687,10 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 formatCurrency={formatCurrency}
                 showToast={showToast}
               />
+            )}
+            
+            {activeTab === 'rules' && (
+              <TradingRulesTab />
             )}
         </div>
         </main>
