@@ -180,6 +180,7 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
 
   // Handle screenshot preview
   const handleScreenshotClick = (screenshot) => {
+    console.log('Screenshot clicked:', screenshot);
     setSelectedScreenshot(screenshot);
     setShowScreenshotModal(true);
   };
@@ -743,13 +744,12 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Screenshots</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
               {filteredTrades.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan="8" className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
                     <IconFileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>No trades found for the selected month and year</p>
                   </td>
@@ -760,7 +760,11 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
                   const status = netPnL > 0 ? 'WIN' : netPnL < 0 ? 'LOSS' : 'BE';
                   
                   return (
-                    <tr key={trade.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <tr 
+                      key={trade.id} 
+                      className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
+                      onClick={() => handleTradeClick(trade)}
+                    >
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-slate-900 dark:text-white">
                           {new Date(trade.date).toLocaleDateString()}
@@ -812,17 +816,6 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleTradeClick(trade)}
-                            className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                            title="View Details"
-                          >
-                            <IconEye className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   );
                 })
@@ -834,8 +827,8 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
 
       {/* Trade Detail Modal */}
       {showDetailModal && selectedTrade && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowDetailModal(false)}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="p-6 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Trade Details</h3>
@@ -960,9 +953,18 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
                           src={screenshot.thumbnail || screenshot.fullSize}
                           alt={screenshot.name || `Screenshot ${index + 1}`}
                           className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                          onClick={() => handleScreenshotClick(screenshot)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleScreenshotClick(screenshot);
+                          }}
                         />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                        <div 
+                          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleScreenshotClick(screenshot);
+                          }}
+                        >
                           <IconEye className="w-6 h-6 text-white" />
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
@@ -980,7 +982,7 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
 
       {/* Screenshot Preview Modal */}
       {showScreenshotModal && selectedScreenshot && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4" onClick={() => setShowScreenshotModal(false)}>
           <div className="relative max-w-4xl max-h-[90vh]">
             <button
               onClick={() => setShowScreenshotModal(false)}
@@ -992,6 +994,14 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
               src={selectedScreenshot.fullSize || selectedScreenshot.thumbnail}
               alt={selectedScreenshot.name || 'Screenshot'}
               className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+              onError={(e) => {
+                console.log('Image failed to load, trying thumbnail:', e.target.src);
+                // Fallback to thumbnail if fullSize fails
+                if (e.target.src !== selectedScreenshot.thumbnail) {
+                  e.target.src = selectedScreenshot.thumbnail;
+                }
+              }}
             />
             {selectedScreenshot.name && (
               <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-lg">
