@@ -10,7 +10,7 @@ import {
   IconZap,
   IconStar,
   IconClock,
-  IconDollarSign,
+  IconRupee,
   IconPercent,
   IconCheck,
   IconX,
@@ -593,7 +593,7 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-              <IconDollarSign className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <IconRupee className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
               <div className={`text-2xl font-bold ${metrics.netPnL >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>

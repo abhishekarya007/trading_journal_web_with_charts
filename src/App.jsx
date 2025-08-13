@@ -1566,15 +1566,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 </button>
               </div>
 
-              {/* Reset Button */}
-              <button 
-                onClick={() => setShowResetConfirm(true)} 
-                type="button" 
-                className="flex items-center gap-1 lg:gap-2 px-3 lg:px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
-              >
-                <IconReset className="w-4 h-4"/> 
-                <span className="hidden md:inline">Reset</span>
-              </button>
+
             </div>
           </div>
         </header>
