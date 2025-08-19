@@ -143,12 +143,12 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       )}
       
       {/* Navigation Sidebar */}
-      <nav className={`bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-500 flex flex-col z-10 shadow-xl ${
-        // Desktop: Always visible with collapse functionality
-        isCollapsed ? 'hidden lg:flex lg:w-20' : 'hidden lg:flex lg:w-72'
-      } ${
-        // Mobile: Fixed overlay when open
-        mobileOpen ? 'fixed inset-y-0 left-0 w-72' : ''
+      <nav className={`bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-500 flex flex-col shadow-xl ${
+        mobileOpen 
+          ? 'fixed inset-y-0 left-0 w-72 z-50' 
+          : isCollapsed 
+            ? 'hidden lg:flex lg:w-20 z-10' 
+            : 'hidden lg:flex lg:w-72 z-10'
       }`}>
         
         {/* Navigation Header */}
