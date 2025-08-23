@@ -189,60 +189,60 @@ export default function TradingRulesTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white animate-pulse">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white animate-pulse">
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 animate-bounce"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12 animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-white/5 rounded-full -translate-x-8 -translate-y-8 animate-spin"></div>
+        <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 sm:-translate-y-12 lg:-translate-y-16 translate-x-8 sm:translate-x-12 lg:translate-x-16 animate-bounce"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white/10 rounded-full translate-y-6 sm:translate-y-8 lg:translate-y-12 -translate-x-6 sm:-translate-x-8 lg:-translate-x-12 animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/5 rounded-full -translate-x-4 sm:-translate-x-6 lg:-translate-x-8 -translate-y-4 sm:-translate-y-6 lg:-translate-y-8 animate-spin"></div>
         
         <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-              <IconBookOpen className="w-8 h-8" />
+          <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <IconBookOpen className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold mb-2">Trading Rules</h1>
-              <p className="text-indigo-100 text-lg">Your foundation for disciplined trading success</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">Trading Rules</h1>
+              <p className="text-sm sm:text-base lg:text-lg text-indigo-100">Your foundation for disciplined trading success</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center animate-pulse">
-                  <IconBookOpen className="w-5 h-5 text-blue-300" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 rounded-lg flex items-center justify-center animate-pulse">
+                  <IconBookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold animate-pulse">{tradingRules.length}</div>
-                  <div className="text-indigo-100 text-sm">Total Rules</div>
+                  <div className="text-lg sm:text-2xl font-bold animate-pulse">{tradingRules.length}</div>
+                  <div className="text-indigo-100 text-xs sm:text-sm">Total Rules</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center animate-bounce">
-                  <IconAlertTriangle className="w-5 h-5 text-red-300" />
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-500/20 rounded-lg flex items-center justify-center animate-bounce">
+                  <IconAlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-300" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold animate-pulse">
+                  <div className="text-lg sm:text-2xl font-bold animate-pulse">
                     {tradingRules.filter(r => r.priority === 'high').length}
                   </div>
-                  <div className="text-indigo-100 text-sm">High Priority</div>
+                  <div className="text-indigo-100 text-xs sm:text-sm">High Priority</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center animate-spin">
-                  <IconAward className="w-5 h-5 text-green-300" />
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-500/20 rounded-lg flex items-center justify-center animate-spin">
+                  <IconAward className="w-4 h-4 sm:w-5 sm:h-5 text-green-300" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold animate-pulse">{categories.length - 1}</div>
-                  <div className="text-indigo-100 text-sm">Categories</div>
+                  <div className="text-lg sm:text-2xl font-bold animate-pulse">{categories.length - 1}</div>
+                  <div className="text-indigo-100 text-xs sm:text-sm">Categories</div>
                 </div>
               </div>
             </div>
@@ -251,54 +251,54 @@ export default function TradingRulesTab() {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-        <div className="space-y-6">
+      <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <div className="space-y-4 sm:space-y-6">
           {/* Search */}
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                <IconSearch className="w-4 h-4 text-white" />
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                <IconSearch className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Search Rules
               </label>
             </div>
             <div className="relative">
-              <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search by title or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+                className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm"
               />
             </div>
           </div>
 
           {/* Category Filter */}
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <IconFilter className="w-4 h-4 text-white" />
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <IconFilter className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Category
               </label>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {categories.map(category => {
                 const IconComponent = category.icon;
                 return (
                   <button
                     key={category.name}
                     onClick={() => setSelectedCategory(category.name)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
                       selectedCategory === category.name
                         ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
                         : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                     }`}
                   >
-                    <IconComponent className="w-4 h-4" />
+                    <IconComponent className="w-3 h-3 sm:w-4 sm:h-4" />
                     {category.name}
                   </button>
                 );
@@ -308,28 +308,28 @@ export default function TradingRulesTab() {
 
           {/* Priority Filter */}
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
-                <IconStar className="w-4 h-4 text-white" />
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                <IconStar className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Priority
               </label>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {priorities.map(priority => {
                 const IconComponent = priority.icon;
                 return (
                   <button
                     key={priority.name}
                     onClick={() => setSelectedPriority(priority.name)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
                       selectedPriority === priority.name
                         ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
                         : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                     }`}
                   >
-                    <IconComponent className="w-4 h-4" />
+                    <IconComponent className="w-3 h-3 sm:w-4 sm:h-4" />
                     {priority.name}
                   </button>
                 );
@@ -340,13 +340,13 @@ export default function TradingRulesTab() {
       </div>
 
       {/* Rules Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredRules.map((rule, index) => {
           const CategoryIcon = getCategoryIcon(rule.category);
           return (
             <div
               key={rule.id}
-              className={`bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
+              className={`bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
                 hoveredRule === rule.id ? 'ring-2 ring-blue-500' : ''
               }`}
               style={{ animationDelay: `${index * 100}ms` }}
@@ -354,40 +354,40 @@ export default function TradingRulesTab() {
               onMouseLeave={() => setHoveredRule(null)}
             >
               {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 ${getCategoryColor(rule.category)} rounded-xl flex items-center justify-center text-white shadow-lg`}>
-                    <span className="text-lg">{rule.icon}</span>
+              <div className="flex items-start justify-between mb-3 sm:mb-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 ${getCategoryColor(rule.category)} rounded-lg sm:rounded-xl flex items-center justify-center text-white shadow-lg`}>
+                    <span className="text-base sm:text-lg">{rule.icon}</span>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base leading-tight">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-tight">
                       {rule.title}
                     </h3>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white ${getPriorityColor(rule.priority)} shadow-lg`}>
+                  <span className={`inline-block px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-bold text-white ${getPriorityColor(rule.priority)} shadow-lg`}>
                     {rule.priority.toUpperCase()}
                   </span>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-slate-600 dark:text-slate-300 text-sm mb-4 leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 sm:mb-4 leading-relaxed">
                 {rule.description}
               </p>
 
               {/* Tips */}
               {rule.tips && (
-                <div className="mb-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <IconLightbulb className="w-4 h-4 text-yellow-500" />
+                <div className="mb-3 sm:mb-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
+                    <IconLightbulb className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
                     <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Quick Tips:</span>
                   </div>
                   <ul className="space-y-1">
                     {rule.tips.map((tip, tipIndex) => (
-                      <li key={tipIndex} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <li key={tipIndex} className="flex items-start gap-1.5 sm:gap-2 text-xs text-slate-600 dark:text-slate-400">
+                        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-500 rounded-full mt-1 sm:mt-1.5 flex-shrink-0"></div>
                         {tip}
                       </li>
                     ))}
@@ -396,15 +396,15 @@ export default function TradingRulesTab() {
               )}
 
               {/* Footer */}
-              <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2">
-                  <CategoryIcon className="w-4 h-4 text-slate-400" />
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white ${getCategoryColor(rule.category)}`}>
+              <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <CategoryIcon className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                  <span className={`inline-block px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-bold text-white ${getCategoryColor(rule.category)}`}>
                     {rule.category}
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-slate-400">
-                  <IconEye className="w-3 h-3" />
+                  <IconEye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   <span className="text-xs">Rule #{rule.id}</span>
                 </div>
               </div>
@@ -415,12 +415,12 @@ export default function TradingRulesTab() {
 
       {/* No Results */}
       {filteredRules.length === 0 && (
-        <div className="text-center py-16">
-          <div className="w-20 h-20 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl animate-bounce">
+        <div className="text-center py-8 sm:py-16">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 text-2xl sm:text-3xl animate-bounce">
             🔍
           </div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">No rules found</h3>
-          <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
+          <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-3">No rules found</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 sm:mb-6 max-w-md mx-auto">
             Try adjusting your search or filter criteria to find the trading rules you're looking for.
           </p>
           <button
@@ -429,7 +429,7 @@ export default function TradingRulesTab() {
               setSelectedCategory("All");
               setSelectedPriority("All");
             }}
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
           >
             Clear All Filters
           </button>
@@ -437,14 +437,14 @@ export default function TradingRulesTab() {
       )}
 
       {/* Footer Info */}
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-            <IconHeart className="w-6 h-6 text-white" />
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+            <IconHeart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           <div>
-            <h4 className="font-bold text-amber-900 dark:text-amber-200 mb-2 text-lg">Remember</h4>
-            <p className="text-amber-800 dark:text-amber-300 leading-relaxed">
+            <h4 className="font-bold text-amber-900 dark:text-amber-200 mb-2 text-base sm:text-lg">Remember</h4>
+            <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
               These trading rules are your foundation for consistent, disciplined trading. Review them regularly, 
               integrate them into your daily routine, and let them guide your decisions in the market. 
               Success comes from following your rules consistently, not from breaking them occasionally.
