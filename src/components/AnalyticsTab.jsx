@@ -23,6 +23,8 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
   const [activeSection, setActiveSection] = useState('overview');
   const [animateCharts, setAnimateCharts] = useState(false);
   const [hoveredMetric, setHoveredMetric] = useState(null);
+  const [enlargedChart, setEnlargedChart] = useState(null);
+  const [chartData, setChartData] = useState(null);
 
   useEffect(() => {
     setAnimateCharts(true);
@@ -54,6 +56,73 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
     if (rate >= 70) return 'text-emerald-600 dark:text-emerald-400';
     if (rate >= 50) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-red-600 dark:text-red-400';
+  };
+
+  const handleChartClick = (chartType, data, title) => {
+    setEnlargedChart(chartType);
+    setChartData({ data, title });
+  };
+
+  const closeEnlargedChart = () => {
+    setEnlargedChart(null);
+    setChartData(null);
+  };
+
+  // Enhanced chart options for enlarged view
+  const enlargedChartOptions = {
+    ...commonChartOptions,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: {
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        titleFont: { size: 16, weight: 'bold' },
+        bodyFont: { size: 14 },
+        padding: 16,
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y || context.parsed;
+            return `${label}: ₹${formatNumber(value)}`;
+          }
+        }
+      },
+      legend: {
+        labels: { 
+          font: { size: 14, weight: 'bold' },
+          padding: 20
+        }
+      }
+    },
+    scales: {
+      x: { 
+        grid: { 
+          display: true,
+          color: 'rgba(0,0,0,0.1)',
+          lineWidth: 1
+        },
+        ticks: { 
+          font: { size: 12, weight: 'bold' },
+          padding: 8
+        }
+      },
+      y: { 
+        grid: { 
+          display: true,
+          color: 'rgba(0,0,0,0.1)',
+          lineWidth: 1
+        },
+        ticks: { 
+          font: { size: 12, weight: 'bold' },
+          padding: 8,
+          callback: function(value) {
+            return '₹' + formatNumber(value);
+          }
+        }
+      }
+    }
   };
 
   return (
@@ -320,19 +389,29 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
       {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Monthly P&L Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
           <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
-                <IconBarChart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
+                  <IconBarChart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Monthly P&L</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Performance by month</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Monthly P&L</h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Performance by month</p>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="w-6 h-6 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                  <IconActivity className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+                </div>
               </div>
             </div>
           </div>
-          <div className="p-4 sm:p-6 h-48 sm:h-64">
+          <div 
+            className="p-4 sm:p-6 h-48 sm:h-64"
+            onClick={() => handleChartClick('monthly', monthlyChart, 'Monthly P&L Performance')}
+          >
             {allMonthRows.length ? (
               <div className={`transition-all duration-1000 ${animateCharts ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
                 <Bar
@@ -365,19 +444,29 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
         </div>
 
         {/* Equity Curve Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
           <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                <IconTrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                  <IconTrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Equity Curve</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Cumulative performance</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Equity Curve</h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Cumulative performance</p>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="w-6 h-6 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                  <IconActivity className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+                </div>
               </div>
             </div>
           </div>
-          <div className="p-4 sm:p-6 h-48 sm:h-64">
+          <div 
+            className="p-4 sm:p-6 h-48 sm:h-64"
+            onClick={() => handleChartClick('equity', equityChart, 'Equity Curve Analysis')}
+          >
             {totals.trades ? (
               <div className={`transition-all duration-1000 ${animateCharts ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
                 <Line 
@@ -403,19 +492,29 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
         </div>
 
         {/* Drawdown Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
           <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <IconTrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                  <IconTrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Drawdown Analysis</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Risk exposure over time</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Drawdown Analysis</h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Risk exposure over time</p>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="w-6 h-6 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                  <IconActivity className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+                </div>
               </div>
             </div>
           </div>
-          <div className="p-4 sm:p-6 h-48 sm:h-64">
+          <div 
+            className="p-4 sm:p-6 h-48 sm:h-64"
+            onClick={() => handleChartClick('drawdown', drawdownChart, 'Drawdown Analysis')}
+          >
             {totals.trades ? (
               <div className={`transition-all duration-1000 ${animateCharts ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
                 <Line 
@@ -861,6 +960,58 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
           </div>
         </div>
       </div>
+
+      {/* Enlarged Chart Modal */}
+      {enlargedChart && chartData && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={closeEnlargedChart}
+        >
+          <div 
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+                  <IconChartBar className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">{chartData.title}</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{periodLabel}</p>
+                </div>
+              </div>
+              <button 
+                onClick={closeEnlargedChart}
+                className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                <span className="text-slate-600 dark:text-slate-400 text-lg font-bold">×</span>
+              </button>
+            </div>
+            
+            <div className="h-96 sm:h-[500px] lg:h-[600px]">
+              {enlargedChart === 'monthly' && (
+                <Bar
+                  data={chartData.data}
+                  options={enlargedChartOptions}
+                />
+              )}
+              {enlargedChart === 'equity' && (
+                <Line
+                  data={chartData.data}
+                  options={enlargedChartOptions}
+                />
+              )}
+              {enlargedChart === 'drawdown' && (
+                <Line
+                  data={chartData.data}
+                  options={enlargedChartOptions}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
