@@ -499,37 +499,37 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white">
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12 animate-bounce"></div>
+        <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 sm:-translate-y-12 lg:-translate-y-16 translate-x-8 sm:translate-x-12 lg:translate-x-16 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white/10 rounded-full translate-y-6 sm:translate-y-8 lg:translate-y-12 -translate-x-6 sm:-translate-x-8 lg:-translate-x-12 animate-bounce"></div>
         
         <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-              <IconFileText className="w-8 h-8" />
+          <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <IconFileText className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Trading Reports</h1>
-              <p className="text-blue-100">Generate detailed monthly trading reports</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Trading Reports</h1>
+              <p className="text-sm sm:text-base text-blue-100">Generate detailed monthly trading reports</p>
             </div>
           </div>
 
           {/* Filter Controls */}
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-3">
-              <IconFilter className="w-5 h-5 text-blue-200" />
-              <span className="text-blue-200 font-medium">Filter by:</span>
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <IconFilter className="w-4 h-4 sm:w-5 sm:h-5 text-blue-200" />
+              <span className="text-blue-200 font-medium text-sm sm:text-base">Filter by:</span>
             </div>
             
-            <div className="flex items-center gap-3">
-              <label className="text-blue-200 text-sm font-medium">Year:</label>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <label className="text-blue-200 text-xs sm:text-sm font-medium">Year:</label>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-white/50"
+                className="px-2 sm:px-3 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
               >
                 {availableYears.map(year => (
                   <option key={year} value={year} className="text-slate-900">
@@ -539,12 +539,12 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
               </select>
             </div>
             
-            <div className="flex items-center gap-3">
-              <label className="text-blue-200 text-sm font-medium">Month:</label>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <label className="text-blue-200 text-xs sm:text-sm font-medium">Month:</label>
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                className="px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-white/50"
+                className="px-2 sm:px-3 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
               >
                 <option value={1}>January</option>
                 <option value={2}>February</option>
@@ -565,61 +565,61 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-              <IconChartBar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-3 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+              <IconChartBar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white">{metrics.totalTrades}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Total Trades</div>
+              <div className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">{metrics.totalTrades}</div>
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Total Trades</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
-              <IconTrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-3 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+              <IconTrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white">{metrics.winRate.toFixed(1)}%</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Win Rate</div>
+              <div className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">{metrics.winRate.toFixed(1)}%</div>
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Win Rate</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-              <IconRupee className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-3 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+              <IconRupee className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <div className={`text-2xl font-bold ${metrics.netPnL >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+              <div className={`text-lg sm:text-2xl font-bold ${metrics.netPnL >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                 {formatCurrency(metrics.netPnL)}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Net P&L</div>
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Net P&L</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-              <IconImage className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-3 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+              <IconImage className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white">{metrics.totalScreenshots}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Screenshots</div>
+              <div className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">{metrics.totalScreenshots}</div>
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Screenshots</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Generate Report Button */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
-        <div className="flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Generate PDF Report</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -631,16 +631,16 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
           <button
             onClick={generatePDFReport}
             disabled={isGenerating || filteredTrades.length === 0}
-            className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-slate-400 disabled:to-slate-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-slate-400 disabled:to-slate-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isGenerating ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 <span>Generating...</span>
               </>
             ) : (
               <>
-                <IconDownload className="w-5 h-5" />
+                <IconDownload className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Generate PDF Report</span>
               </>
             )}
@@ -649,8 +649,8 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
       </div>
 
       {/* Trades Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+      <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Trades Log</h3>
@@ -662,88 +662,88 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800">
               <tr>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   onClick={() => handleSort('date')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     Date
                     {sortField === 'date' && (
-                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                      sortDirection === 'asc' ? <IconChevronUp className="w-3 h-3 sm:w-4 sm:h-4" /> : <IconChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                     )}
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   onClick={() => handleSort('symbol')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     Symbol
                     {sortField === 'symbol' && (
-                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                      sortDirection === 'asc' ? <IconChevronUp className="w-3 h-3 sm:w-4 sm:h-4" /> : <IconChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                     )}
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   onClick={() => handleSort('type')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     Type
                     {sortField === 'type' && (
-                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                      sortDirection === 'asc' ? <IconChevronUp className="w-3 h-3 sm:w-4 sm:h-4" /> : <IconChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                     )}
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   onClick={() => handleSort('qty')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     Qty
                     {sortField === 'qty' && (
-                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                      sortDirection === 'asc' ? <IconChevronUp className="w-3 h-3 sm:w-4 sm:h-4" /> : <IconChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                     )}
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   onClick={() => handleSort('buy')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     Buy
                     {sortField === 'buy' && (
-                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                      sortDirection === 'asc' ? <IconChevronUp className="w-3 h-3 sm:w-4 sm:h-4" /> : <IconChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                     )}
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   onClick={() => handleSort('sell')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     Sell
                     {sortField === 'sell' && (
-                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                      sortDirection === 'asc' ? <IconChevronUp className="w-3 h-3 sm:w-4 sm:h-4" /> : <IconChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                     )}
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   onClick={() => handleSort('netPnL')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     Net P&L
                     {sortField === 'netPnL' && (
-                      sortDirection === 'asc' ? <IconChevronUp className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4" />
+                      sortDirection === 'asc' ? <IconChevronUp className="w-3 h-3 sm:w-4 sm:h-4" /> : <IconChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                     )}
                   </div>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Screenshots</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Screenshots</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
