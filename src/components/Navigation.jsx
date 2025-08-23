@@ -145,7 +145,7 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       {/* Navigation Sidebar */}
       <nav className={`bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-500 flex flex-col shadow-xl ${
         mobileOpen 
-          ? 'fixed inset-y-0 left-0 w-80 sm:w-72 z-50' 
+          ? `fixed inset-y-0 left-0 z-50 ${isCollapsed ? 'w-20' : 'w-80 sm:w-72'}` 
           : isCollapsed 
             ? 'hidden lg:flex lg:w-20 z-10' 
             : 'hidden lg:flex lg:w-72 z-10'
@@ -159,7 +159,7 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              {!isCollapsed && (
+              {!isCollapsed ? (
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center backdrop-blur-sm">
                     <IconCandle className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -169,6 +169,8 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
                     <p className="text-indigo-100 text-xs sm:text-sm">Your success companion</p>
                   </div>
                 </div>
+              ) : (
+                <div></div>
               )}
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
@@ -197,8 +199,8 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
                   key={item.id}
                   onClick={() => {
                     setActiveTab(item.id);
-                    // Close mobile menu when item is selected
-                    if (setMobileOpen) setMobileOpen(false);
+                    // Close mobile menu when item is selected (only if not collapsed)
+                    if (setMobileOpen && !isCollapsed) setMobileOpen(false);
                   }}
                   onMouseEnter={() => setHoveredItem(item.id)}
                   onMouseLeave={() => setHoveredItem(null)}
