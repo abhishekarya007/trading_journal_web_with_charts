@@ -404,23 +404,23 @@ export default function App() {
     e.preventDefault();
     
     try {
-      // Coerce string inputs to numbers here to avoid the "0 not deletable" UX issue
-      const trade = {
-        ...form,
-        qty: Number(form.qty || 0),
-        buy: Number(form.buy || 0),
-        sell: Number(form.sell || 0),
-        trend: form.trend || 'Up',
-        rule: form.rule || 'Yes',
-        emotion: form.emotion || '',
-        riskReward: form.riskReward || '',
-        screenshots: form.screenshots || [],
-      };
+    // Coerce string inputs to numbers here to avoid the "0 not deletable" UX issue
+    const trade = {
+      ...form,
+      qty: Number(form.qty || 0),
+      buy: Number(form.buy || 0),
+      sell: Number(form.sell || 0),
+      trend: form.trend || 'Up',
+      rule: form.rule || 'Yes',
+      emotion: form.emotion || '',
+      riskReward: form.riskReward || '',
+      screenshots: form.screenshots || [],
+    };
       
-      const computed = calcTradeCharges({
-        qty: trade.qty, buy: trade.buy, sell: trade.sell, type: trade.type
-      });
-      trade.meta = computed;
+    const computed = calcTradeCharges({
+      qty: trade.qty, buy: trade.buy, sell: trade.sell, type: trade.type
+    });
+    trade.meta = computed;
       
       // Check if this is an update or new trade
       const existingTradeIndex = trades.findIndex(p => p.id === trade.id);
@@ -428,10 +428,10 @@ export default function App() {
       if (existingTradeIndex >= 0) {
         // Update existing trade
         await tradeService.updateTrade(trade.id, trade);
-        setTrades(prev => {
-          const copy = [...prev];
+    setTrades(prev => {
+        const copy = [...prev];
           copy[existingTradeIndex] = trade;
-          return copy;
+        return copy;
         });
       } else {
         // Add new trade
@@ -439,24 +439,24 @@ export default function App() {
         setTrades(prev => [newTrade, ...prev]);
       }
       
-      setForm(blankTrade());
-      
-      // Show success toast
-      const toastId = Date.now();
-      setToasts(prev => [...prev, {
-        id: toastId,
-        type: 'success',
-        message: 'Trade saved successfully!',
-        icon: '🎯'
-      }]);
-      
-      // Remove toast after 3 seconds
-      setTimeout(() => {
-        setToasts(prev => prev.filter(toast => toast.id !== toastId));
-      }, 3000);
+    setForm(blankTrade());
+    
+    // Show success toast
+    const toastId = Date.now();
+    setToasts(prev => [...prev, {
+      id: toastId,
+      type: 'success',
+      message: 'Trade saved successfully!',
+      icon: '🎯'
+    }]);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== toastId));
+    }, 3000);
 
-      // Play success sound
-      playSuccessSound();
+    // Play success sound
+    playSuccessSound();
       
     } catch (error) {
       console.error('Error saving trade:', error);
@@ -516,23 +516,23 @@ export default function App() {
     if (deleteTradeId) {
       try {
         await tradeService.deleteTrade(deleteTradeId);
-        setTrades(prev => prev.filter(t => t.id !== deleteTradeId));
-        
+      setTrades(prev => prev.filter(t => t.id !== deleteTradeId));
+      
         // Play delete sound
         playDeleteSound();
         
         // Show success toast
-        const toastId = Date.now();
-        setToasts(prev => [...prev, {
-          id: toastId,
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
           type: 'success',
-          message: 'Trade deleted successfully!',
-          icon: '🗑️'
-        }]);
-        
-        setTimeout(() => {
-          setToasts(prev => prev.filter(toast => toast.id !== toastId));
-        }, 3000);
+        message: 'Trade deleted successfully!',
+        icon: '🗑️'
+      }]);
+      
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 3000);
         
       } catch (error) {
         console.error('Error deleting trade:', error);
@@ -559,10 +559,10 @@ export default function App() {
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try {
-        const data = new Uint8Array(evt.target.result);
-        const wb = XLSX.read(data, {type:"array"});
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(sheet, {defval:""});
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:"array"});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet, {defval:""});
         
         // Show loading toast
         const loadingToastId = Date.now();
@@ -573,26 +573,26 @@ export default function App() {
           icon: '⏳'
         }]);
         
-        const mapped = json.map(r => {
-          const t = {
-            id: Date.now() + Math.random(),
-            date: r.Date || r.date || new Date().toISOString().slice(0,10),
-            symbol: r.Symbol || r.symbol || r.SymbolName || "",
-            type: r["Trade Type"] || r.type || "Long",
-            trend: r.Trend || r.trend || "Up",
-            rule: r["Rule Followed"] || r.rule || "Yes",
-            emotion: r.Emotion || r.emotion || "",
-            riskReward: r["Risk Reward"] || r.riskReward || "",
-            qty: Number(r.Qty || r.qty || 0),
-            buy: Number(r["Buy Price"] || r.buy || 0),
-            sell: Number(r["Sell Price"] || r.sell || 0),
-            setup: r.Setup || r.setup || "",
-            remarks: r.Remarks || r.remarks || "",
-            screenshots: [] // Screenshots can't be imported from Excel, start with empty array
-          };
-          t.meta = calcTradeCharges({ qty: t.qty, buy: t.buy, sell: t.sell, type: t.type});
-          return t;
-        });
+      const mapped = json.map(r => {
+        const t = {
+          id: Date.now() + Math.random(),
+          date: r.Date || r.date || new Date().toISOString().slice(0,10),
+          symbol: r.Symbol || r.symbol || r.SymbolName || "",
+          type: r["Trade Type"] || r.type || "Long",
+          trend: r.Trend || r.trend || "Up",
+          rule: r["Rule Followed"] || r.rule || "Yes",
+          emotion: r.Emotion || r.emotion || "",
+          riskReward: r["Risk Reward"] || r.riskReward || "",
+          qty: Number(r.Qty || r.qty || 0),
+          buy: Number(r["Buy Price"] || r.buy || 0),
+          sell: Number(r["Sell Price"] || r.sell || 0),
+          setup: r.Setup || r.setup || "",
+          remarks: r.Remarks || r.remarks || "",
+          screenshots: [] // Screenshots can't be imported from Excel, start with empty array
+        };
+        t.meta = calcTradeCharges({ qty: t.qty, buy: t.buy, sell: t.sell, type: t.type});
+        return t;
+      });
         
         // Save each trade to database
         const savedTrades = [];
@@ -611,20 +611,20 @@ export default function App() {
         
         // Remove loading toast
         setToasts(prev => prev.filter(toast => toast.id !== loadingToastId));
-        
-        // Show success toast
-        const toastId = Date.now();
-        setToasts(prev => [...prev, {
-          id: toastId,
-          type: 'success',
+      
+      // Show success toast
+      const toastId = Date.now();
+      setToasts(prev => [...prev, {
+        id: toastId,
+        type: 'success',
           message: `Excel import successful! ${savedTrades.length} trades imported.`,
-          icon: '📊'
-        }]);
-        
-        // Remove toast after 4 seconds
-        setTimeout(() => {
-          setToasts(prev => prev.filter(toast => toast.id !== toastId));
-        }, 4000);
+        icon: '📊'
+      }]);
+      
+      // Remove toast after 4 seconds
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== toastId));
+      }, 4000);
         
       } catch (error) {
         // Show error toast
@@ -958,13 +958,13 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
   }, {});
   const monthRows = Object.entries(monthly)
     .map(([m, v]) => ({
-      month: m,
-      total: v.trades,
-      wins: v.wins,
-      losses: v.losses,
-      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
-      totalNet: Math.round(v.net*100)/100,
-      avg: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+    month: m,
+    total: v.trades,
+    wins: v.wins,
+    losses: v.losses,
+    winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+    totalNet: Math.round(v.net*100)/100,
+    avg: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
     }))
     .sort((a, b) => {
       // Sort by month in ascending order (chronological)
@@ -1097,12 +1097,12 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     }, {});
     return Object.entries(setupMap)
       .map(([s, v]) => ({
-        setup: s,
-        trades: v.trades,
-        wins: v.wins,
-        losses: v.losses,
-        winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
-        avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+      setup: s,
+      trades: v.trades,
+      wins: v.wins,
+      losses: v.losses,
+      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+      avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
       }))
       .sort((a, b) => b.trades - a.trades); // Sort by number of trades (descending)
   }, [scopedTrades]);
@@ -1120,12 +1120,12 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     }, {});
     return Object.entries(directionMap)
       .map(([combo, v]) => ({
-        combo,
-        trades: v.trades,
-        wins: v.wins,
-        losses: v.losses,
-        winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
-        avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+      combo,
+      trades: v.trades,
+      wins: v.wins,
+      losses: v.losses,
+      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+      avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
       }))
       .sort((a, b) => b.trades - a.trades); // Sort by number of trades (descending)
   }, [scopedTrades]);
@@ -1143,12 +1143,12 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     }, {});
     return Object.entries(emotionMap)
       .map(([emotion, v]) => ({
-        emotion,
-        trades: v.trades,
-        wins: v.wins,
-        losses: v.losses,
-        winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
-        avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
+      emotion,
+      trades: v.trades,
+      wins: v.wins,
+      losses: v.losses,
+      winRate: v.trades ? Math.round((v.wins/v.trades)*100*100)/100 : 0,
+      avgNet: v.trades ? Math.round((v.net/v.trades)*100)/100 : 0
       }))
       .sort((a, b) => b.trades - a.trades); // Sort by number of trades (descending)
   }, [scopedTrades]);
@@ -1530,7 +1530,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
 
               {/* User Profile */}
               <div className="flex items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl">
-                <button
+              <button 
                   onClick={() => setShowProfile(true)}
                   className="flex items-center gap-2 lg:gap-3 hover:opacity-80 transition-opacity"
                   title="Profile Settings"
@@ -1563,7 +1563,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                   title="Sign out"
                 >
                   <IconLogOut className="w-4 h-4" />
-                </button>
+              </button>
               </div>
 
 
@@ -1818,22 +1818,22 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                     // Clear database
                     await tradeService.clearAllTrades();
                     
-                    localStorage.removeItem(STORAGE_KEY);
-                    setTrades([]);
-                    setShowResetConfirm(false);
-                    
-                    // Show reset toast
-                    const toastId = Date.now();
-                    setToasts(prev => [...prev, {
-                      id: toastId,
-                      type: 'info',
-                      message: 'All data has been reset!',
-                      icon: '🔄'
-                    }]);
-                    
-                    setTimeout(() => {
-                      setToasts(prev => prev.filter(toast => toast.id !== toastId));
-                    }, 3000);
+                  localStorage.removeItem(STORAGE_KEY);
+                  setTrades([]);
+                  setShowResetConfirm(false);
+                  
+                  // Show reset toast
+                  const toastId = Date.now();
+                  setToasts(prev => [...prev, {
+                    id: toastId,
+                    type: 'info',
+                    message: 'All data has been reset!',
+                    icon: '🔄'
+                  }]);
+                  
+                  setTimeout(() => {
+                    setToasts(prev => prev.filter(toast => toast.id !== toastId));
+                  }, 3000);
                   } catch (error) {
                     console.error('Error resetting data:', error);
                     

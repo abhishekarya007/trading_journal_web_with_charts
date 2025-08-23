@@ -324,21 +324,23 @@ const TradesTab = ({
       {/* Action Bar */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          {/* Action Buttons - Stack vertically on mobile, horizontal on larger screens */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <button
               onClick={() => { setForm({ id: Date.now() + Math.random(), date: new Date().toISOString().slice(0,10), symbol: "", type: "Long", qty: "", buy: "", sell: "", trend: "Up", rule: "Yes", emotion: "", riskReward: "", setup: "", remarks: "", screenshots: [] }); setEditingId(null); setShowModal(true); }}
-              className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="btn btn-primary flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 sm:px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
               title="Add New Trade (Ctrl+N)"
             >
               <IconPlus className="w-5 h-5" />
-              <span>Add New Trade</span>
-              <span className="text-xs opacity-75">Ctrl+N</span>
+              <span className="hidden sm:inline">Add New Trade</span>
+              <span className="sm:hidden">Add Trade</span>
+              <span className="text-xs opacity-75 hidden lg:inline">Ctrl+N</span>
             </button>
 
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <button
                 onClick={() => setShowImportMenu(!showImportMenu)}
-                className="btn btn-secondary flex items-center gap-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-200 px-4 py-3 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                className="btn btn-secondary flex items-center justify-center gap-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-200 px-4 py-3 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
               >
                 <IconUpload className="w-4 h-4" />
                 <span>Import</span>
@@ -400,37 +402,35 @@ const TradesTab = ({
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
+          {/* Filters - Stack vertically on mobile, horizontal on larger screens */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3 lg:gap-4">
+            {/* Search Input */}
+            <div className="relative w-full lg:w-auto">
+              <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search trades..."
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                className="pl-10 pr-4 py-2 lg:py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm w-full lg:w-64"
+              />
+            </div>
 
-
-            {/* Search and Status Filters Group */}
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search trades..."
-                  value={filterText}
-                  onChange={(e) => setFilterText(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-sm"
-                />
-              </div>
-
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
-                {['all', 'wins', 'losses'].map(status => (
-                  <button
-                    key={status}
-                    onClick={() => setFilterStatus(status)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
-                      filterStatus === status
-                        ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {status === 'all' ? 'All' : status === 'wins' ? 'Wins' : 'Losses'}
-                  </button>
-                ))}
-              </div>
+            {/* Status Filter Buttons */}
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1 w-full lg:w-auto">
+              {['all', 'wins', 'losses'].map(status => (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`flex-1 lg:flex-none px-3 py-1.5 lg:py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    filterStatus === status
+                      ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  {status === 'all' ? 'All' : status === 'wins' ? 'Wins' : 'Losses'}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -452,63 +452,63 @@ const TradesTab = ({
         </div>
 
         <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('date')}
-                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    className="flex items-center gap-1 sm:gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
                     title={getSortTooltip('date')}
                   >
                     <span>Date</span>
                     {getSortIcon('date')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('symbol')}
-                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    className="flex items-center gap-1 sm:gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
                     title={getSortTooltip('symbol')}
                   >
                     <span>Symbol</span>
                     {getSortIcon('symbol')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('type')}
-                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    className="flex items-center gap-1 sm:gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
                     title={getSortTooltip('type')}
                   >
                     <span>Type</span>
                     {getSortIcon('type')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('qty')}
-                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    className="flex items-center gap-1 sm:gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
                     title={getSortTooltip('qty')}
                   >
                     <span>Qty</span>
                     {getSortIcon('qty')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('net')}
-                    className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
+                    className="flex items-center gap-1 sm:gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
                     title={getSortTooltip('net')}
                   >
                     <span>Performance</span>
                     {getSortIcon('net')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <span>Analysis</span>
                 </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <span>Actions</span>
                 </th>
               </tr>
@@ -521,42 +521,42 @@ const TradesTab = ({
                   style={{ animationDelay: `${index * 50}ms` }}
                   onClick={() => handleTradeDetail(trade)}
                 >
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-500 dark:text-slate-400">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                       {new Date(trade.date).toLocaleDateString()}
                     </div>
                   </td>
                   
-                  <td className="px-6 py-4">
-                    <div className="font-semibold text-slate-900 dark:text-white">{trade.symbol || 'Unknown'}</div>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm">{trade.symbol || 'Unknown'}</div>
                   </td>
                   
-                  <td className="px-6 py-4">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-white ${getTradeTypeColor(trade.type)}`}>
                       {getTradeTypeIcon(trade.type)}
-                      {trade.type}
+                      <span className="hidden sm:inline">{trade.type}</span>
                     </span>
                   </td>
                   
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-500 dark:text-slate-400">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                       {trade.qty}
                     </div>
                   </td>
                   
-                  <td className="px-6 py-4">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
                     <div className="space-y-1">
-                      <div className={`text-lg font-bold ${(trade.meta?.net || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                      <div className={`text-sm sm:text-lg font-bold ${(trade.meta?.net || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                         ₹{formatNumber(trade.meta?.net || 0)}
                       </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                      <div className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
                         Buy: ₹{trade.buy} | Sell: ₹{trade.sell}
                       </div>
                     </div>
                   </td>
                   
-                  <td className="px-6 py-4">
-                    <div className="space-y-2">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="space-y-1 sm:space-y-2">
                       {trade.setup && (
                         <span className="inline-block px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs rounded-lg">
                           {trade.setup}
@@ -570,13 +570,14 @@ const TradesTab = ({
                       {trade.screenshots && trade.screenshots.length > 0 && (
                         <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
                           <IconEye className="w-3 h-3" />
-                          {trade.screenshots.length} screenshot{trade.screenshots.length !== 1 ? 's' : ''}
+                          <span className="hidden sm:inline">{trade.screenshots.length} screenshot{trade.screenshots.length !== 1 ? 's' : ''}</span>
+                          <span className="sm:hidden">{trade.screenshots.length}</span>
                         </div>
                       )}
                     </div>
                   </td>
                   
-                  <td className="px-6 py-4">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-center gap-1">
                       <button
                         onClick={(e) => { e.stopPropagation(); handleEdit(trade); }}
