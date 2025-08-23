@@ -240,80 +240,80 @@ const TradesTab = ({
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-2xl p-8 text-white animate-pulse">
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white animate-pulse">
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 animate-bounce"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12 animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-white/5 rounded-full -translate-x-8 -translate-y-8 animate-spin"></div>
+        <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 sm:-translate-y-12 lg:-translate-y-16 translate-x-8 sm:translate-x-12 lg:translate-x-16 animate-bounce"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white/10 rounded-full translate-y-6 sm:translate-y-8 lg:translate-y-12 -translate-x-6 sm:-translate-x-8 lg:-translate-x-12 animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/5 rounded-full -translate-x-4 sm:-translate-x-6 lg:-translate-x-8 -translate-y-4 sm:-translate-y-6 lg:-translate-y-8 animate-spin"></div>
         
         <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-              <IconChartBar className="w-8 h-8" />
+          <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <IconChartBar className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold mb-2">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">
                 {latestMonthData.month !== null ? `${monthNames[latestMonthData.month]} ${latestMonthData.year} Performance` : 'Overall Performance'}
               </h1>
-              <p className="text-blue-100 text-lg">
+              <p className="text-sm sm:text-base lg:text-lg text-blue-100">
                 {latestMonthData.month !== null ? 'Latest month trading statistics and insights' : 'Complete trading statistics and insights'}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center animate-pulse">
-                  <IconRocket className="w-5 h-5 text-emerald-300" />
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center animate-pulse">
+                  <IconRocket className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-300" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold animate-pulse">{latestMonthData.trades.length}</div>
-                  <div className="text-blue-100 text-sm">Latest Month Trades</div>
+                  <div className="text-lg sm:text-2xl font-bold animate-pulse">{latestMonthData.trades.length}</div>
+                  <div className="text-blue-100 text-xs sm:text-sm">Latest Month Trades</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center animate-bounce">
-                  <IconProfit className="w-5 h-5 text-blue-300" />
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 rounded-lg flex items-center justify-center animate-bounce">
+                  <IconProfit className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold animate-pulse">
+                  <div className="text-lg sm:text-2xl font-bold animate-pulse">
                     {latestMonthData.wins}
                   </div>
-                  <div className="text-blue-100 text-sm">Latest Month Wins</div>
+                  <div className="text-blue-100 text-xs sm:text-sm">Latest Month Wins</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center animate-pulse">
-                  <IconZap className="w-5 h-5 text-purple-300" />
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 rounded-lg flex items-center justify-center animate-pulse">
+                  <IconZap className="w-4 h-4 sm:w-5 sm:h-5 text-purple-300" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold animate-pulse">
+                  <div className="text-lg sm:text-2xl font-bold animate-pulse">
                     {latestMonthData.winRate}%
                   </div>
-                  <div className="text-blue-100 text-sm">Latest Month Win Rate</div>
+                  <div className="text-blue-100 text-xs sm:text-sm">Latest Month Win Rate</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center animate-spin">
-                  <IconRupee className="w-5 h-5 text-orange-300" />
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-500/20 rounded-lg flex items-center justify-center animate-spin">
+                  <IconRupee className="w-4 h-4 sm:w-5 sm:h-5 text-orange-300" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold animate-pulse">
+                  <div className="text-lg sm:text-2xl font-bold animate-pulse">
                     {formatNumber(latestMonthData.pnl)}
                   </div>
-                  <div className="text-blue-100 text-sm">Latest Month P&L</div>
+                  <div className="text-blue-100 text-xs sm:text-sm">Latest Month P&L</div>
                 </div>
               </div>
             </div>
@@ -322,16 +322,16 @@ const TradesTab = ({
       </div>
 
       {/* Action Bar */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+      <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           {/* Action Buttons - Stack vertically on mobile, horizontal on larger screens */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <button
               onClick={() => { setForm({ id: Date.now() + Math.random(), date: new Date().toISOString().slice(0,10), symbol: "", type: "Long", qty: "", buy: "", sell: "", trend: "Up", rule: "Yes", emotion: "", riskReward: "", setup: "", remarks: "", screenshots: [] }); setEditingId(null); setShowModal(true); }}
-              className="btn btn-primary flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 sm:px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
+              className="btn btn-primary flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-sm"
               title="Add New Trade (Ctrl+N)"
             >
-              <IconPlus className="w-5 h-5" />
+              <IconPlus className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="hidden sm:inline">Add New Trade</span>
               <span className="sm:hidden">Add Trade</span>
               <span className="text-xs opacity-75 hidden lg:inline">Ctrl+N</span>
@@ -340,11 +340,11 @@ const TradesTab = ({
             <div className="relative w-full sm:w-auto">
               <button
                 onClick={() => setShowImportMenu(!showImportMenu)}
-                className="btn btn-secondary flex items-center justify-center gap-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-200 px-4 py-3 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
+                className="btn btn-secondary flex items-center justify-center gap-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-200 px-3 sm:px-4 py-2 sm:py-3 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto text-sm"
               >
-                <IconUpload className="w-4 h-4" />
+                <IconUpload className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span>Import</span>
-                <IconTrendingDown className="w-4 h-4" />
+                <IconTrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
 
 
@@ -422,7 +422,7 @@ const TradesTab = ({
                 <button
                   key={status}
                   onClick={() => setFilterStatus(status)}
-                  className={`flex-1 lg:flex-none px-3 py-1.5 lg:py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  className={`flex-1 lg:flex-none px-2 sm:px-3 py-1.5 lg:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 ${
                     filterStatus === status
                       ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -439,12 +439,12 @@ const TradesTab = ({
 
 
       {/* Trade Log */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+      <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Trade Log</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Trade Log</h2>
             {tableTrades.length > 0 && (
-              <span className="text-sm text-slate-600 dark:text-slate-400">
+              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 Showing {startIndex + 1}-{Math.min(endIndex, tableTrades.length)} of {tableTrades.length} trades
               </span>
             )}
