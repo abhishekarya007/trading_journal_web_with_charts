@@ -469,7 +469,40 @@ export default function App() {
   };
 
   const calculateLevel = (experience) => {
-    return Math.floor(experience / 100) + 1;
+    // Progressive XP requirements for levels
+    // Level 1: 0-199 XP (200 XP needed)
+    // Level 2: 200-499 XP (300 XP needed) 
+    // Level 3: 500-899 XP (400 XP needed)
+    // Level 4: 900-1399 XP (500 XP needed)
+    // And so on... each level requires 100 more XP than the previous
+    
+    let level = 1;
+    let currentXP = experience;
+    let xpForNextLevel = 200; // Starting requirement
+    
+    while (currentXP >= xpForNextLevel) {
+      currentXP -= xpForNextLevel;
+      level++;
+      xpForNextLevel += 100; // Each level requires 100 more XP
+    }
+    
+    return level;
+  };
+
+  const getXPForLevel = (level) => {
+    // Calculate total XP needed to reach a specific level
+    let totalXP = 0;
+    for (let i = 1; i < level; i++) {
+      totalXP += 200 + (i - 1) * 100;
+    }
+    return totalXP;
+  };
+
+  const getXPForNextLevel = (experience) => {
+    const currentLevel = calculateLevel(experience);
+    const xpForCurrentLevel = getXPForLevel(currentLevel);
+    const xpForNextLevel = getXPForLevel(currentLevel + 1);
+    return xpForNextLevel - experience;
   };
 
   const calculateDailyChallengeXP = (trades) => {
@@ -533,19 +566,82 @@ export default function App() {
     const wins = trades.filter(t => (t.meta?.net || 0) > 0).length;
     const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
     const psychologyEntries = psychologyData.length;
+    const streaks = calculateStreaks(trades, psychologyData);
+    
+    // Calculate total profit
+    const totalProfit = trades.reduce((sum, t) => sum + (t.meta?.net || 0), 0);
+    const profitableTrades = wins;
+    
+    // Calculate trading days
+    const tradingDays = [...new Set(trades.map(t => new Date(t.date).toDateString()))].length;
 
-    // Trade count achievements
-    if (totalTrades >= 10) achievements.push({ id: 'first_10', name: 'Getting Started', description: 'Complete 10 trades', icon: '🎯', unlocked: true });
-    if (totalTrades >= 50) achievements.push({ id: 'first_50', name: 'Active Trader', description: 'Complete 50 trades', icon: '📈', unlocked: true });
-    if (totalTrades >= 100) achievements.push({ id: 'first_100', name: 'Century Club', description: 'Complete 100 trades', icon: '🏆', unlocked: true });
+    // 🎯 BEGINNER ACHIEVEMENTS (Level 1-3)
+    if (totalTrades >= 10) achievements.push({ id: 'first_10', name: 'First Steps', description: 'Complete 10 trades', icon: '🎯', tier: 'Bronze', unlocked: true });
+    if (totalTrades >= 25) achievements.push({ id: 'first_25', name: 'Getting Started', description: 'Complete 25 trades', icon: '📊', tier: 'Bronze', unlocked: true });
+    if (totalTrades >= 50) achievements.push({ id: 'first_50', name: 'Active Trader', description: 'Complete 50 trades', icon: '📈', tier: 'Bronze', unlocked: true });
 
-    // Win rate achievements
-    if (winRate >= 60) achievements.push({ id: 'win_rate_60', name: 'Consistent Winner', description: 'Maintain 60% win rate', icon: '⭐', unlocked: true });
-    if (winRate >= 70) achievements.push({ id: 'win_rate_70', name: 'Elite Trader', description: 'Maintain 70% win rate', icon: '👑', unlocked: true });
+    // 🔥 INTERMEDIATE ACHIEVEMENTS (Level 4-7)
+    if (totalTrades >= 100) achievements.push({ id: 'first_100', name: 'Century Club', description: 'Complete 100 trades', icon: '💯', tier: 'Silver', unlocked: true });
+    if (totalTrades >= 250) achievements.push({ id: 'first_250', name: 'Trade Warrior', description: 'Complete 250 trades', icon: '⚔️', tier: 'Silver', unlocked: true });
+    if (totalTrades >= 500) achievements.push({ id: 'first_500', name: 'Market Veteran', description: 'Complete 500 trades', icon: '🛡️', tier: 'Silver', unlocked: true });
+    if (totalTrades >= 750) achievements.push({ id: 'first_750', name: 'Trade Master', description: 'Complete 750 trades', icon: '🏅', tier: 'Silver', unlocked: true });
 
-    // Psychology achievements
-    if (psychologyEntries >= 7) achievements.push({ id: 'psychology_week', name: 'Mindful Trader', description: 'Log psychology for 7 days', icon: '🧠', unlocked: true });
-    if (psychologyEntries >= 30) achievements.push({ id: 'psychology_month', name: 'Mental Master', description: 'Log psychology for 30 days', icon: '🎭', unlocked: true });
+    // 👑 ADVANCED ACHIEVEMENTS (Level 8-12)
+    if (totalTrades >= 1000) achievements.push({ id: 'first_1000', name: 'Thousand Trades', description: 'Complete 1,000 trades', icon: '🏆', tier: 'Gold', unlocked: true });
+    if (totalTrades >= 1500) achievements.push({ id: 'first_1500', name: 'Market Legend', description: 'Complete 1,500 trades', icon: '👑', tier: 'Gold', unlocked: true });
+    if (totalTrades >= 2000) achievements.push({ id: 'first_2000', name: 'Trading Titan', description: 'Complete 2,000 trades', icon: '⚡', tier: 'Gold', unlocked: true });
+    if (totalTrades >= 3000) achievements.push({ id: 'first_3000', name: 'Market Immortal', description: 'Complete 3,000 trades', icon: '💎', tier: 'Diamond', unlocked: true });
+    if (totalTrades >= 5000) achievements.push({ id: 'first_5000', name: 'Trading God', description: 'Complete 5,000 trades', icon: '🌟', tier: 'Diamond', unlocked: true });
+
+    // 📈 WIN RATE ACHIEVEMENTS
+    if (totalTrades >= 50 && winRate >= 55) achievements.push({ id: 'win_rate_55', name: 'Consistent Gains', description: 'Maintain 55% win rate (50+ trades)', icon: '📊', tier: 'Bronze', unlocked: true });
+    if (totalTrades >= 100 && winRate >= 60) achievements.push({ id: 'win_rate_60', name: 'Skilled Trader', description: 'Maintain 60% win rate (100+ trades)', icon: '⭐', tier: 'Silver', unlocked: true });
+    if (totalTrades >= 200 && winRate >= 65) achievements.push({ id: 'win_rate_65', name: 'Elite Performance', description: 'Maintain 65% win rate (200+ trades)', icon: '🔥', tier: 'Gold', unlocked: true });
+    if (totalTrades >= 300 && winRate >= 70) achievements.push({ id: 'win_rate_70', name: 'Master Trader', description: 'Maintain 70% win rate (300+ trades)', icon: '👑', tier: 'Gold', unlocked: true });
+    if (totalTrades >= 500 && winRate >= 75) achievements.push({ id: 'win_rate_75', name: 'Trading Genius', description: 'Maintain 75% win rate (500+ trades)', icon: '🧠', tier: 'Diamond', unlocked: true });
+    if (totalTrades >= 1000 && winRate >= 80) achievements.push({ id: 'win_rate_80', name: 'Market Oracle', description: 'Maintain 80% win rate (1000+ trades)', icon: '🔮', tier: 'Diamond', unlocked: true });
+
+    // 🧠 PSYCHOLOGY ACHIEVEMENTS
+    if (psychologyEntries >= 7) achievements.push({ id: 'psychology_week', name: 'Mindful Week', description: 'Log psychology for 7 days', icon: '🧠', tier: 'Bronze', unlocked: true });
+    if (psychologyEntries >= 30) achievements.push({ id: 'psychology_month', name: 'Mental Discipline', description: 'Log psychology for 30 days', icon: '🎭', tier: 'Silver', unlocked: true });
+    if (psychologyEntries >= 60) achievements.push({ id: 'psychology_60', name: 'Mind Master', description: 'Log psychology for 60 days', icon: '🧘', tier: 'Silver', unlocked: true });
+    if (psychologyEntries >= 100) achievements.push({ id: 'psychology_100', name: 'Mental Fortress', description: 'Log psychology for 100 days', icon: '🏰', tier: 'Gold', unlocked: true });
+    if (psychologyEntries >= 180) achievements.push({ id: 'psychology_180', name: 'Psychology Expert', description: 'Log psychology for 180 days', icon: '🎓', tier: 'Gold', unlocked: true });
+    if (psychologyEntries >= 365) achievements.push({ id: 'psychology_365', name: 'Year of Mindfulness', description: 'Log psychology for 365 days', icon: '📅', tier: 'Diamond', unlocked: true });
+
+    // 🔥 STREAK ACHIEVEMENTS
+    if (streaks.bestWinStreak >= 3) achievements.push({ id: 'win_streak_3', name: 'Hot Streak', description: '3 consecutive winning days', icon: '🔥', tier: 'Bronze', unlocked: true });
+    if (streaks.bestWinStreak >= 5) achievements.push({ id: 'win_streak_5', name: 'On Fire', description: '5 consecutive winning days', icon: '🚀', tier: 'Silver', unlocked: true });
+    if (streaks.bestWinStreak >= 10) achievements.push({ id: 'win_streak_10', name: 'Unstoppable', description: '10 consecutive winning days', icon: '💪', tier: 'Gold', unlocked: true });
+    if (streaks.bestWinStreak >= 15) achievements.push({ id: 'win_streak_15', name: 'Legendary Streak', description: '15 consecutive winning days', icon: '⚡', tier: 'Gold', unlocked: true });
+    if (streaks.bestWinStreak >= 25) achievements.push({ id: 'win_streak_25', name: 'Mythical Streak', description: '25 consecutive winning days', icon: '🌟', tier: 'Diamond', unlocked: true });
+    if (streaks.bestWinStreak >= 50) achievements.push({ id: 'win_streak_50', name: 'Immortal Streak', description: '50 consecutive winning days', icon: '💎', tier: 'Diamond', unlocked: true });
+
+    // 📅 TRADING DAYS ACHIEVEMENTS
+    if (tradingDays >= 10) achievements.push({ id: 'trading_days_10', name: 'Market Explorer', description: 'Trade on 10 different days', icon: '🗓️', tier: 'Bronze', unlocked: true });
+    if (tradingDays >= 30) achievements.push({ id: 'trading_days_30', name: 'Monthly Trader', description: 'Trade on 30 different days', icon: '📆', tier: 'Silver', unlocked: true });
+    if (tradingDays >= 60) achievements.push({ id: 'trading_days_60', name: 'Dedicated Trader', description: 'Trade on 60 different days', icon: '⏰', tier: 'Silver', unlocked: true });
+    if (tradingDays >= 100) achievements.push({ id: 'trading_days_100', name: 'Persistent Trader', description: 'Trade on 100 different days', icon: '💪', tier: 'Gold', unlocked: true });
+    if (tradingDays >= 200) achievements.push({ id: 'trading_days_200', name: 'Market Regular', description: 'Trade on 200 different days', icon: '🏛️', tier: 'Gold', unlocked: true });
+    if (tradingDays >= 365) achievements.push({ id: 'trading_days_365', name: 'Year-Round Trader', description: 'Trade on 365 different days', icon: '🌍', tier: 'Diamond', unlocked: true });
+
+    // 💰 PROFIT ACHIEVEMENTS (₹)
+    if (totalProfit >= 1000) achievements.push({ id: 'profit_1k', name: 'First Thousand', description: 'Earn ₹1,000 profit', icon: '💰', tier: 'Bronze', unlocked: true });
+    if (totalProfit >= 5000) achievements.push({ id: 'profit_5k', name: 'Five Grand', description: 'Earn ₹5,000 profit', icon: '💵', tier: 'Silver', unlocked: true });
+    if (totalProfit >= 10000) achievements.push({ id: 'profit_10k', name: 'Ten Thousand', description: 'Earn ₹10,000 profit', icon: '💸', tier: 'Silver', unlocked: true });
+    if (totalProfit >= 25000) achievements.push({ id: 'profit_25k', name: 'Quarter Lakh', description: 'Earn ₹25,000 profit', icon: '🏦', tier: 'Gold', unlocked: true });
+    if (totalProfit >= 50000) achievements.push({ id: 'profit_50k', name: 'Half Lakh', description: 'Earn ₹50,000 profit', icon: '🏆', tier: 'Gold', unlocked: true });
+    if (totalProfit >= 100000) achievements.push({ id: 'profit_100k', name: 'One Lakh', description: 'Earn ₹1,00,000 profit', icon: '👑', tier: 'Diamond', unlocked: true });
+    if (totalProfit >= 500000) achievements.push({ id: 'profit_500k', name: 'Five Lakh', description: 'Earn ₹5,00,000 profit', icon: '💎', tier: 'Diamond', unlocked: true });
+    if (totalProfit >= 1000000) achievements.push({ id: 'profit_1m', name: 'Crorepati', description: 'Earn ₹10,00,000 profit', icon: '🌟', tier: 'Diamond', unlocked: true });
+
+    // 🎯 WINNING TRADES ACHIEVEMENTS
+    if (profitableTrades >= 10) achievements.push({ id: 'wins_10', name: 'Winner', description: '10 profitable trades', icon: '✅', tier: 'Bronze', unlocked: true });
+    if (profitableTrades >= 50) achievements.push({ id: 'wins_50', name: 'Profit Hunter', description: '50 profitable trades', icon: '🎯', tier: 'Silver', unlocked: true });
+    if (profitableTrades >= 100) achievements.push({ id: 'wins_100', name: 'Century Winner', description: '100 profitable trades', icon: '🏅', tier: 'Silver', unlocked: true });
+    if (profitableTrades >= 250) achievements.push({ id: 'wins_250', name: 'Profit Master', description: '250 profitable trades', icon: '🔥', tier: 'Gold', unlocked: true });
+    if (profitableTrades >= 500) achievements.push({ id: 'wins_500', name: 'Profit King', description: '500 profitable trades', icon: '👑', tier: 'Gold', unlocked: true });
+    if (profitableTrades >= 1000) achievements.push({ id: 'wins_1000', name: 'Profit Legend', description: '1,000 profitable trades', icon: '⚡', tier: 'Diamond', unlocked: true });
 
     return achievements;
   };
