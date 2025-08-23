@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Line, Bar } from "react-chartjs-2";
+import zoomPlugin from 'chartjs-plugin-zoom';
+import { Chart } from 'chart.js';
+
+// Register the zoom plugin
+Chart.register(zoomPlugin);
 import { 
   IconTrendingUp, 
   IconTrendingDown, 
@@ -16,7 +21,8 @@ import {
   IconRupee,
   IconPercent,
   IconUsers,
-  IconActivity
+  IconActivity,
+  IconRefresh
 } from './icons';
 
 export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, directionRows, emotionRows, rrAnalysis, monthlyChart, equityChart, drawdownChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth, advancedMetrics }) {
@@ -68,11 +74,16 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
     setChartData(null);
   };
 
-  // Enhanced chart options for enlarged view
+  // Enhanced chart options for enlarged view with zoom and pan
   const enlargedChartOptions = {
     ...commonChartOptions,
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'nearest',
+      axis: 'x',
+      intersect: false
+    },
     plugins: {
       tooltip: {
         backgroundColor: 'rgba(0,0,0,0.9)',
@@ -93,6 +104,29 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
         labels: { 
           font: { size: 14, weight: 'bold' },
           padding: 20
+        }
+      },
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: 'xy',
+          modifierKey: 'ctrl'
+        },
+        zoom: {
+          wheel: {
+            enabled: true,
+            speed: 0.1
+          },
+          pinch: {
+            enabled: true
+          },
+          mode: 'xy',
+          drag: {
+            enabled: true,
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            borderColor: 'rgba(0,0,0,0.3)',
+            borderWidth: 1
+          }
         }
       }
     },
@@ -1000,12 +1034,47 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                   <p className="text-sm text-slate-600 dark:text-slate-400">{periodLabel}</p>
                 </div>
               </div>
-              <button 
-                onClick={closeEnlargedChart}
-                className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-              >
-                <span className="text-slate-600 dark:text-slate-400 text-lg font-bold">×</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Zoom Controls */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                  <button 
+                    onClick={() => {
+                      const chart = Chart.getChart(document.querySelector(`[data-chart-id="${enlargedChart}"]`));
+                      if (chart) chart.zoom(1.1);
+                    }}
+                    className="w-8 h-8 bg-white dark:bg-slate-600 rounded-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors"
+                    title="Zoom In"
+                  >
+                    <span className="text-slate-600 dark:text-slate-400 text-lg font-bold">+</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const chart = Chart.getChart(document.querySelector(`[data-chart-id="${enlargedChart}"]`));
+                      if (chart) chart.zoom(0.9);
+                    }}
+                    className="w-8 h-8 bg-white dark:bg-slate-600 rounded-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors"
+                    title="Zoom Out"
+                  >
+                    <span className="text-slate-600 dark:text-slate-400 text-lg font-bold">−</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const chart = Chart.getChart(document.querySelector(`[data-chart-id="${enlargedChart}"]`));
+                      if (chart) chart.resetZoom();
+                    }}
+                    className="w-8 h-8 bg-white dark:bg-slate-600 rounded-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors"
+                    title="Reset Zoom"
+                  >
+                    <IconRefresh className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                </div>
+                <button 
+                  onClick={closeEnlargedChart}
+                  className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                >
+                  <span className="text-slate-600 dark:text-slate-400 text-lg font-bold">×</span>
+                </button>
+              </div>
             </div>
             
             <div className="h-96 sm:h-[500px] lg:h-[600px]">
@@ -1013,18 +1082,21 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                 <Bar
                   data={chartData.data}
                   options={enlargedChartOptions}
+                  data-chart-id={enlargedChart}
                 />
               )}
               {enlargedChart === 'equity' && (
                 <Line
                   data={chartData.data}
                   options={enlargedChartOptions}
+                  data-chart-id={enlargedChart}
                 />
               )}
               {enlargedChart === 'drawdown' && (
                 <Line
                   data={chartData.data}
                   options={enlargedChartOptions}
+                  data-chart-id={enlargedChart}
                 />
               )}
             </div>
