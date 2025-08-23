@@ -532,21 +532,21 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
   }, [sortedData, selectedMonth]);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white">
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12 animate-bounce"></div>
+        <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 sm:-translate-y-12 lg:-translate-y-16 translate-x-8 sm:translate-x-12 lg:translate-x-16 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white/10 rounded-full translate-y-6 sm:translate-y-8 lg:translate-y-12 -translate-x-6 sm:-translate-x-8 lg:-translate-x-12 animate-bounce"></div>
         
         <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-              <IconChartBar className="w-8 h-8" />
+          <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <IconChartBar className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Growth Calculator</h1>
-              <p className="text-indigo-100">Track your capital growth journey over time</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Growth Calculator</h1>
+              <p className="text-sm sm:text-base text-indigo-100">Track your capital growth journey over time</p>
             </div>
           </div>
 
@@ -555,9 +555,9 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
             <>
               {/* Selected Month Header */}
               <div className="mb-4 text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
-                  <IconCalendar className="w-5 h-5 text-indigo-200" />
-                  <span className="text-lg font-semibold text-white">
+                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+                  <IconCalendar className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-200" />
+                  <span className="text-sm sm:text-lg font-semibold text-white">
                     {summaryMetrics.selectedMonth} {summaryMetrics.selectedYear}
                   </span>
                   {selectedMonth && (
@@ -566,49 +566,49 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                       className="ml-2 p-1 hover:bg-white/20 rounded-lg transition-colors"
                       title="Show earliest month"
                     >
-                      <IconX className="w-4 h-4 text-indigo-200" />
+                      <IconX className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-200" />
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="flex items-center gap-3">
-                    <IconRupee className="w-6 h-6 text-emerald-300" />
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <IconRupee className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-300" />
                     <div>
-                      <div className="text-2xl font-bold">{formatCurrency(summaryMetrics.selectedFinalCapital)}</div>
-                      <div className="text-indigo-100 text-sm">Final Capital</div>
+                      <div className="text-lg sm:text-2xl font-bold">{formatCurrency(summaryMetrics.selectedFinalCapital)}</div>
+                      <div className="text-indigo-100 text-xs sm:text-sm">Final Capital</div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="flex items-center gap-3">
-                    <IconTarget className="w-6 h-6 text-blue-300" />
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <IconTarget className="w-4 h-4 sm:w-6 sm:h-6 text-blue-300" />
                     <div>
-                      <div className="text-2xl font-bold">{formatCurrency(summaryMetrics.selectedCapitalUsed)}</div>
-                      <div className="text-indigo-100 text-sm">Capital Used</div>
+                      <div className="text-lg sm:text-2xl font-bold">{formatCurrency(summaryMetrics.selectedCapitalUsed)}</div>
+                      <div className="text-indigo-100 text-xs sm:text-sm">Capital Used</div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="flex items-center gap-3">
-                    <IconTrendingUp className="w-6 h-6 text-yellow-300" />
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <IconTrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-300" />
                     <div>
-                      <div className="text-2xl font-bold">{formatNumber(summaryMetrics.selectedGrowth)}%</div>
-                      <div className="text-indigo-100 text-sm">Growth</div>
+                      <div className="text-lg sm:text-2xl font-bold">{formatNumber(summaryMetrics.selectedGrowth)}%</div>
+                      <div className="text-indigo-100 text-xs sm:text-sm">Growth</div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="flex items-center gap-3">
-                    <IconTrophy className="w-6 h-6 text-purple-300" />
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <IconTrophy className="w-4 h-4 sm:w-6 sm:h-6 text-purple-300" />
                     <div>
-                      <div className="text-2xl font-bold">{summaryMetrics.selectedTrades}</div>
-                      <div className="text-indigo-100 text-sm">Trades</div>
+                      <div className="text-lg sm:text-2xl font-bold">{summaryMetrics.selectedTrades}</div>
+                      <div className="text-indigo-100 text-xs sm:text-sm">Trades</div>
                     </div>
                   </div>
                 </div>
@@ -620,18 +620,18 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
 
       {/* Growth Data Table */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Growth Data</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">Detailed monthly breakdown</p>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
               {/* Add New Button */}
               <button
                 onClick={() => setShowAddModal(true)}
-                className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                className="btn btn-primary flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
               >
                 <IconPlus className="w-4 h-4" />
                 <span>Add New</span>
@@ -640,7 +640,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
               {/* Refresh Button */}
               <button
                 onClick={handleRefresh}
-                className="btn btn-secondary flex items-center gap-2 bg-gradient-to-r from-blue-100 to-indigo-200 dark:from-blue-700 dark:to-indigo-600 hover:from-blue-200 hover:to-indigo-300 dark:hover:from-blue-600 dark:hover:to-indigo-500 text-blue-700 dark:text-blue-200 px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                className="btn btn-secondary flex items-center justify-center gap-2 bg-gradient-to-r from-blue-100 to-indigo-200 dark:from-blue-700 dark:to-indigo-600 hover:from-blue-200 hover:to-indigo-300 dark:hover:from-blue-600 dark:hover:to-indigo-500 text-blue-700 dark:text-blue-200 px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
                 title="Recalculate metrics based on current trades"
               >
                 <IconRefresh className="w-4 h-4" />
@@ -648,17 +648,17 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
               </button>
 
               {/* Import Button */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <button
                   onClick={() => setShowImportMenu(!showImportMenu)}
-                  className="btn btn-secondary flex items-center gap-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                  className="btn btn-secondary flex items-center justify-center gap-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
                 >
                   <IconUpload className="w-4 h-4" />
                   <span>Import</span>
                 </button>
 
                 {showImportMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
+                  <div className="absolute right-0 sm:right-0 left-0 sm:left-auto mt-2 w-full sm:w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
                     <div className="p-2">
                       <label className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
                         <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
@@ -688,7 +688,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
               {/* Export Button */}
               <button
                 onClick={exportExcel}
-                className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                className="btn btn-primary flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white px-3 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
               >
                 <IconDownload className="w-4 h-4" />
                 <span>Export</span>
@@ -698,10 +698,10 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('date')}
                     className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
@@ -711,7 +711,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                     {getSortIcon('date')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('initialCapital')}
                     className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
@@ -721,7 +721,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                     {getSortIcon('initialCapital')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('pnl')}
                     className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
@@ -731,7 +731,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                     {getSortIcon('pnl')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('finalCapital')}
                     className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
@@ -741,7 +741,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                     {getSortIcon('finalCapital')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('growthPercentage')}
                     className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
@@ -751,7 +751,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                     {getSortIcon('growthPercentage')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('trades')}
                     className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
@@ -761,7 +761,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                     {getSortIcon('trades')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   <button 
                     onClick={() => handleSort('winRate')}
                     className="flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-200 transition-colors duration-200"
@@ -771,7 +771,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                     {getSortIcon('winRate')}
                   </button>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -786,46 +786,46 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                   onClick={() => setSelectedMonth(item.id)}
                   title="Click to view this month's details"
                 >
-                  <td className="px-6 py-4">
-                    <div className="font-semibold text-slate-900 dark:text-white">{item.month} {item.year}</div>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base">{item.month} {item.year}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-slate-600 dark:text-slate-400">{formatCurrency(item.initialCapital)}</div>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">{formatCurrency(item.initialCapital)}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className={`font-semibold ${item.pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className={`font-semibold text-sm sm:text-base ${item.pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                       {formatCurrency(item.pnl)}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="font-semibold text-slate-900 dark:text-white">{formatCurrency(item.finalCapital)}</div>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base">{formatCurrency(item.finalCapital)}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className={`font-semibold ${item.growthPercentage >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className={`font-semibold text-sm sm:text-base ${item.growthPercentage >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                       {formatNumber(item.growthPercentage)}%
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-slate-600 dark:text-slate-400">{item.trades}</div>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">{item.trades}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-slate-600 dark:text-slate-400">{formatNumber(item.winRate)}%</div>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">{formatNumber(item.winRate)}%</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-1 sm:gap-2" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => openEditModal(item)}
-                        className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        className="p-1 sm:p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                         title="Edit"
                       >
-                        <IconEdit className="w-4 h-4" />
+                        <IconEdit className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                       <button
                         onClick={() => showDeleteConfirmation(item.id)}
-                        className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="p-1 sm:p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                         title="Delete"
                       >
-                        <IconTrash className="w-4 h-4" />
+                        <IconTrash className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                     </div>
                   </td>
@@ -837,14 +837,14 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Capital Used Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Capital Used Over Time</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">Track your capital utilization</p>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {sortedData.length > 0 ? (
               <Line 
                 data={chartData.capitalUsed}
@@ -877,12 +877,12 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
         </div>
 
         {/* Monthly Growth Percentage Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Monthly Growth %</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">Percentage growth or loss by month</p>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {sortedData.length > 0 ? (
               <Bar 
                 data={chartData.growthPercentage}
