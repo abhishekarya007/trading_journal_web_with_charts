@@ -113,6 +113,45 @@ function playDeleteSound() {
   }
 }
 
+// Achievement sound function
+function playAchievementSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Create a celebratory achievement sound with multiple frequencies
+    const oscillators = [];
+    const gainNodes = [];
+    
+    // Create 4 oscillators with different frequencies for a celebration sound
+    const frequencies = [523, 659, 784, 1047]; // C, E, G, C (higher octave)
+    
+    frequencies.forEach((freq, index) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Set frequency
+      oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+      
+      // Create a celebration-like envelope
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.05);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start(audioContext.currentTime + (index * 0.1)); // Staggered start
+      oscillator.stop(audioContext.currentTime + 0.5 + (index * 0.1));
+      
+      oscillators.push(oscillator);
+      gainNodes.push(gainNode);
+    });
+    
+  } catch (error) {
+    console.log('Audio not supported:', error);
+  }
+}
+
 function blankTrade() {
   return {
     id: Date.now() + Math.random(),
@@ -172,6 +211,9 @@ export default function App() {
 
   // Psychology data state
   const [psychologyData, setPsychologyData] = useState([]);
+
+  // Flag to track if achievements have been initialized (to prevent notifications on page load)
+  const [achievementsInitialized, setAchievementsInitialized] = useState(false);
 
   // Gamification state
   const [gamificationData, setGamificationData] = useState({
@@ -255,6 +297,8 @@ export default function App() {
           await loadUserProfile(currentUser.id);
           await loadGrowthData();
           await loadPsychologyData();
+          // Set achievements as initialized after initial data load
+          setAchievementsInitialized(true);
         } else {
           console.log('No authenticated user found');
         }
@@ -266,12 +310,15 @@ export default function App() {
           
           if (event === 'SIGNED_IN') {
             // Reload trades, profile, and growth data when user signs in
+            setAchievementsInitialized(false); // Reset flag for new user
             loadTrades();
             if (session?.user) {
               loadUserProfile(session.user.id);
             }
             loadGrowthData();
             loadPsychologyData();
+            // Set achievements as initialized after sign-in data load
+            setTimeout(() => setAchievementsInitialized(true), 1000);
           } else if (event === 'SIGNED_OUT') {
             // Clear trades, profile, and growth data when user signs out
             setTrades([]);
@@ -279,6 +326,7 @@ export default function App() {
             setGrowthData([]);
             setGrowthDataLoaded(false);
             setPsychologyData([]);
+            setAchievementsInitialized(false); // Reset flag on sign out
             // Clear psychology service cache
             psychologyService.clearCache();
           }
@@ -312,7 +360,7 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showLogoutConfirm, showProfile]);
 
-  // Update gamification when trades or psychology data changes
+  // Update gamification when trades or psychology data changes (but not during initial load)
   useEffect(() => {
     if (user) {
       updateGamification();
@@ -729,19 +777,56 @@ export default function App() {
     // Calculate streaks properly
     const streaks = calculateStreaks(trades, psychologyData);
 
-    setGamificationData(prev => ({
-      ...prev,
-      level,
-      experience,
-      achievements,
-      dailyChallenges,
-      streaks,
-      totalTrades: trades.length,
-      totalWins: trades.filter(t => (t.meta?.net || 0) > 0).length,
-      totalLosses: trades.filter(t => (t.meta?.net || 0) <= 0).length,
-      bestWinStreak: streaks.bestWinStreak,
-      lastActiveDate: new Date().toDateString()
-    }));
+    setGamificationData(prev => {
+      // Check for new achievements (only after initial load)
+      const newAchievements = achievementsInitialized ? achievements.filter(newAchievement => 
+        !prev.achievements.some(oldAchievement => oldAchievement.id === newAchievement.id)
+      ) : [];
+
+      // Show notifications for new achievements (only after initial load)
+      if (achievementsInitialized) {
+        newAchievements.forEach(achievement => {
+          showAchievementUnlocked(achievement);
+        });
+      }
+
+      return {
+        ...prev,
+        level,
+        experience,
+        achievements,
+        dailyChallenges,
+        streaks,
+        totalTrades: trades.length,
+        totalWins: trades.filter(t => (t.meta?.net || 0) > 0).length,
+        totalLosses: trades.filter(t => (t.meta?.net || 0) <= 0).length,
+        bestWinStreak: streaks.bestWinStreak,
+        lastActiveDate: new Date().toDateString()
+      };
+    });
+  };
+
+  const showAchievementUnlocked = (achievement) => {
+    const toastId = Date.now() + Math.random();
+    
+    // Play achievement sound
+    playAchievementSound();
+    
+    // Show achievement notification
+    setToasts(prev => [...prev, {
+      id: toastId,
+      type: 'achievement',
+      message: `Achievement Unlocked: ${achievement.name}`,
+      description: achievement.description,
+      icon: achievement.icon,
+      tier: achievement.tier,
+      duration: 6000 // Show for 6 seconds
+    }]);
+    
+    // Remove toast after duration
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== toastId));
+    }, 6000);
   };
 
   const calculateStreaks = (trades, psychologyData) => {
@@ -2464,31 +2549,40 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
           <div
             key={toast.id}
             className={`flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md transform transition-all duration-300 max-w-sm ${
-              toast.type === 'success' 
+              toast.type === 'achievement'
+                ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white border-yellow-400 shadow-yellow-500/25 animate-pulse' 
+                : toast.type === 'success' 
                 ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-400 shadow-emerald-500/25' 
                 : toast.type === 'error'
                 ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-red-400 shadow-red-500/25'
                 : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-400 shadow-blue-500/25'
             }`}
             style={{
-              animation: 'slideInRight 0.4s ease-out'
+              animation: toast.type === 'achievement' ? 'slideInRight 0.6s ease-out, achievementUnlock 0.8s ease-out' : 'slideInRight 0.4s ease-out'
             }}
           >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              toast.type === 'success' 
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              toast.type === 'achievement'
+                ? 'bg-white/20 animate-bounce' 
+                : toast.type === 'success' 
                 ? 'bg-white/20' 
                 : toast.type === 'error'
                 ? 'bg-white/20'
                 : 'bg-white/20'
             }`}>
-              <span className="text-xl">{toast.icon}</span>
+              <span className="text-2xl">{toast.icon}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <span className="font-semibold text-sm leading-tight">{toast.message}</span>
+              <span className="font-bold text-sm leading-tight">{toast.message}</span>
+              {toast.type === 'achievement' && toast.description && (
+                <p className="text-xs opacity-90 mt-1 leading-tight">{toast.description}</p>
+              )}
               <div className="mt-2 w-full bg-white/20 rounded-full h-1">
                 <div 
                   className={`h-1 rounded-full transition-all duration-300 ${
-                    toast.type === 'success' 
+                    toast.type === 'achievement'
+                      ? 'bg-gradient-to-r from-yellow-300 to-orange-300'
+                      : toast.type === 'success' 
                       ? 'bg-white' 
                       : toast.type === 'error'
                       ? 'bg-white'
@@ -2496,7 +2590,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                   }`}
                   style={{
                     width: '100%',
-                    animation: 'shrink 4s linear forwards'
+                    animation: toast.type === 'achievement' ? 'shrink 6s linear forwards' : 'shrink 4s linear forwards'
                   }}
                 ></div>
               </div>
