@@ -630,31 +630,8 @@ export default function App() {
     const experience = calculateExperience(trades);
     const level = calculateLevel(experience);
 
-    // Calculate streaks
-    const today = new Date().toDateString();
-    const lastActive = gamificationData.lastActiveDate;
-    const isNewDay = lastActive !== today;
-
-    let streaks = { ...gamificationData.streaks };
-    if (isNewDay) {
-      // Check if user traded yesterday
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayTrades = trades.filter(t => new Date(t.date).toDateString() === yesterday.toDateString());
-      
-      if (yesterdayTrades.length > 0) {
-        streaks.tradingDays++;
-        const yesterdayWins = yesterdayTrades.filter(t => (t.meta?.net || 0) > 0).length;
-        if (yesterdayWins > 0) {
-          streaks.winningDays++;
-        } else {
-          streaks.winningDays = 0;
-        }
-      } else {
-        streaks.tradingDays = 0;
-        streaks.winningDays = 0;
-      }
-    }
+    // Calculate streaks properly
+    const streaks = calculateStreaks(trades, psychologyData);
 
     setGamificationData(prev => ({
       ...prev,
@@ -666,8 +643,127 @@ export default function App() {
       totalTrades: trades.length,
       totalWins: trades.filter(t => (t.meta?.net || 0) > 0).length,
       totalLosses: trades.filter(t => (t.meta?.net || 0) <= 0).length,
-      lastActiveDate: today
+      bestWinStreak: streaks.bestWinStreak,
+      lastActiveDate: new Date().toDateString()
     }));
+  };
+
+  const calculateStreaks = (trades, psychologyData) => {
+    if (trades.length === 0) {
+      return {
+        winningDays: 0,
+        tradingDays: 0,
+        psychologyEntries: 0,
+        bestWinStreak: 0
+      };
+    }
+
+    // Group trades by date
+    const tradesByDate = {};
+    trades.forEach(trade => {
+      const date = new Date(trade.date).toDateString();
+      if (!tradesByDate[date]) {
+        tradesByDate[date] = [];
+      }
+      tradesByDate[date].push(trade);
+    });
+
+    // Group psychology entries by date
+    const psychologyByDate = {};
+    psychologyData.forEach(entry => {
+      const date = new Date(entry.date).toDateString();
+      psychologyByDate[date] = true;
+    });
+
+    // Sort dates
+    const sortedDates = Object.keys(tradesByDate).sort((a, b) => new Date(a) - new Date(b));
+    
+    let currentTradingStreak = 0;
+    let currentWinningStreak = 0;
+    let currentPsychologyStreak = 0;
+    let bestWinStreak = 0;
+    let bestTradingStreak = 0;
+    let bestPsychologyStreak = 0;
+
+    // Calculate current streaks (from most recent date backwards)
+    const today = new Date().toDateString();
+    let checkDate = new Date();
+    
+    // Check current streaks (consecutive days from today backwards)
+    while (true) {
+      const dateString = checkDate.toDateString();
+      
+      // Check trading streak
+      if (tradesByDate[dateString] && tradesByDate[dateString].length > 0) {
+        currentTradingStreak++;
+        
+        // Check winning streak
+        const dayWins = tradesByDate[dateString].filter(t => (t.meta?.net || 0) > 0).length;
+        if (dayWins > 0) {
+          currentWinningStreak++;
+        } else {
+          currentWinningStreak = 0;
+        }
+      } else {
+        break; // Streak broken
+      }
+      
+      // Check psychology streak
+      if (psychologyByDate[dateString]) {
+        currentPsychologyStreak++;
+      } else {
+        currentPsychologyStreak = 0;
+      }
+      
+      // Move to previous day
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+
+    // Calculate best streaks (from all historical data)
+    let tempWinningStreak = 0;
+    let tempTradingStreak = 0;
+    let tempPsychologyStreak = 0;
+
+    for (const dateString of sortedDates) {
+      // Trading streak
+      if (tradesByDate[dateString] && tradesByDate[dateString].length > 0) {
+        tempTradingStreak++;
+        bestTradingStreak = Math.max(bestTradingStreak, tempTradingStreak);
+        
+        // Winning streak
+        const dayWins = tradesByDate[dateString].filter(t => (t.meta?.net || 0) > 0).length;
+        if (dayWins > 0) {
+          tempWinningStreak++;
+          bestWinStreak = Math.max(bestWinStreak, tempWinningStreak);
+        } else {
+          tempWinningStreak = 0;
+        }
+      } else {
+        tempTradingStreak = 0;
+        tempWinningStreak = 0;
+      }
+    }
+
+    // Calculate psychology streak from all dates
+    const allDates = [...new Set([...Object.keys(tradesByDate), ...Object.keys(psychologyByDate)])].sort((a, b) => new Date(a) - new Date(b));
+    
+    for (const dateString of allDates) {
+      if (psychologyByDate[dateString]) {
+        tempPsychologyStreak++;
+        bestPsychologyStreak = Math.max(bestPsychologyStreak, tempPsychologyStreak);
+      } else {
+        tempPsychologyStreak = 0;
+      }
+    }
+
+    return {
+      winningDays: currentWinningStreak,
+      tradingDays: currentTradingStreak,
+      psychologyEntries: currentPsychologyStreak,
+      bestWinStreak: bestWinStreak,
+      bestTradingStreak: bestTradingStreak,
+      bestPsychologyStreak: bestPsychologyStreak
+    };
   };
 
 
