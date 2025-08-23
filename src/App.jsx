@@ -1571,44 +1571,44 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
           </div>
         </header>
         {activeTab === 'analytics' && (
-          <div className="container-wrap pt-6">
-            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 mb-6 shadow-lg">
+          <div className="container-wrap pt-4 sm:pt-6">
+            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-pink-500/5"></div>
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full -translate-y-12 translate-x-12 animate-pulse"></div>
               <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full translate-y-10 -translate-x-10 animate-bounce"></div>
               
-              <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-                      <IconCandle className="w-4 h-4 text-white" />
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+                      <IconCandle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                     </div>
-                    <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                    <div className="text-xs sm:text-sm font-medium text-indigo-600 dark:text-indigo-400">
                       Welcome back, {userProfile?.display_name || user.email?.split('@')[0] || 'Trader'}!
                     </div>
                   </div>
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Your trading performance at a glance</div>
-                  <p className="text-slate-600 dark:text-slate-400">Track your progress and optimize your strategy</p>
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2">Your trading performance at a glance</div>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Track your progress and optimize your strategy</p>
                 </div>
                 
-                <div className="flex items-center gap-4">
-                  <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Win Rate</span>
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
+                  <div className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 bg-white dark:bg-slate-700 rounded-lg sm:rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Win Rate</span>
                     </div>
-                    <div className="text-xl font-bold text-slate-900 dark:text-white">{totals.winRate}%</div>
+                    <div className="text-sm sm:text-lg lg:text-xl font-bold text-slate-900 dark:text-white">{totals.winRate}%</div>
                   </div>
                   
-                  <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Net</span>
+                  <div className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 bg-white dark:bg-slate-700 rounded-lg sm:rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Total Net</span>
                     </div>
-                    <div className={`text-xl font-bold ${totals.net>=0?'text-emerald-600 dark:text-emerald-400':'text-red-600 dark:text-red-400'}`}>
+                    <div className={`text-sm sm:text-lg lg:text-xl font-bold ${totals.net>=0?'text-emerald-600 dark:text-emerald-400':'text-red-600 dark:text-red-400'}`}>
                       ₹{formatNumber(totals.net)}
                     </div>
-                    <div className="mt-2 h-8">
+                    <div className="mt-1 sm:mt-2 h-6 sm:h-8">
                       <Line 
                         data={{ 
                           labels: spark.map((_,i)=>i+1), 
@@ -1631,12 +1631,12 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                     </div>
                   </div>
                   
-                  <div className="px-4 py-3 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Trades</span>
+                  <div className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 bg-white dark:bg-slate-700 rounded-lg sm:rounded-xl border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Total Trades</span>
                     </div>
-                    <div className="text-xl font-bold text-slate-900 dark:text-white">{totals.trades}</div>
+                    <div className="text-sm sm:text-lg lg:text-xl font-bold text-slate-900 dark:text-white">{totals.trades}</div>
                   </div>
                 </div>
               </div>
