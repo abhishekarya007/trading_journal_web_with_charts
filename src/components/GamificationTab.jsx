@@ -312,25 +312,65 @@ const GamificationTab = ({ gamificationData, formatNumber }) => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {gamificationData.dailyChallenges.map(challenge => (
-              <div key={challenge.id} className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-4 border border-indigo-200 dark:border-indigo-700">
+              <div key={challenge.id} className={`bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-4 border border-indigo-200 dark:border-indigo-700 ${
+                challenge.disabled ? 'opacity-50' : ''
+              }`}>
                 <div className="flex items-start gap-3">
                   <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-2xl">
                     {challenge.icon}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-900 dark:text-white mb-1">{challenge.name}</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">{challenge.description}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{challenge.description}</p>
+                    
+                    {/* Progress Bar */}
+                    {challenge.target > 1 && (
+                      <div className="mb-3">
+                        <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
+                          <span>Progress</span>
+                          <span>
+                            {challenge.showAsPercentage 
+                              ? `${Math.round(challenge.progress)}%`
+                              : `${challenge.progress}/${challenge.target}`
+                            }
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all duration-500 ${
+                              challenge.completed 
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                                : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+                            }`}
+                            style={{ 
+                              width: `${Math.min(
+                                challenge.showAsPercentage 
+                                  ? challenge.progress 
+                                  : (challenge.progress / challenge.target) * 100, 
+                                100
+                              )}%` 
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <IconStar className="w-4 h-4 text-yellow-500" />
                         <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{challenge.xp} XP</span>
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        challenge.completed 
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                          : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
-                      }`}>
-                        {challenge.completed ? 'Completed' : 'In Progress'}
+                      <div className="flex items-center gap-2">
+
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          challenge.completed 
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                            : challenge.disabled
+                            ? 'bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
+                            : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                        }`}>
+                          {challenge.completed ? 'Completed' : challenge.disabled ? 'Locked' : 'In Progress'}
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -13,7 +13,7 @@ import {
   IconDownload
 } from './icons';
 
-const DailyPsychologyTab = ({ showToast, playSuccessSound, playDeleteSound }) => {
+const DailyPsychologyTab = ({ showToast, playSuccessSound, playDeleteSound, onDataChange }) => {
   const [entries, setEntries] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [psychology, setPsychology] = useState('');
@@ -103,6 +103,10 @@ const DailyPsychologyTab = ({ showToast, playSuccessSound, playDeleteSound }) =>
         if (playSuccessSound) {
           playSuccessSound();
         }
+        // Update gamification data
+        if (onDataChange) {
+          onDataChange();
+        }
       } catch (error) {
         console.error('Error updating entry:', error);
         if (showToast) {
@@ -124,6 +128,10 @@ const DailyPsychologyTab = ({ showToast, playSuccessSound, playDeleteSound }) =>
         }
         if (playSuccessSound) {
           playSuccessSound();
+        }
+        // Update gamification data
+        if (onDataChange) {
+          onDataChange();
         }
       } catch (error) {
         console.error('Error adding entry:', error);
@@ -182,6 +190,10 @@ const DailyPsychologyTab = ({ showToast, playSuccessSound, playDeleteSound }) =>
       }
       if (playDeleteSound) {
         playDeleteSound();
+      }
+      // Update gamification data
+      if (onDataChange) {
+        onDataChange();
       }
     } catch (error) {
       console.error('Error deleting entry:', error);

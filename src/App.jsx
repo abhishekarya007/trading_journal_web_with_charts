@@ -376,7 +376,7 @@ export default function App() {
   const loadPsychologyData = async () => {
     try {
       console.log('Loading psychology data from database...');
-      const data = await psychologyService.loadPsychologyData();
+      const data = await psychologyService.getAllEntries();
       console.log(`Loaded ${data.length} psychology records from database`);
       setPsychologyData(data);
     } catch (error) {
@@ -450,6 +450,8 @@ export default function App() {
   // Gamification Functions
   const calculateExperience = (trades) => {
     let exp = 0;
+    
+    // XP from trades
     trades.forEach(trade => {
       const net = trade.meta?.net || 0;
       if (net > 0) {
@@ -458,11 +460,71 @@ export default function App() {
         exp += 5; // 5 XP for any trade (learning experience)
       }
     });
+    
+    // XP from daily challenges (calculated from trades data)
+    const challengeXP = calculateDailyChallengeXP(trades);
+    exp += challengeXP;
+    
     return exp;
   };
 
   const calculateLevel = (experience) => {
     return Math.floor(experience / 100) + 1;
+  };
+
+  const calculateDailyChallengeXP = (trades) => {
+    let totalChallengeXP = 0;
+    
+    // Group trades by date
+    const tradesByDate = {};
+    trades.forEach(trade => {
+      const date = new Date(trade.date).toDateString();
+      if (!tradesByDate[date]) {
+        tradesByDate[date] = [];
+      }
+      tradesByDate[date].push(trade);
+    });
+    
+    // Calculate XP for each day's challenges
+    Object.entries(tradesByDate).forEach(([date, dayTrades]) => {
+      let dayXP = 0;
+      
+      // Active Trader: +20 XP (if any trades on that day)
+      if (dayTrades.length > 0) {
+        dayXP += 20;
+      }
+      
+      // Profitable Day: +30 XP (if any winning trades on that day)
+      const wins = dayTrades.filter(t => (t.meta?.net || 0) > 0).length;
+      if (wins > 0) {
+        dayXP += 30;
+      }
+      
+      // Patient Trader: +40 XP (if 3 or fewer trades on that day)
+      if (dayTrades.length <= 3 && dayTrades.length > 0) {
+        dayXP += 40;
+      }
+      
+      // Perfect Day: +50 XP (if all trades were profitable that day)
+      if (dayTrades.length > 0 && wins === dayTrades.length) {
+        dayXP += 50;
+      }
+      
+      // Volume Trader: +25 XP (if 5+ trades in a day)
+      if (dayTrades.length >= 5) {
+        dayXP += 25;
+      }
+      
+      // Rule Follower: +35 XP (if all trades followed rules that day)
+      const ruleFollowedTrades = dayTrades.filter(t => t.rule === 'Yes').length;
+      if (dayTrades.length > 0 && ruleFollowedTrades === dayTrades.length) {
+        dayXP += 35;
+      }
+      
+      totalChallengeXP += dayXP;
+    });
+    
+    return totalChallengeXP;
   };
 
   const getAchievements = (trades, psychologyData) => {
@@ -489,21 +551,84 @@ export default function App() {
   };
 
   const getDailyChallenges = () => {
+    const today = new Date().toDateString();
+    
+    // Get today's trades
+    const todayTrades = trades.filter(t => new Date(t.date).toDateString() === today);
+    const todayWins = todayTrades.filter(t => (t.meta?.net || 0) > 0).length;
+    const todayRuleFollowed = todayTrades.filter(t => t.rule === 'Yes').length;
+    
     const challenges = [
-      { id: 'trade_today', name: 'Trade Today', description: 'Make at least one trade today', icon: '📊', xp: 20, completed: false },
-      { id: 'win_today', name: 'Win Today', description: 'Have a winning trade today', icon: '🎯', xp: 30, completed: false },
-      { id: 'psychology_today', name: 'Mind Check', description: 'Log your psychology today', icon: '🧠', xp: 15, completed: false },
-      { id: 'review_trades', name: 'Review Time', description: 'Review your last 5 trades', icon: '📝', xp: 25, completed: false },
-      { id: 'no_overtrading', name: 'Patience', description: 'Make no more than 3 trades today', icon: '⏰', xp: 40, completed: false }
+      { 
+        id: 'active_trader', 
+        name: 'Active Trader', 
+        description: 'Make at least one trade today', 
+        icon: '📊', 
+        xp: 20, 
+        completed: todayTrades.length > 0,
+        progress: todayTrades.length > 0 ? 1 : 0,
+        target: 1
+      },
+      { 
+        id: 'profitable_day', 
+        name: 'Profitable Day', 
+        description: 'Have a winning trade today', 
+        icon: '💰', 
+        xp: 30, 
+        completed: todayWins > 0,
+        progress: todayWins > 0 ? 1 : 0,
+        target: 1
+      },
+      { 
+        id: 'patient_trader', 
+        name: 'Patient Trader', 
+        description: 'Make no more than 3 trades today', 
+        icon: '⏰', 
+        xp: 40, 
+        completed: todayTrades.length <= 3 && todayTrades.length > 0,
+        progress: todayTrades.length <= 3 && todayTrades.length > 0 ? 1 : 0,
+        target: 1
+      },
+      { 
+        id: 'perfect_day', 
+        name: 'Perfect Day', 
+        description: 'All trades profitable today', 
+        icon: '🌟', 
+        xp: 50, 
+        completed: todayTrades.length > 0 && todayWins === todayTrades.length,
+        progress: todayTrades.length > 0 && todayWins === todayTrades.length ? 1 : 0,
+        target: 1
+      },
+      { 
+        id: 'volume_trader', 
+        name: 'Volume Trader', 
+        description: 'Make 5 or more trades today', 
+        icon: '🔥', 
+        xp: 25, 
+        completed: todayTrades.length >= 5,
+        progress: Math.min(todayTrades.length, 5),
+        target: 5
+      },
+      { 
+        id: 'rule_follower', 
+        name: 'Rule Follower', 
+        description: 'Follow trading rules in all trades today', 
+        icon: '📋', 
+        xp: 35, 
+        completed: todayTrades.length > 0 && todayRuleFollowed === todayTrades.length,
+        progress: todayTrades.length > 0 ? (todayRuleFollowed / todayTrades.length) * 100 : 0,
+        target: 100,
+        showAsPercentage: true
+      }
     ];
     return challenges;
   };
 
   const updateGamification = () => {
-    const experience = calculateExperience(trades);
-    const level = calculateLevel(experience);
     const achievements = getAchievements(trades, psychologyData);
     const dailyChallenges = getDailyChallenges();
+    const experience = calculateExperience(trades);
+    const level = calculateLevel(experience);
 
     // Calculate streaks
     const today = new Date().toDateString();
@@ -544,6 +669,16 @@ export default function App() {
       lastActiveDate: today
     }));
   };
+
+
+
+  // Function to refresh psychology data and update gamification
+  const refreshPsychologyData = async () => {
+    await loadPsychologyData();
+    updateGamification();
+  };
+
+
 
   async function addOrUpdateTrade(e) {
     e.preventDefault();
@@ -2113,6 +2248,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 showToast={showToast} 
                 playSuccessSound={playSuccessSound}
                 playDeleteSound={playDeleteSound}
+                onDataChange={refreshPsychologyData}
               />
             )}
             
