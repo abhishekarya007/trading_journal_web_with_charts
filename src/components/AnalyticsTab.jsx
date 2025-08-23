@@ -389,7 +389,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
       {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Monthly P&L Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-xl transition-all duration-300 group">
           <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-3">
@@ -398,26 +398,42 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Monthly P&L</h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Performance by month</p>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Performance by month • Click bars to filter</p>
                 </div>
               </div>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="w-6 h-6 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
-                  <IconActivity className="w-3 h-3 text-slate-600 dark:text-slate-400" />
-                </div>
-              </div>
+              <button 
+                onClick={() => handleChartClick('monthly', monthlyChart, 'Monthly P&L Performance')}
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600"
+                title="Enlarge chart"
+              >
+                <IconActivity className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+              </button>
             </div>
           </div>
-          <div 
-            className="p-4 sm:p-6 h-48 sm:h-64"
-            onClick={() => handleChartClick('monthly', monthlyChart, 'Monthly P&L Performance')}
-          >
+          <div className="p-4 sm:p-6 h-48 sm:h-64">
             {allMonthRows.length ? (
               <div className={`transition-all duration-1000 ${animateCharts ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
                 <Bar
                   data={monthlyChart}
                   options={{
-                    ...commonChartOptions,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      title: { display: false },
+                    },
+                    interaction: {
+                      mode: 'nearest',
+                      axis: 'x',
+                      intersect: false
+                    },
+                    elements: {
+                      bar: {
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                      }
+                    },
                     scales: {
                       x: { grid: { display: false } },
                       y: { grid: { color: '#e5e7eb' } }
@@ -428,6 +444,9 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                       const idx = el.index;
                       const label = chart.data.labels?.[idx];
                       if (label) onSelectMonth(label);
+                    },
+                    onHover: (evt, elements, chart) => {
+                      evt.native.target.style.cursor = elements.length ? 'pointer' : 'default';
                     }
                   }}
                 />
