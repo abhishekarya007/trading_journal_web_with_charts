@@ -36,6 +36,8 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
   const [sortDir, setSortDir] = useState('asc');
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [enlargedChart, setEnlargedChart] = useState(null);
+  const [enlargedChartData, setEnlargedChartData] = useState(null);
 
   // Form state for add/edit
   const [formData, setFormData] = useState({
@@ -53,6 +55,78 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
       }
     }
   }, [growthData, selectedMonth]);
+
+  const handleChartClick = (chartType, data, title) => {
+    setEnlargedChart(chartType);
+    setEnlargedChartData({ data, title });
+  };
+
+  const closeEnlargedChart = () => {
+    setEnlargedChart(null);
+    setEnlargedChartData(null);
+  };
+
+  // Enhanced chart options for enlarged view
+  const enlargedChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: {
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        titleFont: { size: 16, weight: 'bold' },
+        bodyFont: { size: 14 },
+        padding: 16,
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y || context.parsed;
+            if (context.dataset.label === 'Growth %') {
+              return `${label}: ${formatNumber(value)}%`;
+            }
+            return `${label}: ${formatCurrency(value)}`;
+          }
+        }
+      },
+      legend: {
+        labels: { 
+          font: { size: 14, weight: 'bold' },
+          padding: 20
+        }
+      }
+    },
+    scales: {
+      x: { 
+        grid: { 
+          display: true,
+          color: 'rgba(0,0,0,0.1)',
+          lineWidth: 1
+        },
+        ticks: { 
+          font: { size: 12, weight: 'bold' },
+          padding: 8
+        }
+      },
+      y: { 
+        grid: { 
+          display: true,
+          color: 'rgba(0,0,0,0.1)',
+          lineWidth: 1
+        },
+        ticks: { 
+          font: { size: 12, weight: 'bold' },
+          padding: 8,
+          callback: function(value) {
+            if (enlargedChart === 'growth') {
+              return formatNumber(value) + '%';
+            }
+            return formatCurrency(value);
+          }
+        }
+      }
+    }
+  };
 
   // Generate dummy data for August
   const generateDummyData = () => {
@@ -839,12 +913,26 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Capital Used Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
           <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Capital Used Over Time</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Track your capital utilization</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Capital Used Over Time</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Track your capital utilization</p>
+              </div>
+              <button 
+                onClick={() => handleChartClick('capital', chartData.capitalUsed, 'Capital Used Over Time')}
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600"
+                title="Enlarge chart"
+              >
+                <IconChartBar className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+              </button>
+            </div>
           </div>
-          <div className="p-4 sm:p-6">
+          <div 
+            className="p-4 sm:p-6"
+            onClick={() => handleChartClick('capital', chartData.capitalUsed, 'Capital Used Over Time')}
+          >
             {sortedData.length > 0 ? (
               <Line 
                 data={chartData.capitalUsed}
@@ -877,12 +965,26 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
         </div>
 
         {/* Monthly Growth Percentage Chart */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
           <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Monthly Growth %</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Percentage growth or loss by month</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Monthly Growth %</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Percentage growth or loss by month</p>
+              </div>
+              <button 
+                onClick={() => handleChartClick('growth', chartData.growthPercentage, 'Monthly Growth Percentage')}
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600"
+                title="Enlarge chart"
+              >
+                <IconChartBar className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+              </button>
+            </div>
           </div>
-          <div className="p-4 sm:p-6">
+          <div 
+            className="p-4 sm:p-6"
+            onClick={() => handleChartClick('growth', chartData.growthPercentage, 'Monthly Growth Percentage')}
+          >
             {sortedData.length > 0 ? (
               <Bar 
                 data={chartData.growthPercentage}
@@ -1135,6 +1237,52 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
               >
                 {isLoading ? 'Deleting...' : 'Delete'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enlarged Chart Modal */}
+      {enlargedChart && enlargedChartData && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={closeEnlargedChart}
+        >
+          <div 
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+                  <IconChartBar className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">{enlargedChartData.title}</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Growth Calculator Analysis</p>
+                </div>
+              </div>
+              <button 
+                onClick={closeEnlargedChart}
+                className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                <span className="text-slate-600 dark:text-slate-400 text-lg font-bold">×</span>
+              </button>
+            </div>
+            
+            <div className="h-96 sm:h-[500px] lg:h-[600px]">
+              {enlargedChart === 'capital' && (
+                <Line
+                  data={enlargedChartData.data}
+                  options={enlargedChartOptions}
+                />
+              )}
+              {enlargedChart === 'growth' && (
+                <Bar
+                  data={enlargedChartData.data}
+                  options={enlargedChartOptions}
+                />
+              )}
             </div>
           </div>
         </div>
