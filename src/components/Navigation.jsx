@@ -145,40 +145,40 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       {/* Navigation Sidebar */}
       <nav className={`bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-500 flex flex-col shadow-xl ${
         mobileOpen 
-          ? 'fixed inset-y-0 left-0 w-72 z-50' 
+          ? 'fixed inset-y-0 left-0 w-80 sm:w-72 z-50' 
           : isCollapsed 
             ? 'hidden lg:flex lg:w-20 z-10' 
             : 'hidden lg:flex lg:w-72 z-10'
       }`}>
         
         {/* Navigation Header */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 text-white">
+        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-4 sm:p-6 text-white">
           <div className="absolute inset-0 bg-black/10"></div>
-          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10 animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-8 -translate-x-8 animate-bounce"></div>
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-white/10 rounded-full -translate-y-8 sm:-translate-y-10 translate-x-8 sm:translate-x-10 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 bg-white/10 rounded-full translate-y-6 sm:translate-y-8 -translate-x-6 sm:-translate-x-8 animate-bounce"></div>
           
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               {!isCollapsed && (
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <IconCandle className="w-6 h-6" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center backdrop-blur-sm">
+                    <IconCandle className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold">Trading Journal</h1>
-                    <p className="text-indigo-100 text-sm">Your success companion</p>
+                    <h1 className="text-lg sm:text-xl font-bold">Trading Journal</h1>
+                    <p className="text-indigo-100 text-xs sm:text-sm">Your success companion</p>
                   </div>
                 </div>
               )}
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-all duration-300 transform hover:scale-110"
+                className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-white/30 transition-all duration-300 transform hover:scale-110"
                 title={isCollapsed ? 'Expand navigation' : 'Collapse navigation'}
               >
                 {isCollapsed ? (
-                  <IconChevronRight className="w-5 h-5" />
+                  <IconChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 ) : (
-                  <IconChevronLeft className="w-5 h-5" />
+                  <IconChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 )}
               </button>
             </div>
@@ -186,8 +186,8 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
         </div>
 
         {/* Navigation Items */}
-        <div className="flex-1 p-4">
-          <div className="space-y-2">
+        <div className="flex-1 p-3 sm:p-4">
+          <div className="space-y-1.5 sm:space-y-2">
             {navigationItems.map((item, index) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -202,7 +202,7 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
                   }}
                   onMouseEnter={() => setHoveredItem(item.id)}
                   onMouseLeave={() => setHoveredItem(null)}
-                  className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 group relative overflow-hidden ${
+                  className={`w-full flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-105 group relative overflow-hidden ${
                     isActive
                       ? `bg-gradient-to-r ${item.color} text-white shadow-lg`
                       : `text-slate-700 dark:text-slate-300 hover:bg-gradient-to-r ${item.bgColor} dark:hover:${item.darkBgColor}`
@@ -215,13 +215,13 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
                     <div className={`absolute inset-0 bg-gradient-to-r ${item.bgColor} dark:${item.darkBgColor} opacity-50 animate-pulse`}></div>
                   )}
                   
-                  <div className="relative z-10 flex items-center gap-4 w-full">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 ${
+                  <div className="relative z-10 flex items-center gap-3 sm:gap-4 w-full">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 ${
                       isActive 
                         ? 'bg-white/20 backdrop-blur-sm' 
                         : `bg-gradient-to-r ${item.color} text-white group-hover:scale-110`
                     }`}>
-                      <Icon className={`w-6 h-6 ${
+                      <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${
                         isActive 
                           ? 'text-white' 
                           : 'text-white group-hover:animate-pulse'
@@ -230,8 +230,8 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
                     
                     {!isCollapsed && (
                       <div className="flex flex-col items-start min-w-0 flex-1">
-                        <span className="font-bold text-base truncate">{item.label}</span>
-                        <span className={`text-sm truncate ${
+                        <span className="font-bold text-sm sm:text-base truncate">{item.label}</span>
+                        <span className={`text-xs sm:text-sm truncate ${
                           isActive 
                             ? 'text-white/80' 
                             : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'
@@ -243,7 +243,7 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
                     
                     {/* Active indicator for collapsed state */}
                     {isCollapsed && isActive && (
-                      <div className="absolute left-0 w-1 h-12 bg-white rounded-r-full shadow-lg"></div>
+                      <div className="absolute left-0 w-1 h-10 sm:h-12 bg-white rounded-r-full shadow-lg"></div>
                     )}
 
                     {/* Hover indicator */}
@@ -259,19 +259,19 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
 
         {/* Footer */}
         {!isCollapsed && (
-          <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-            <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 rounded-xl p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
-                  <IconStar className="w-4 h-4 text-white" />
+          <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 rounded-xl p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
+                  <IconStar className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-slate-900 dark:text-white">Trading Journal</div>
+                  <div className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">Trading Journal</div>
                   <div className="text-xs text-slate-600 dark:text-slate-400">v1.0.0</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                <IconHeart className="w-3 h-3 text-red-500" />
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <IconHeart className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-red-500" />
                 <span>Made with passion</span>
               </div>
             </div>
@@ -280,9 +280,9 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
 
         {/* Collapsed Footer */}
         {isCollapsed && (
-          <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-            <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mx-auto">
-              <IconSparkles className="w-4 h-4 text-white" />
+          <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mx-auto">
+              <IconSparkles className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
         )}
