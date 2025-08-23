@@ -471,6 +471,13 @@ export const IconImage = (props) => (
   </svg>
 );
 
+export const IconSettings = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m10.5-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM21 12a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-6 7.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+  </svg>
+);
+
 
 
 
