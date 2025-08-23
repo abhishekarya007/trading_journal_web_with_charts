@@ -913,13 +913,15 @@ const TradesTab = ({
                     <option value="Support">Support</option>
                     <option value="Resistance">Resistance</option>
                     <option value="Gap">Gap</option>
-                    <option value="News">News</option>
-                    <option value="Earnings">Earnings</option>
-                    <option value="Technical">Technical</option>
-                    <option value="Fundamental">Fundamental</option>
+                    <option value="Liquidity-Sweep">Liquidity-Sweep</option>
+                    <option value="Trendline">Trendline</option>
+                    <option value="M-Pattern">M-Pattern</option>
+                    <option value="W-Pattern">W-Pattern</option>
+                    <option value="Pin-Bar">Pin-Bar</option>
+                    <option value="Magic-Candle">Magic-candle</option>
+                    <option value="Trap">Trap</option>
                     <option value="Scalping">Scalping</option>
                     <option value="Swing">Swing</option>
-                    <option value="Intraday">Intraday</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
