@@ -27,7 +27,9 @@ import {
   IconChevronDown,
   IconRefresh,
   IconEdit,
-  IconTrash
+  IconTrash,
+  IconImage,
+  IconFileText
 } from './icons';
 
 const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMetrics, loadGrowthData, formatNumber, formatCurrency, showToast, playSuccessSound, playDeleteSound }) => {
@@ -69,6 +71,79 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
   const closeEnlargedChart = () => {
     setEnlargedChart(null);
     setEnlargedChartData(null);
+  };
+
+  // Chart export functions
+  const exportChartAsImage = async (format = 'png') => {
+    try {
+      const chartElement = document.querySelector(`[data-chart-id="${enlargedChart}"]`);
+      if (!chartElement) return;
+
+      // Use html2canvas to capture the chart
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(chartElement, {
+        backgroundColor: '#ffffff',
+        scale: 2, // High resolution
+        useCORS: true,
+        allowTaint: true
+      });
+
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${enlargedChartData.title.replace(/\s+/g, '_')}_Growth_Calculator.${format}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, `image/${format}`);
+    } catch (error) {
+      console.error('Error exporting chart:', error);
+    }
+  };
+
+  const exportChartAsPDF = async () => {
+    try {
+      const chartElement = document.querySelector(`[data-chart-id="${enlargedChart}"]`);
+      if (!chartElement) return;
+
+      // Use html2canvas to capture the chart
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+      
+      const canvas = await html2canvas(chartElement, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      
+      const imgWidth = 297; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pageHeight = 210; // A4 height in mm
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`${enlargedChartData.title.replace(/\s+/g, '_')}_Growth_Calculator.pdf`);
+    } catch (error) {
+      console.error('Error exporting chart as PDF:', error);
+    }
   };
 
   // Enhanced chart options for enlarged view with zoom and pan
@@ -1296,6 +1371,31 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {/* Export Controls */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                  <button 
+                    onClick={() => exportChartAsImage('png')}
+                    className="w-8 h-8 bg-white dark:bg-slate-600 rounded-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors"
+                    title="Export as PNG"
+                  >
+                    <IconDownload className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                  <button 
+                    onClick={() => exportChartAsImage('jpg')}
+                    className="w-8 h-8 bg-white dark:bg-slate-600 rounded-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors"
+                    title="Export as JPG"
+                  >
+                    <IconImage className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                  <button 
+                    onClick={exportChartAsPDF}
+                    className="w-8 h-8 bg-white dark:bg-slate-600 rounded-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors"
+                    title="Export as PDF"
+                  >
+                    <IconFileText className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                </div>
+                
                 {/* Zoom Controls */}
                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
                   <button 
@@ -1331,7 +1431,7 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
                 </div>
                 <button 
                   onClick={closeEnlargedChart}
-                  className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="w-8 h-8 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                 >
                   <span className="text-slate-600 dark:text-slate-400 text-lg font-bold">×</span>
                 </button>

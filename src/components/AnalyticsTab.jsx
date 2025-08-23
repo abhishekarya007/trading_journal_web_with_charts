@@ -22,7 +22,10 @@ import {
   IconPercent,
   IconUsers,
   IconActivity,
-  IconRefresh
+  IconRefresh,
+  IconDownload,
+  IconImage,
+  IconFileText
 } from './icons';
 
 export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, directionRows, emotionRows, rrAnalysis, monthlyChart, equityChart, drawdownChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth, advancedMetrics }) {
@@ -72,6 +75,79 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
   const closeEnlargedChart = () => {
     setEnlargedChart(null);
     setChartData(null);
+  };
+
+  // Chart export functions
+  const exportChartAsImage = async (format = 'png') => {
+    try {
+      const chartElement = document.querySelector(`[data-chart-id="${enlargedChart}"]`);
+      if (!chartElement) return;
+
+      // Use html2canvas to capture the chart
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(chartElement, {
+        backgroundColor: '#ffffff',
+        scale: 2, // High resolution
+        useCORS: true,
+        allowTaint: true
+      });
+
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${chartData.title.replace(/\s+/g, '_')}_${periodLabel.replace(/\s+/g, '_')}.${format}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, `image/${format}`);
+    } catch (error) {
+      console.error('Error exporting chart:', error);
+    }
+  };
+
+  const exportChartAsPDF = async () => {
+    try {
+      const chartElement = document.querySelector(`[data-chart-id="${enlargedChart}"]`);
+      if (!chartElement) return;
+
+      // Use html2canvas to capture the chart
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+      
+      const canvas = await html2canvas(chartElement, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      
+      const imgWidth = 297; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pageHeight = 210; // A4 height in mm
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`${chartData.title.replace(/\s+/g, '_')}_${periodLabel.replace(/\s+/g, '_')}.pdf`);
+    } catch (error) {
+      console.error('Error exporting chart as PDF:', error);
+    }
   };
 
   // Enhanced chart options for enlarged view with zoom and pan
@@ -401,6 +477,8 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
           </div>
         </div>
       </div>
+
+
 
       {/* Period Controls */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
@@ -1035,6 +1113,31 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {/* Export Controls */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                  <button 
+                    onClick={() => exportChartAsImage('png')}
+                    className="w-8 h-8 bg-white dark:bg-slate-600 rounded-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors"
+                    title="Export as PNG"
+                  >
+                    <IconDownload className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                  <button 
+                    onClick={() => exportChartAsImage('jpg')}
+                    className="w-8 h-8 bg-white dark:bg-slate-600 rounded-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors"
+                    title="Export as JPG"
+                  >
+                    <IconImage className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                  <button 
+                    onClick={exportChartAsPDF}
+                    className="w-8 h-8 bg-white dark:bg-slate-600 rounded-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors"
+                    title="Export as PDF"
+                  >
+                    <IconFileText className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                </div>
+                
                 {/* Zoom Controls */}
                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
                   <button 
