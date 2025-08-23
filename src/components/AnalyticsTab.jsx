@@ -57,118 +57,119 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white animate-pulse">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 xl:p-8 text-white animate-pulse min-h-0">
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 animate-bounce"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12 animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-white/5 rounded-full -translate-x-8 -translate-y-8 animate-spin"></div>
+        {/* Mobile: Smaller decorative elements */}
+        <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8 sm:-translate-y-12 sm:translate-x-12 lg:-translate-y-16 lg:translate-x-16 animate-bounce"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-18 sm:h-18 lg:w-24 lg:h-24 bg-white/10 rounded-full translate-y-6 -translate-x-6 sm:translate-y-9 sm:-translate-x-9 lg:translate-y-12 lg:-translate-x-12 animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/5 rounded-full -translate-x-4 -translate-y-4 sm:-translate-x-6 sm:-translate-y-6 lg:-translate-x-8 lg:-translate-y-8 animate-spin"></div>
         
         <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-              <IconChartBar className="w-8 h-8" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4 lg:mb-6">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 bg-white/20 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <IconChartBar className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold mb-2">Trading Analytics</h1>
-              <p className="text-indigo-100 text-lg">Deep insights into your trading performance</p>
+              <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-0.5 sm:mb-1 lg:mb-2">Trading Analytics</h1>
+              <p className="text-indigo-100 text-xs sm:text-sm lg:text-base xl:text-lg">Deep insights into your trading performance</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
             <div 
-              className={`bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
+              className={`bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
                 hoveredMetric === 'net' ? 'bg-white/30 scale-110 shadow-2xl' : 'hover:bg-white/20'
               }`}
               onMouseEnter={() => setHoveredMetric('net')}
               onMouseLeave={() => setHoveredMetric(null)}
             >
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center ${
+              <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center ${
                   hoveredMetric === 'net' ? 'animate-bounce' : 'animate-pulse'
                 }`}>
-                                      <IconRupee className="w-5 h-5 text-emerald-300" />
+                  <IconRupee className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-emerald-300" />
                 </div>
-                <div>
-                  <div className={`text-2xl font-bold ${
+                <div className="flex-1 min-w-0">
+                  <div className={`text-sm sm:text-lg lg:text-2xl font-bold truncate ${
                     hoveredMetric === 'net' ? 'animate-pulse text-emerald-200' : 'animate-pulse'
                   }`}>
                     {formatNumber(totals.net)}
                   </div>
-                  <div className="text-indigo-100 text-sm">Total Net P&L</div>
+                  <div className="text-indigo-100 text-xs sm:text-sm truncate">Total Net P&L</div>
                 </div>
               </div>
             </div>
 
             <div 
-              className={`bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
+              className={`bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
                 hoveredMetric === 'winRate' ? 'bg-white/30 scale-110 shadow-2xl' : 'hover:bg-white/20'
               }`}
               onMouseEnter={() => setHoveredMetric('winRate')}
               onMouseLeave={() => setHoveredMetric(null)}
             >
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center ${
+              <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-blue-500/20 rounded-lg flex items-center justify-center ${
                   hoveredMetric === 'winRate' ? 'animate-spin' : 'animate-bounce'
                 }`}>
-                  <IconPercent className="w-5 h-5 text-blue-300" />
+                  <IconPercent className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-blue-300" />
                 </div>
-                <div>
-                  <div className={`text-2xl font-bold ${
+                <div className="flex-1 min-w-0">
+                  <div className={`text-sm sm:text-lg lg:text-2xl font-bold truncate ${
                     hoveredMetric === 'winRate' ? 'animate-pulse text-blue-200' : 'animate-pulse'
                   }`}>
                     {totals.winRate}%
                   </div>
-                  <div className="text-indigo-100 text-sm">Win Rate</div>
+                  <div className="text-indigo-100 text-xs sm:text-sm truncate">Win Rate</div>
                 </div>
               </div>
             </div>
 
             <div 
-              className={`bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
+              className={`bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
                 hoveredMetric === 'trades' ? 'bg-white/30 scale-110 shadow-2xl' : 'hover:bg-white/20'
               }`}
               onMouseEnter={() => setHoveredMetric('trades')}
               onMouseLeave={() => setHoveredMetric(null)}
             >
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center ${
+              <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-purple-500/20 rounded-lg flex items-center justify-center ${
                   hoveredMetric === 'trades' ? 'animate-bounce' : 'animate-pulse'
                 }`}>
-                  <IconUsers className="w-5 h-5 text-purple-300" />
+                  <IconUsers className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-purple-300" />
                 </div>
-                <div>
-                  <div className={`text-2xl font-bold ${
+                <div className="flex-1 min-w-0">
+                  <div className={`text-sm sm:text-lg lg:text-2xl font-bold truncate ${
                     hoveredMetric === 'trades' ? 'animate-pulse text-purple-200' : 'animate-pulse'
                   }`}>
                     {totals.trades}
                   </div>
-                  <div className="text-indigo-100 text-sm">Total Trades</div>
+                  <div className="text-indigo-100 text-xs sm:text-sm truncate">Total Trades</div>
                 </div>
               </div>
             </div>
 
             <div 
-              className={`bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
+              className={`bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 border border-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
                 hoveredMetric === 'avg' ? 'bg-white/30 scale-110 shadow-2xl' : 'hover:bg-white/20'
               }`}
               onMouseEnter={() => setHoveredMetric('avg')}
               onMouseLeave={() => setHoveredMetric(null)}
             >
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center ${
+              <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-orange-500/20 rounded-lg flex items-center justify-center ${
                   hoveredMetric === 'avg' ? 'animate-pulse' : 'animate-spin'
                 }`}>
-                  <IconActivity className="w-5 h-5 text-orange-300" />
+                  <IconActivity className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-orange-300" />
                 </div>
-                <div>
-                  <div className={`text-2xl font-bold ${
+                <div className="flex-1 min-w-0">
+                  <div className={`text-sm sm:text-lg lg:text-2xl font-bold truncate ${
                     hoveredMetric === 'avg' ? 'animate-pulse text-orange-200' : 'animate-pulse'
                   }`}>
                     {formatNumber(totals.avg)}
                   </div>
-                  <div className="text-indigo-100 text-sm">Avg Net/Trade</div>
+                  <div className="text-indigo-100 text-xs sm:text-sm truncate">Avg Net/Trade</div>
                 </div>
               </div>
             </div>
@@ -177,39 +178,39 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
       </div>
 
       {/* Period Controls */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
-              <IconCalendar className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+              <IconCalendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Analysis Period</h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400">{periodLabel}</p>
+              <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Analysis Period</h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">{periodLabel}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
+          <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 rounded-xl p-1 w-full sm:w-auto">
             {periodControls}
           </div>
         </div>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Monthly P&L Chart */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
-                <IconBarChart className="w-5 h-5 text-white" />
+          <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
+                <IconBarChart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Monthly P&L</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Performance by month</p>
+                <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Monthly P&L</h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Performance by month</p>
               </div>
             </div>
           </div>
-          <div className="p-6 h-64">
+          <div className="p-4 sm:p-6 h-48 sm:h-64">
             {allMonthRows.length ? (
               <div className={`transition-all duration-1000 ${animateCharts ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
                 <Bar
@@ -233,8 +234,8 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
             ) : (
               <div className="flex items-center justify-center h-full text-slate-500">
                 <div className="text-center">
-                  <IconBarChart className="w-12 h-12 mx-auto mb-2 text-slate-300" />
-                  <p>No monthly data available</p>
+                  <IconBarChart className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 text-slate-300" />
+                  <p className="text-sm sm:text-base">No monthly data available</p>
                 </div>
               </div>
             )}
@@ -243,18 +244,18 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
 
         {/* Equity Curve Chart */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                <IconTrendingUp className="w-5 h-5 text-white" />
+          <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                <IconTrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Equity Curve</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Cumulative performance</p>
+                <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Equity Curve</h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Cumulative performance</p>
               </div>
             </div>
           </div>
-          <div className="p-6 h-64">
+          <div className="p-4 sm:p-6 h-48 sm:h-64">
             {totals.trades ? (
               <div className={`transition-all duration-1000 ${animateCharts ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
                 <Line 
@@ -271,8 +272,8 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
             ) : (
               <div className="flex items-center justify-center h-full text-slate-500">
                 <div className="text-center">
-                  <IconTrendingUp className="w-12 h-12 mx-auto mb-2 text-slate-300" />
-                  <p>No trades yet</p>
+                  <IconTrendingUp className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 text-slate-300" />
+                  <p className="text-sm sm:text-base">No trades yet</p>
                 </div>
               </div>
             )}
@@ -282,34 +283,34 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
 
       {/* Monthly Summary Table */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <IconCalendar className="w-5 h-5 text-white" />
+        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <IconCalendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Monthly Summary</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Click on any month to filter data</p>
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Monthly Summary</h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Click on any month to filter data</p>
             </div>
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   Month
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   Trades
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   Win Rate
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   Total Net
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                   Average
                 </th>
               </tr>
@@ -324,32 +325,32 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                   style={{ animationDelay: `${index * 50}ms` }}
                   onClick={() => onSelectMonth(m.month)}
                 >
-                  <td className="px-6 py-4">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-900 dark:text-white">{m.month}</span>
+                      <span className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base">{m.month}</span>
                       {activeMonthLabel === m.month && (
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center gap-2">
-                      <IconUsers className="w-4 h-4 text-slate-400" />
-                      <span className="font-medium">{m.total}</span>
+                      <IconUsers className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                      <span className="font-medium text-sm sm:text-base">{m.total}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`font-semibold ${getWinRateColor(m.winRate)}`}>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <span className={`font-semibold text-sm sm:text-base ${getWinRateColor(m.winRate)}`}>
                       {m.winRate}%
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`font-bold ${getPerformanceColor(m.totalNet)}`}>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <span className={`font-bold text-sm sm:text-base ${getPerformanceColor(m.totalNet)}`}>
                       ₹{formatNumber(m.totalNet)}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`font-semibold ${getPerformanceColor(m.avg)}`}>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <span className={`font-semibold text-sm sm:text-base ${getPerformanceColor(m.avg)}`}>
                       ₹{formatNumber(m.avg)}
                     </span>
                   </td>
@@ -372,40 +373,40 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
       {/* Performance Analytics Section */}
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-            <IconTarget className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+            <IconTarget className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Performance Analytics</h2>
-            <p className="text-slate-600 dark:text-slate-400">Deep dive into your trading patterns</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Performance Analytics</h2>
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Deep dive into your trading patterns</p>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {/* Setup Performance */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg flex items-center justify-center">
-                  <IconTarget className="w-4 h-4 text-white" />
+            <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg flex items-center justify-center">
+                  <IconTarget className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
-                <h4 className="font-semibold text-slate-900 dark:text-white">Setup Performance</h4>
+                <h4 className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base">Setup Performance</h4>
               </div>
             </div>
             <div className="max-h-80 overflow-y-auto">
               {setupRows && setupRows.length ? setupRows.map((s, index) => (
                                  <div 
                    key={s.setup} 
-                   className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 last:border-b-0 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50 dark:hover:from-emerald-900/10 dark:hover:to-green-900/10 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg"
+                   className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 dark:border-slate-700 last:border-b-0 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50 dark:hover:from-emerald-900/10 dark:hover:to-green-900/10 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg"
                    style={{ animationDelay: `${index * 100}ms` }}
                  >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-slate-900 dark:text-white">{s.setup}</span>
-                    <span className={`text-lg font-bold ${getPerformanceColor(s.avgNet)}`}>
+                    <span className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base">{s.setup}</span>
+                    <span className={`text-base sm:text-lg font-bold ${getPerformanceColor(s.avgNet)}`}>
                       ₹{formatNumber(s.avgNet)}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center justify-between text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                     <div className="flex items-center gap-1">
                       <IconUsers className="w-3 h-3" />
                       <span>{s.trades} trades</span>
@@ -416,9 +417,9 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                   </div>
                 </div>
               )) : (
-                <div className="px-6 py-8 text-center text-slate-500">
-                  <IconTarget className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                  <p>No setups yet</p>
+                <div className="px-4 sm:px-6 py-6 sm:py-8 text-center text-slate-500">
+                  <IconTarget className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-slate-300" />
+                  <p className="text-sm sm:text-base">No setups yet</p>
                 </div>
               )}
             </div>
