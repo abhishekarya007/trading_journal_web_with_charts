@@ -12,7 +12,8 @@ import {
   IconSparkles,
   IconTarget,
   IconFileText,
-  IconBrain
+  IconBrain,
+  IconTrophy
 } from './icons';
 
 const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }) => {
@@ -60,6 +61,10 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
             setActiveTab('psychology');
             break;
           case '6':
+            e.preventDefault();
+            setActiveTab('gamification');
+            break;
+          case '7':
             e.preventDefault();
             setActiveTab('rules');
             break;
@@ -120,6 +125,15 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       color: 'from-purple-500 to-pink-500',
       bgColor: 'from-purple-50 to-pink-50',
       darkBgColor: 'from-purple-900/20 to-pink-900/20'
+    },
+    {
+      id: 'gamification',
+      label: 'Achievements',
+      icon: IconTrophy,
+      description: 'Track your progress & rewards',
+      color: 'from-yellow-500 to-orange-500',
+      bgColor: 'from-yellow-50 to-orange-50',
+      darkBgColor: 'from-yellow-900/20 to-orange-900/20'
     },
     {
       id: 'rules',

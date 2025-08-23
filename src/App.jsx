@@ -21,6 +21,7 @@ import TradingRulesTab from "./components/TradingRulesTab";
 import GrowthCalculatorTab from "./components/GrowthCalculatorTab";
 import ReportsTab from "./components/ReportsTab";
 import DailyPsychologyTab from "./components/DailyPsychologyTab";
+import GamificationTab from "./components/GamificationTab";
 import CooldownTimer from "./components/CooldownTimer";
 import Navigation from "./components/Navigation";
 import Auth from "./components/Auth";
@@ -169,6 +170,29 @@ export default function App() {
   const [growthData, setGrowthData] = useState([]);
   const [growthDataLoaded, setGrowthDataLoaded] = useState(false);
 
+  // Psychology data state
+  const [psychologyData, setPsychologyData] = useState([]);
+
+  // Gamification state
+  const [gamificationData, setGamificationData] = useState({
+    level: 1,
+    experience: 0,
+    achievements: [],
+    streaks: {
+      winningDays: 0,
+      tradingDays: 0,
+      psychologyEntries: 0
+    },
+    dailyChallenges: [],
+    completedChallenges: [],
+    totalTrades: 0,
+    totalWins: 0,
+    totalLosses: 0,
+    bestWinStreak: 0,
+    bestDay: 0,
+    lastActiveDate: null
+  });
+
   // Toast functions
   const showToast = (message, type = 'info') => {
     const toastId = Date.now();
@@ -226,10 +250,11 @@ export default function App() {
         
         // If user is already authenticated, load their trades, profile, and growth data
         if (currentUser) {
-          console.log('User is authenticated, loading trades, profile, and growth data...');
+          console.log('User is authenticated, loading trades, profile, growth data, and psychology data...');
           await loadTrades();
           await loadUserProfile(currentUser.id);
           await loadGrowthData();
+          await loadPsychologyData();
         } else {
           console.log('No authenticated user found');
         }
@@ -246,12 +271,14 @@ export default function App() {
               loadUserProfile(session.user.id);
             }
             loadGrowthData();
+            loadPsychologyData();
           } else if (event === 'SIGNED_OUT') {
             // Clear trades, profile, and growth data when user signs out
             setTrades([]);
             setUserProfile(null);
             setGrowthData([]);
             setGrowthDataLoaded(false);
+            setPsychologyData([]);
             // Clear psychology service cache
             psychologyService.clearCache();
           }
@@ -284,6 +311,13 @@ export default function App() {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showLogoutConfirm, showProfile]);
+
+  // Update gamification when trades or psychology data changes
+  useEffect(() => {
+    if (user) {
+      updateGamification();
+    }
+  }, [trades, psychologyData, user]);
 
   // Load user profile function
   const loadUserProfile = async (userId) => {
@@ -335,6 +369,19 @@ export default function App() {
       console.error('Error loading growth data:', error);
       setGrowthData([]);
       setGrowthDataLoaded(true);
+    }
+  };
+
+  // Load psychology data from database
+  const loadPsychologyData = async () => {
+    try {
+      console.log('Loading psychology data from database...');
+      const data = await psychologyService.loadPsychologyData();
+      console.log(`Loaded ${data.length} psychology records from database`);
+      setPsychologyData(data);
+    } catch (error) {
+      console.error('Error loading psychology data:', error);
+      setPsychologyData([]);
     }
   };
 
@@ -398,6 +445,104 @@ export default function App() {
         setToasts(prev => prev.filter(toast => toast.id !== toastId));
       }, 5000);
     }
+  };
+
+  // Gamification Functions
+  const calculateExperience = (trades) => {
+    let exp = 0;
+    trades.forEach(trade => {
+      const net = trade.meta?.net || 0;
+      if (net > 0) {
+        exp += Math.floor(net / 100) + 10; // 10 XP base + 1 XP per 100 profit
+      } else {
+        exp += 5; // 5 XP for any trade (learning experience)
+      }
+    });
+    return exp;
+  };
+
+  const calculateLevel = (experience) => {
+    return Math.floor(experience / 100) + 1;
+  };
+
+  const getAchievements = (trades, psychologyData) => {
+    const achievements = [];
+    const totalTrades = trades.length;
+    const wins = trades.filter(t => (t.meta?.net || 0) > 0).length;
+    const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
+    const psychologyEntries = psychologyData.length;
+
+    // Trade count achievements
+    if (totalTrades >= 10) achievements.push({ id: 'first_10', name: 'Getting Started', description: 'Complete 10 trades', icon: '🎯', unlocked: true });
+    if (totalTrades >= 50) achievements.push({ id: 'first_50', name: 'Active Trader', description: 'Complete 50 trades', icon: '📈', unlocked: true });
+    if (totalTrades >= 100) achievements.push({ id: 'first_100', name: 'Century Club', description: 'Complete 100 trades', icon: '🏆', unlocked: true });
+
+    // Win rate achievements
+    if (winRate >= 60) achievements.push({ id: 'win_rate_60', name: 'Consistent Winner', description: 'Maintain 60% win rate', icon: '⭐', unlocked: true });
+    if (winRate >= 70) achievements.push({ id: 'win_rate_70', name: 'Elite Trader', description: 'Maintain 70% win rate', icon: '👑', unlocked: true });
+
+    // Psychology achievements
+    if (psychologyEntries >= 7) achievements.push({ id: 'psychology_week', name: 'Mindful Trader', description: 'Log psychology for 7 days', icon: '🧠', unlocked: true });
+    if (psychologyEntries >= 30) achievements.push({ id: 'psychology_month', name: 'Mental Master', description: 'Log psychology for 30 days', icon: '🎭', unlocked: true });
+
+    return achievements;
+  };
+
+  const getDailyChallenges = () => {
+    const challenges = [
+      { id: 'trade_today', name: 'Trade Today', description: 'Make at least one trade today', icon: '📊', xp: 20, completed: false },
+      { id: 'win_today', name: 'Win Today', description: 'Have a winning trade today', icon: '🎯', xp: 30, completed: false },
+      { id: 'psychology_today', name: 'Mind Check', description: 'Log your psychology today', icon: '🧠', xp: 15, completed: false },
+      { id: 'review_trades', name: 'Review Time', description: 'Review your last 5 trades', icon: '📝', xp: 25, completed: false },
+      { id: 'no_overtrading', name: 'Patience', description: 'Make no more than 3 trades today', icon: '⏰', xp: 40, completed: false }
+    ];
+    return challenges;
+  };
+
+  const updateGamification = () => {
+    const experience = calculateExperience(trades);
+    const level = calculateLevel(experience);
+    const achievements = getAchievements(trades, psychologyData);
+    const dailyChallenges = getDailyChallenges();
+
+    // Calculate streaks
+    const today = new Date().toDateString();
+    const lastActive = gamificationData.lastActiveDate;
+    const isNewDay = lastActive !== today;
+
+    let streaks = { ...gamificationData.streaks };
+    if (isNewDay) {
+      // Check if user traded yesterday
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayTrades = trades.filter(t => new Date(t.date).toDateString() === yesterday.toDateString());
+      
+      if (yesterdayTrades.length > 0) {
+        streaks.tradingDays++;
+        const yesterdayWins = yesterdayTrades.filter(t => (t.meta?.net || 0) > 0).length;
+        if (yesterdayWins > 0) {
+          streaks.winningDays++;
+        } else {
+          streaks.winningDays = 0;
+        }
+      } else {
+        streaks.tradingDays = 0;
+        streaks.winningDays = 0;
+      }
+    }
+
+    setGamificationData(prev => ({
+      ...prev,
+      level,
+      experience,
+      achievements,
+      dailyChallenges,
+      streaks,
+      totalTrades: trades.length,
+      totalWins: trades.filter(t => (t.meta?.net || 0) > 0).length,
+      totalLosses: trades.filter(t => (t.meta?.net || 0) <= 0).length,
+      lastActiveDate: today
+    }));
   };
 
   async function addOrUpdateTrade(e) {
@@ -1674,36 +1819,36 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
           <div className="relative z-10 container-wrap flex items-center justify-between min-h-10 sm:min-h-12 py-1 sm:py-2 lg:py-3 gap-1 sm:gap-2 lg:gap-4">
             {/* Left Section - Mobile Menu + Logo */}
             <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 flex-shrink-0">
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setMobileNavOpen(!mobileNavOpen)}
+                {/* Mobile Menu Button */}
+                <button
+                  onClick={() => setMobileNavOpen(!mobileNavOpen)}
                 className="lg:hidden w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-md"
-                title="Toggle navigation menu"
-              >
-                {mobileNavOpen ? (
+                  title="Toggle navigation menu"
+                >
+                  {mobileNavOpen ? (
                   <IconX className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
-                ) : (
+                  ) : (
                   <IconMenu className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
-                )}
-              </button>
-              
+                  )}
+                </button>
+                
               <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-3">
                 <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-12 lg:h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
                   <IconCandle className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-6 lg:h-6 text-white"/>
-                </div>
+                  </div>
                 <div className="hidden sm:block">
                   <h1 className="text-xs sm:text-sm lg:text-xl font-bold text-slate-900 dark:text-white leading-tight">Trading Journal</h1>
                   <p className="text-xs lg:text-sm text-slate-600 dark:text-slate-400 hidden lg:block leading-tight">Professional Trading Companion</p>
-                </div>
+                  </div>
                 <div className="px-1 sm:px-1.5 lg:px-3 py-0.5 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs font-bold rounded-full shadow-md hidden lg:block">
-                  v1.0
+                    v1.0
+                  </div>
                 </div>
               </div>
-            </div>
-
+              
             {/* Center Section - Timer */}
             <div className="transform hover:scale-105 transition-transform duration-300 relative z-20 flex-shrink-0">
-              <CooldownTimer />
+                <CooldownTimer />
             </div>
 
             {/* Right Section - Controls */}
@@ -1968,6 +2113,13 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 showToast={showToast} 
                 playSuccessSound={playSuccessSound}
                 playDeleteSound={playDeleteSound}
+              />
+            )}
+            
+            {activeTab === 'gamification' && (
+              <GamificationTab 
+                gamificationData={gamificationData}
+                formatNumber={formatNumber}
               />
             )}
             
