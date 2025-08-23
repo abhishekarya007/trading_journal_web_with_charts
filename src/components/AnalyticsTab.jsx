@@ -19,7 +19,7 @@ import {
   IconActivity
 } from './icons';
 
-export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, directionRows, emotionRows, rrAnalysis, monthlyChart, equityChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth }) {
+export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, directionRows, emotionRows, rrAnalysis, monthlyChart, equityChart, drawdownChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth, advancedMetrics }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [animateCharts, setAnimateCharts] = useState(false);
   const [hoveredMetric, setHoveredMetric] = useState(null);
@@ -177,6 +177,128 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
         </div>
       </div>
 
+      {/* Advanced Performance Metrics */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+            <IconTarget className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Advanced Performance Metrics</h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Professional trading analytics for {periodLabel.toLowerCase().replace('showing: ', '')}
+            </p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+          {/* Maximum Drawdown */}
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl p-3 sm:p-4 border border-red-200 dark:border-red-700">
+            <div className="flex items-center gap-2 mb-2">
+              <IconTrendingDown className="w-4 h-4 text-red-600" />
+              <span className="text-xs font-semibold text-red-700 dark:text-red-300">Max Drawdown</span>
+            </div>
+            <div className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400">
+              ₹{formatNumber(advancedMetrics?.maxDrawdown || 0)}
+            </div>
+          </div>
+
+
+
+          {/* Profit Factor */}
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-3 sm:p-4 border border-blue-200 dark:border-blue-700">
+            <div className="flex items-center gap-2 mb-2">
+              <IconBarChart className="w-4 h-4 text-blue-600" />
+              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Profit Factor</span>
+            </div>
+            <div className="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400">
+              {formatNumber(advancedMetrics?.profitFactor || 0)}
+            </div>
+          </div>
+
+          {/* Win/Loss Ratio */}
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-3 sm:p-4 border border-purple-200 dark:border-purple-700">
+            <div className="flex items-center gap-2 mb-2">
+              <IconTarget className="w-4 h-4 text-purple-600" />
+              <span className="text-xs font-semibold text-purple-700 dark:text-purple-300">Win/Loss Ratio</span>
+            </div>
+            <div className="text-base sm:text-lg font-bold text-purple-600 dark:text-purple-400">
+              {formatNumber(advancedMetrics?.winLossRatio || 0)}
+            </div>
+          </div>
+
+          {/* Average Win */}
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-3 sm:p-4 border border-emerald-200 dark:border-emerald-700">
+            <div className="flex items-center gap-2 mb-2">
+              <IconTrendingUp className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Average Win</span>
+            </div>
+            <div className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400">
+              ₹{formatNumber(advancedMetrics?.avgWin || 0)}
+            </div>
+          </div>
+
+          {/* Average Loss */}
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl p-3 sm:p-4 border border-red-200 dark:border-red-700">
+            <div className="flex items-center gap-2 mb-2">
+              <IconTrendingDown className="w-4 h-4 text-red-600" />
+              <span className="text-xs font-semibold text-red-700 dark:text-red-300">Average Loss</span>
+            </div>
+            <div className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400">
+              ₹{formatNumber(advancedMetrics?.avgLoss || 0)}
+            </div>
+          </div>
+
+
+
+          {/* Recovery Factor */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-3 sm:p-4 border border-indigo-200 dark:border-indigo-700">
+            <div className="flex items-center gap-2 mb-2">
+              <IconRocket className="w-4 h-4 text-indigo-600" />
+              <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">Recovery Factor</span>
+            </div>
+            <div className="text-base sm:text-lg font-bold text-indigo-600 dark:text-indigo-400">
+              {formatNumber(advancedMetrics?.recoveryFactor || 0)}
+            </div>
+          </div>
+
+          {/* Largest Win */}
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-3 sm:p-4 border border-emerald-200 dark:border-emerald-700">
+            <div className="flex items-center gap-2 mb-2">
+              <IconTrophy className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Largest Win</span>
+            </div>
+            <div className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400">
+              ₹{formatNumber(advancedMetrics?.largestWin || 0)}
+            </div>
+          </div>
+
+
+
+          {/* Consecutive Wins */}
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-3 sm:p-4 border border-blue-200 dark:border-blue-700">
+            <div className="flex items-center gap-2 mb-2">
+              <IconStar className="w-4 h-4 text-blue-600" />
+              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Max Win Streak</span>
+            </div>
+            <div className="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400">
+              {advancedMetrics?.consecutiveWins || 0}
+            </div>
+          </div>
+
+          {/* Consecutive Losses */}
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-3 sm:p-4 border border-orange-200 dark:border-orange-700">
+            <div className="flex items-center gap-2 mb-2">
+              <IconZap className="w-4 h-4 text-orange-600" />
+              <span className="text-xs font-semibold text-orange-700 dark:text-orange-300">Max Loss Streak</span>
+            </div>
+            <div className="text-base sm:text-lg font-bold text-orange-600 dark:text-orange-400">
+              {advancedMetrics?.consecutiveLosses || 0}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Period Controls */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -196,7 +318,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Monthly P&L Chart */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
@@ -273,6 +395,44 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
               <div className="flex items-center justify-center h-full text-slate-500">
                 <div className="text-center">
                   <IconTrendingUp className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 text-slate-300" />
+                  <p className="text-sm sm:text-base">No trades yet</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Drawdown Chart */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <IconTrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Drawdown Analysis</h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Risk exposure over time</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 sm:p-6 h-48 sm:h-64">
+            {totals.trades ? (
+              <div className={`transition-all duration-1000 ${animateCharts ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+                <Line 
+                  data={drawdownChart} 
+                  options={{
+                    ...commonChartOptions, 
+                    scales:{ 
+                      x:{ grid:{ display:false } }, 
+                      y:{ grid:{ color:'#e5e7eb' } } 
+                    }
+                  }} 
+                />
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-500">
+                <div className="text-center">
+                  <IconTrendingDown className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 text-slate-300" />
                   <p className="text-sm sm:text-base">No trades yet</p>
                 </div>
               </div>

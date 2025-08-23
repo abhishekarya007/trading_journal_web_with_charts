@@ -1045,6 +1045,117 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     return { net: round2(net), wins, losses, winRate, avg, trades: trades.length };
   }, [trades]);
 
+  // Advanced Performance Metrics
+  const advancedMetrics = useMemo(() => {
+    if (trades.length === 0) {
+      return {
+        maxDrawdown: 0,
+        sharpeRatio: 0,
+        profitFactor: 0,
+        avgWin: 0,
+        avgLoss: 0,
+        winLossRatio: 0,
+        largestWin: 0,
+        largestLoss: 0,
+        consecutiveWins: 0,
+        consecutiveLosses: 0,
+        expectancy: 0,
+        recoveryFactor: 0
+      };
+    }
+
+    // Calculate returns for each trade
+    const returns = trades.map(t => t.meta?.net || 0);
+    
+    // Maximum Drawdown
+    let peak = 0;
+    let maxDrawdown = 0;
+    let runningTotal = 0;
+    
+    returns.forEach(return_ => {
+      runningTotal += return_;
+      if (runningTotal > peak) {
+        peak = runningTotal;
+      }
+      const drawdown = peak - runningTotal;
+      if (drawdown > maxDrawdown) {
+        maxDrawdown = drawdown;
+      }
+    });
+
+    // Win/Loss Analysis
+    const wins = returns.filter(r => r > 0);
+    const losses = returns.filter(r => r < 0);
+    const avgWin = wins.length > 0 ? wins.reduce((sum, w) => sum + w, 0) / wins.length : 0;
+    const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, l) => sum + l, 0) / losses.length) : 0;
+    const winLossRatio = avgLoss > 0 ? avgWin / avgLoss : 0;
+    
+    // Profit Factor
+    const grossProfit = wins.reduce((sum, w) => sum + w, 0);
+    const grossLoss = Math.abs(losses.reduce((sum, l) => sum + l, 0));
+    const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : 0;
+
+    // Largest Win/Loss
+    const largestWin = wins.length > 0 ? Math.max(...wins) : 0;
+    const largestLoss = losses.length > 0 ? Math.min(...losses) : 0;
+
+    // Consecutive Wins/Losses
+    let currentStreak = 0;
+    let maxConsecutiveWins = 0;
+    let maxConsecutiveLosses = 0;
+    
+    returns.forEach(return_ => {
+      if (return_ > 0) {
+        if (currentStreak > 0) {
+          currentStreak++;
+        } else {
+          currentStreak = 1;
+        }
+        maxConsecutiveWins = Math.max(maxConsecutiveWins, currentStreak);
+      } else if (return_ < 0) {
+        if (currentStreak < 0) {
+          currentStreak--;
+        } else {
+          currentStreak = -1;
+        }
+        maxConsecutiveLosses = Math.max(maxConsecutiveLosses, Math.abs(currentStreak));
+      } else {
+        currentStreak = 0;
+      }
+    });
+
+    // Expectancy
+    const winRate = wins.length / returns.length;
+    const lossRate = losses.length / returns.length;
+    const expectancy = (winRate * avgWin) - (lossRate * avgLoss);
+
+    // Recovery Factor
+    const recoveryFactor = maxDrawdown > 0 ? totals.net / maxDrawdown : 0;
+
+    // Sharpe Ratio (simplified - assuming risk-free rate of 0)
+    const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+    const variance = returns.reduce((sum, r) => sum + Math.pow(r - meanReturn, 2), 0) / returns.length;
+    const stdDev = Math.sqrt(variance);
+    const sharpeRatio = stdDev > 0 ? meanReturn / stdDev : 0;
+
+    return {
+      maxDrawdown: round2(maxDrawdown),
+      sharpeRatio: round2(sharpeRatio),
+      profitFactor: round2(profitFactor),
+      avgWin: round2(avgWin),
+      avgLoss: round2(avgLoss),
+      winLossRatio: round2(winLossRatio),
+      largestWin: round2(largestWin),
+      largestLoss: round2(largestLoss),
+      consecutiveWins: maxConsecutiveWins,
+      consecutiveLosses: maxConsecutiveLosses,
+      expectancy: round2(expectancy),
+      recoveryFactor: round2(recoveryFactor)
+    };
+  }, [trades, totals.net]);
+
+
+
   const formatNumber = (n) => (typeof n === "number" ? n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : n);
   // Analytics period controls
   const [analyticsScope, setAnalyticsScope] = useState('month'); // 'month' | 'overall'
@@ -1083,6 +1194,100 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
     const avg = scopedTrades.length ? Math.round((net / scopedTrades.length) * 100) / 100 : 0;
     return { net: Math.round(net * 100) / 100, wins, losses, winRate, avg, trades: scopedTrades.length };
   }, [scopedTrades]);
+
+  // Scoped Advanced Metrics (for selected month or overall)
+  const scopedAdvancedMetrics = useMemo(() => {
+    const tradesToAnalyze = analyticsScope === 'overall' ? trades : scopedTrades;
+    
+    if (tradesToAnalyze.length === 0) {
+      return {
+        maxDrawdown: 0,
+        profitFactor: 0,
+        avgWin: 0,
+        avgLoss: 0,
+        winLossRatio: 0,
+        largestWin: 0,
+        consecutiveWins: 0,
+        consecutiveLosses: 0,
+        recoveryFactor: 0
+      };
+    }
+
+    // Calculate returns for each trade
+    const returns = tradesToAnalyze.map(t => t.meta?.net || 0);
+    
+    // Maximum Drawdown
+    let peak = 0;
+    let maxDrawdown = 0;
+    let runningTotal = 0;
+    
+    returns.forEach(return_ => {
+      runningTotal += return_;
+      if (runningTotal > peak) {
+        peak = runningTotal;
+      }
+      const drawdown = peak - runningTotal;
+      if (drawdown > maxDrawdown) {
+        maxDrawdown = drawdown;
+      }
+    });
+
+    // Win/Loss Analysis
+    const wins = returns.filter(r => r > 0);
+    const losses = returns.filter(r => r < 0);
+    const avgWin = wins.length > 0 ? wins.reduce((sum, w) => sum + w, 0) / wins.length : 0;
+    const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, l) => sum + l, 0) / losses.length) : 0;
+    const winLossRatio = avgLoss > 0 ? avgWin / avgLoss : 0;
+    
+    // Profit Factor
+    const grossProfit = wins.reduce((sum, w) => sum + w, 0);
+    const grossLoss = Math.abs(losses.reduce((sum, l) => sum + l, 0));
+    const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : 0;
+
+    // Largest Win
+    const largestWin = wins.length > 0 ? Math.max(...wins) : 0;
+
+    // Consecutive Wins/Losses
+    let currentStreak = 0;
+    let maxConsecutiveWins = 0;
+    let maxConsecutiveLosses = 0;
+    
+    returns.forEach(return_ => {
+      if (return_ > 0) {
+        if (currentStreak > 0) {
+          currentStreak++;
+        } else {
+          currentStreak = 1;
+        }
+        maxConsecutiveWins = Math.max(maxConsecutiveWins, currentStreak);
+      } else if (return_ < 0) {
+        if (currentStreak < 0) {
+          currentStreak--;
+        } else {
+          currentStreak = -1;
+        }
+        maxConsecutiveLosses = Math.max(maxConsecutiveLosses, Math.abs(currentStreak));
+      } else {
+        currentStreak = 0;
+      }
+    });
+
+    // Recovery Factor
+    const scopedNet = tradesToAnalyze.reduce((sum, t) => sum + (t.meta?.net || 0), 0);
+    const recoveryFactor = maxDrawdown > 0 ? scopedNet / maxDrawdown : 0;
+
+    return {
+      maxDrawdown: round2(maxDrawdown),
+      profitFactor: round2(profitFactor),
+      avgWin: round2(avgWin),
+      avgLoss: round2(avgLoss),
+      winLossRatio: round2(winLossRatio),
+      largestWin: round2(largestWin),
+      consecutiveWins: maxConsecutiveWins,
+      consecutiveLosses: maxConsecutiveLosses,
+      recoveryFactor: round2(recoveryFactor)
+    };
+  }, [trades, scopedTrades, analyticsScope]);
 
   // Scoped Setup Analytics
   const scopedSetupRows = useMemo(() => {
@@ -1283,6 +1488,45 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
       { label: "Equity Curve (Net P&L)", data: scopedEquityDataPoints, tension: 0.25, borderColor: "#0ea5e9", backgroundColor: "rgba(14,165,233,0.15)", fill: true }
     ]
   };
+
+  // Drawdown Chart
+  const drawdownChart = useMemo(() => {
+    if (scopedTradesSorted.length === 0) {
+      return {
+        labels: [],
+        datasets: [{
+          label: "Drawdown",
+          data: [],
+          borderColor: "#dc2626",
+          backgroundColor: "rgba(220,38,38,0.1)",
+          fill: true,
+        }]
+      };
+    }
+
+    let peak = 0;
+    let runningTotal = 0;
+    const drawdownData = scopedTradesSorted.map(t => {
+      runningTotal += (t.meta?.net || 0);
+      if (runningTotal > peak) {
+        peak = runningTotal;
+      }
+      const drawdown = peak - runningTotal;
+      return Math.round(drawdown * 100) / 100;
+    });
+
+    return {
+      labels: scopedEquityLabels,
+      datasets: [{
+        label: "Drawdown",
+        data: drawdownData,
+        borderColor: "#dc2626",
+        backgroundColor: "rgba(220,38,38,0.1)",
+        fill: true,
+        tension: 0.25,
+      }]
+    };
+  }, [scopedTradesSorted, scopedEquityLabels]);
   // Sparkline for last 10 trades
   const last10 = tradesSorted.slice(-10);
   let s = 0;
@@ -1685,11 +1929,13 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 rrAnalysis={rrAnalysis}
                 monthlyChart={monthlyChart}
                 equityChart={scopedEquityChart}
+                drawdownChart={drawdownChart}
                 commonChartOptions={commonChartOptions}
                 formatNumber={formatNumber}
                 periodLabel={periodLabel}
                 periodControls={periodControls}
                 onSelectMonth={onSelectMonth}
+                advancedMetrics={scopedAdvancedMetrics}
               />
             )}
             
