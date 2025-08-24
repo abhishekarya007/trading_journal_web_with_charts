@@ -35,6 +35,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
   const [hoveredMetric, setHoveredMetric] = useState(null);
   const [enlargedChart, setEnlargedChart] = useState(null);
   const [chartData, setChartData] = useState(null);
+  const [showHeatmap, setShowHeatmap] = useState(false);
 
   useEffect(() => {
     setAnimateCharts(true);
@@ -480,12 +481,34 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
       </div>
 
       {/* Performance Heatmap */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-lg mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+              <IconBarChart className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Performance Heatmap</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Visualize your trading performance over time</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowHeatmap(true)}
+            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            Open Heatmap
+          </button>
+        </div>
+        <p className="text-slate-600 dark:text-slate-400 text-sm">
+          Click the button above to open the interactive performance heatmap with week, month, and year views.
+        </p>
+      </div>
+
+      {/* Performance Heatmap Modal */}
       <PerformanceHeatmap 
         trades={trades} 
-        onDateClick={(date, dayTrades) => {
-          // You can add functionality here to show trades for a specific day
-          console.log(`Clicked on ${date} with ${dayTrades.length} trades:`, dayTrades);
-        }}
+        isOpen={showHeatmap}
+        onClose={() => setShowHeatmap(false)}
       />
 
       {/* Period Controls */}
