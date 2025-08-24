@@ -438,20 +438,30 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
 
           {/* Best Trading Days */}
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <IconCalendar className="w-5 h-5 text-emerald-500" />
-              Best Trading Days
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
+                <IconCalendar className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Best Trading Days</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Your most profitable days of the week</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {analysis.patterns.bestDays?.slice(0, 3).map((day, index) => (
-                <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg p-3 border border-emerald-200 dark:border-emerald-700">
+                <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-700">
                   <div className="text-center">
-                    <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{day.day}</div>
-                    <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{day.winRate}%</div>
-                    <div className="text-xs text-emerald-600 dark:text-emerald-400">{day.trades} trades</div>
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <div className="w-6 h-6 bg-emerald-100 dark:bg-emerald-800 rounded-lg flex items-center justify-center">
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">{index + 1}</span>
+                      </div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">{day.day}</div>
+                    </div>
+                    <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">{day.winRate}%</div>
+                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{day.trades} trades</div>
                     {day.avgProfit && (
-                      <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                        ₹{day.avgProfit}
+                      <div className="text-xs text-slate-600 dark:text-slate-400 mt-2">
+                        ₹{day.avgProfit} avg profit
                       </div>
                     )}
                   </div>
@@ -463,20 +473,30 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
           {/* Worst Trading Days */}
           {analysis.patterns.worstDays && analysis.patterns.worstDays.length > 0 && (
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <IconAlertTriangle className="w-5 h-5 text-red-500" />
-                Days to Avoid
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                  <IconAlertTriangle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Days to Avoid</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Your least profitable days of the week</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {analysis.patterns.worstDays?.slice(0, 3).map((day, index) => (
-                  <div key={index} className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-lg p-3 border border-red-200 dark:border-red-700">
+                  <div key={index} className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-red-200 dark:border-red-700">
                     <div className="text-center">
-                      <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{day.day}</div>
-                      <div className="text-lg font-bold text-red-600 dark:text-red-400">{day.winRate}%</div>
-                      <div className="text-xs text-red-600 dark:text-red-400">{day.trades} trades</div>
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <div className="w-6 h-6 bg-red-100 dark:bg-red-800 rounded-lg flex items-center justify-center">
+                          <span className="text-red-600 dark:text-red-400 font-bold text-sm">{index + 1}</span>
+                        </div>
+                        <div className="text-sm font-semibold text-slate-900 dark:text-white">{day.day}</div>
+                      </div>
+                      <div className="text-2xl font-bold text-red-600 dark:text-red-400 mb-1">{day.winRate}%</div>
+                      <div className="text-xs text-red-600 dark:text-red-400 font-medium">{day.trades} trades</div>
                       {day.avgLoss && (
-                        <div className="text-xs text-red-600 dark:text-red-400 mt-1">
-                          ₹{day.avgLoss}
+                        <div className="text-xs text-slate-600 dark:text-slate-400 mt-2">
+                          ₹{day.avgLoss} avg loss
                         </div>
                       )}
                     </div>
@@ -486,45 +506,23 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
             </div>
           )}
 
-          {/* Setup Patterns - Compact Design */}
+          {/* Setup Patterns - Box Grid */}
           {analysis.patterns.setupPatterns && analysis.patterns.setupPatterns.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <IconTarget className="w-5 h-5 text-blue-500" />
-                Setup Performance
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+                  <IconTarget className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Setup Performance</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {analysis.patterns.setupPatterns.map((setup, index) => (
-                  <div key={index} className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-700 dark:to-gray-700 rounded-lg p-3 border border-slate-200 dark:border-slate-600">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-slate-900 dark:text-white">{setup.setup}</span>
-                          <span className="text-xs bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-400 px-2 py-1 rounded">
-                            {setup.total} trades
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
-                          <span>₹{setup.avgProfit || 0} avg</span>
-                          <span>•</span>
-                          <span>{setup.lastUsed || 'N/A'}</span>
-                        </div>
-                      </div>
-                      <div className="text-right ml-3">
-                        <div className="text-xl font-bold text-slate-900 dark:text-white">{setup.winRate}%</div>
-                        <div className="text-xs text-slate-600 dark:text-slate-400">Win Rate</div>
-                      </div>
-                    </div>
-                    
-                    {/* Compact Progress Bar */}
-                    <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-1.5">
-                      <div 
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          setup.winRate >= 70 ? 'bg-emerald-500' :
-                          setup.winRate >= 50 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${Math.min(setup.winRate, 100)}%` }}
-                      ></div>
+                  <div key={index} className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-3 border border-indigo-200 dark:border-indigo-700">
+                    <div className="text-center">
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{setup.setup}</div>
+                      <div className="text-lg font-bold text-indigo-600 dark:text-indigo-400 mb-1">{setup.winRate}%</div>
+                      <div className="text-xs text-indigo-600 dark:text-indigo-400 mb-1">{setup.total} trades</div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400">₹{setup.avgProfit || 0} avg</div>
                     </div>
                   </div>
                 ))}
@@ -555,20 +553,28 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
               )}
 
               {analysis.patterns.timePatterns.bestHours && (
-                <div>
+                <div className="space-y-8">
                   {/* Session Analysis */}
                   {analysis.patterns.timePatterns.sessionAnalysis && analysis.patterns.timePatterns.sessionAnalysis.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Market Session Performance</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+                          <IconClock className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-bold text-slate-900 dark:text-white">Market Session Performance</h4>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">How you perform during different market hours</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {analysis.patterns.timePatterns.sessionAnalysis.map((session, index) => (
-                          <div key={index} className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-3 border border-indigo-200 dark:border-indigo-700">
+                          <div key={index} className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-4 border border-indigo-200 dark:border-indigo-700">
                             <div className="text-center">
-                              <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{session.session}</div>
-                              <div className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{session.winRate}%</div>
-                              <div className="text-xs text-indigo-600 dark:text-indigo-400">{session.trades} trades</div>
-                              <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                                ₹{session.avgProfit} avg
+                              <div className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{session.session}</div>
+                              <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mb-1">{session.winRate}%</div>
+                              <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">{session.trades} trades</div>
+                              <div className="text-xs text-slate-600 dark:text-slate-400 mt-2">
+                                ₹{session.avgProfit} avg profit
                               </div>
                             </div>
                           </div>
@@ -579,36 +585,53 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
 
                   {/* Duration Analysis */}
                   {analysis.patterns.timePatterns.durationAnalysis && (
-                    <div className="mb-6">
-                      <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Trade Duration Analysis</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-3 border border-green-200 dark:border-green-700">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
+                          <IconClock className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-bold text-slate-900 dark:text-white">Trade Duration Analysis</h4>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Performance based on how long you hold positions</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 border border-green-200 dark:border-green-700">
                           <div className="text-center">
-                            <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Short (≤30min)</div>
-                            <div className="text-lg font-bold text-green-600 dark:text-green-400">{analysis.patterns.timePatterns.durationAnalysis.short.winRate}%</div>
-                            <div className="text-xs text-green-600 dark:text-green-400">{analysis.patterns.timePatterns.durationAnalysis.short.count} trades</div>
-                            <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                              ₹{analysis.patterns.timePatterns.durationAnalysis.short.avgProfit} avg
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <div className="text-sm font-semibold text-slate-900 dark:text-white">Short (≤30min)</div>
+                            </div>
+                            <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">{analysis.patterns.timePatterns.durationAnalysis.short.winRate}%</div>
+                            <div className="text-xs text-green-600 dark:text-green-400 font-medium">{analysis.patterns.timePatterns.durationAnalysis.short.count} trades</div>
+                            <div className="text-xs text-slate-600 dark:text-slate-400 mt-2">
+                              ₹{analysis.patterns.timePatterns.durationAnalysis.short.avgProfit} avg profit
                             </div>
                           </div>
                         </div>
-                        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-3 border border-yellow-200 dark:border-yellow-700">
+                        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 border border-yellow-200 dark:border-yellow-700">
                           <div className="text-center">
-                            <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Medium (30min-2h)</div>
-                            <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">{analysis.patterns.timePatterns.durationAnalysis.medium.winRate}%</div>
-                            <div className="text-xs text-yellow-600 dark:text-yellow-400">{analysis.patterns.timePatterns.durationAnalysis.medium.count} trades</div>
-                            <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                              ₹{analysis.patterns.timePatterns.durationAnalysis.medium.avgProfit} avg
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                              <div className="text-sm font-semibold text-slate-900 dark:text-white">Medium (30min-2h)</div>
+                            </div>
+                            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-1">{analysis.patterns.timePatterns.durationAnalysis.medium.winRate}%</div>
+                            <div className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">{analysis.patterns.timePatterns.durationAnalysis.medium.count} trades</div>
+                            <div className="text-xs text-slate-600 dark:text-slate-400 mt-2">
+                              ₹{analysis.patterns.timePatterns.durationAnalysis.medium.avgProfit} avg profit
                             </div>
                           </div>
                         </div>
-                        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+                        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
                           <div className="text-center">
-                            <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Long (&gt;2h)</div>
-                            <div className="text-lg font-bold text-blue-600 dark:text-blue-400">{analysis.patterns.timePatterns.durationAnalysis.long.winRate}%</div>
-                            <div className="text-xs text-blue-600 dark:text-blue-400">{analysis.patterns.timePatterns.durationAnalysis.long.count} trades</div>
-                            <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                              ₹{analysis.patterns.timePatterns.durationAnalysis.long.avgProfit} avg
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <div className="text-sm font-semibold text-slate-900 dark:text-white">Long (&gt;2h)</div>
+                            </div>
+                            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">{analysis.patterns.timePatterns.durationAnalysis.long.winRate}%</div>
+                            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">{analysis.patterns.timePatterns.durationAnalysis.long.count} trades</div>
+                            <div className="text-xs text-slate-600 dark:text-slate-400 mt-2">
+                              ₹{analysis.patterns.timePatterns.durationAnalysis.long.avgProfit} avg profit
                             </div>
                           </div>
                         </div>
@@ -617,39 +640,66 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
                   )}
                   
                   {/* Hourly Analysis */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Best Trading Hours</h4>
-                      <div className="space-y-2">
-                        {analysis.patterns.timePatterns.bestHours?.map((hour, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded">
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-900 dark:text-white font-medium">{hour.time}</span>
-                              <span className="text-xs text-slate-500 dark:text-slate-400">({hour.trades} trades)</span>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-emerald-600 dark:text-emerald-400 font-semibold">{hour.winRate}%</div>
-                              <div className="text-xs text-emerald-600 dark:text-emerald-400">₹{hour.avgProfit}</div>
-                            </div>
-                          </div>
-                        ))}
+                  <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                        <IconClock className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-bold text-slate-900 dark:text-white">Trading Hour Performance</h4>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Your best and worst trading hours</p>
                       </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Worst Trading Hours</h4>
-                      <div className="space-y-2">
-                        {analysis.patterns.timePatterns.worstHours?.map((hour, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded">
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-900 dark:text-white font-medium">{hour.time}</span>
-                              <span className="text-xs text-slate-500 dark:text-slate-400">({hour.trades} trades)</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                          <h5 className="font-semibold text-slate-900 dark:text-white">Best Trading Hours</h5>
+                        </div>
+                        <div className="space-y-3">
+                          {analysis.patterns.timePatterns.bestHours?.map((hour, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-800 rounded-lg flex items-center justify-center">
+                                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">{index + 1}</span>
+                                </div>
+                                <div>
+                                  <div className="text-slate-900 dark:text-white font-medium">{hour.time}</div>
+                                  <div className="text-xs text-slate-500 dark:text-slate-400">{hour.trades} trades</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-emerald-600 dark:text-emerald-400 font-bold text-lg">{hour.winRate}%</div>
+                                <div className="text-xs text-emerald-600 dark:text-emerald-400">₹{hour.avgProfit}</div>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-red-600 dark:text-red-400 font-semibold">{hour.winRate}%</div>
-                              <div className="text-xs text-red-600 dark:text-red-400">₹{hour.avgProfit}</div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                          <h5 className="font-semibold text-slate-900 dark:text-white">Worst Trading Hours</h5>
+                        </div>
+                        <div className="space-y-3">
+                          {analysis.patterns.timePatterns.worstHours?.map((hour, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-red-100 dark:bg-red-800 rounded-lg flex items-center justify-center">
+                                  <span className="text-red-600 dark:text-red-400 font-bold text-sm">{index + 1}</span>
+                                </div>
+                                <div>
+                                  <div className="text-slate-900 dark:text-white font-medium">{hour.time}</div>
+                                  <div className="text-xs text-slate-500 dark:text-slate-400">{hour.trades} trades</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-red-600 dark:text-red-400 font-bold text-lg">{hour.winRate}%</div>
+                                <div className="text-xs text-red-600 dark:text-red-400">₹{hour.avgProfit}</div>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
