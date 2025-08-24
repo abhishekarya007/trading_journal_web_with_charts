@@ -225,12 +225,19 @@ class AITradingAssistant {
 
   // Identify trading patterns
   identifyPatterns(trades, psychologyData) {
+    const bestDays = this.findBestTradingDays(trades);
+    const worstDays = this.findWorstTradingDays(trades);
+    
+    console.log('Best Days:', bestDays);
+    console.log('Worst Days:', worstDays);
+    
     const patterns = {
-      bestDays: this.findBestTradingDays(trades),
-      worstDays: this.findWorstTradingDays(trades),
+      bestDays: bestDays,
+      worstDays: worstDays,
       timePatterns: this.analyzeTimePatterns(trades),
       emotionalPatterns: this.analyzeEmotionalPatterns(trades, psychologyData),
-      setupPatterns: this.analyzeSetupPatterns(trades)
+      setupPatterns: this.analyzeSetupPatterns(trades),
+      averageTradesPerDay: this.calculateAverageTradesPerDay(trades)
     };
     
     return patterns;
@@ -362,18 +369,45 @@ class AITradingAssistant {
     });
     
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const dayScores = Object.entries(tradesByDay).map(([day, dayTrades]) => {
-      const winRate = this.calculateWinRate(dayTrades);
-      const avgProfit = dayTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0) / dayTrades.length;
-      return { day: dayNames[day], winRate, avgProfit, trades: dayTrades.length };
-    });
+    const dayScores = Object.entries(tradesByDay)
+      .filter(([day, dayTrades]) => dayTrades.length >= 2) // Only include days with at least 2 trades
+      .map(([day, dayTrades]) => {
+        const winRate = this.calculateWinRate(dayTrades);
+        const avgProfit = dayTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0) / dayTrades.length;
+        return { 
+          day: dayNames[day], 
+          winRate, 
+          avgProfit: Math.round(avgProfit), 
+          trades: dayTrades.length 
+        };
+      });
     
     return dayScores.sort((a, b) => b.winRate - a.winRate);
   }
 
   findWorstTradingDays(trades) {
-    const bestDays = this.findBestTradingDays(trades);
-    return bestDays.reverse();
+    const tradesByDay = {};
+    trades.forEach(trade => {
+      const day = new Date(trade.date).getDay();
+      if (!tradesByDay[day]) tradesByDay[day] = [];
+      tradesByDay[day].push(trade);
+    });
+    
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayScores = Object.entries(tradesByDay)
+      .filter(([day, dayTrades]) => dayTrades.length >= 2) // Only include days with at least 2 trades
+      .map(([day, dayTrades]) => {
+        const winRate = this.calculateWinRate(dayTrades);
+        const avgLoss = dayTrades.reduce((sum, t) => sum + (t.meta?.net || 0), 0) / dayTrades.length;
+        return { 
+          day: dayNames[day], 
+          winRate, 
+          avgLoss: Math.round(avgLoss), 
+          trades: dayTrades.length 
+        };
+      });
+    
+    return dayScores.sort((a, b) => a.winRate - b.winRate);
   }
 
   analyzeTimePatterns(trades) {
@@ -394,17 +428,34 @@ class AITradingAssistant {
     const setups = {};
     trades.forEach(trade => {
       const setup = trade.setup || 'Unknown';
-      if (!setups[setup]) setups[setup] = { total: 0, wins: 0 };
+      if (!setups[setup]) {
+        setups[setup] = { 
+          total: 0, 
+          wins: 0, 
+          profits: [],
+          dates: []
+        };
+      }
       setups[setup].total++;
+      setups[setup].profits.push(trade.meta?.net || 0);
+      setups[setup].dates.push(new Date(trade.date));
       if ((trade.meta?.net || 0) > 0) setups[setup].wins++;
     });
     
-    return Object.entries(setups).map(([setup, data]) => ({
-      setup,
-      total: data.total,
-      wins: data.wins,
-      winRate: Math.round((data.wins / data.total) * 100)
-    }));
+    return Object.entries(setups).map(([setup, data]) => {
+      const avgProfit = data.profits.reduce((sum, profit) => sum + profit, 0) / data.profits.length;
+      const lastUsed = data.dates.length > 0 ? 
+        data.dates.sort((a, b) => b - a)[0].toLocaleDateString() : 'N/A';
+      
+      return {
+        setup,
+        total: data.total,
+        wins: data.wins,
+        winRate: Math.round((data.wins / data.total) * 100),
+        avgProfit: Math.round(avgProfit),
+        lastUsed: lastUsed
+      };
+    }).sort((a, b) => b.winRate - a.winRate); // Sort by win rate descending
   }
 
   calculatePerformanceMetrics(trades) {

@@ -442,20 +442,19 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
               <IconCalendar className="w-5 h-5 text-emerald-500" />
               Best Trading Days
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {analysis.patterns.bestDays?.slice(0, 6).map((day, index) => (
-                <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg p-4 border border-emerald-200 dark:border-emerald-700">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-slate-900 dark:text-white">{day.day}</span>
-                    <span className="text-sm text-emerald-600 dark:text-emerald-400">{day.trades} trades</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {analysis.patterns.bestDays?.slice(0, 3).map((day, index) => (
+                <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg p-3 border border-emerald-200 dark:border-emerald-700">
+                  <div className="text-center">
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{day.day}</div>
+                    <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{day.winRate}%</div>
+                    <div className="text-xs text-emerald-600 dark:text-emerald-400">{day.trades} trades</div>
+                    {day.avgProfit && (
+                      <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                        ₹{day.avgProfit}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">{day.winRate}%</div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Win Rate</p>
-                  {day.avgProfit && (
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                      Avg: ₹{day.avgProfit}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>
@@ -468,72 +467,64 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
                 <IconAlertTriangle className="w-5 h-5 text-red-500" />
                 Days to Avoid
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {analysis.patterns.worstDays?.slice(0, 3).map((day, index) => (
-                  <div key={index} className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-lg p-4 border border-red-200 dark:border-red-700">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold text-slate-900 dark:text-white">{day.day}</span>
-                      <span className="text-sm text-red-600 dark:text-red-400">{day.trades} trades</span>
+                  <div key={index} className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-lg p-3 border border-red-200 dark:border-red-700">
+                    <div className="text-center">
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{day.day}</div>
+                      <div className="text-lg font-bold text-red-600 dark:text-red-400">{day.winRate}%</div>
+                      <div className="text-xs text-red-600 dark:text-red-400">{day.trades} trades</div>
+                      {day.avgLoss && (
+                        <div className="text-xs text-red-600 dark:text-red-400 mt-1">
+                          ₹{day.avgLoss}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-2xl font-bold text-red-600 dark:text-red-400 mb-1">{day.winRate}%</div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Win Rate</p>
-                    {day.avgLoss && (
-                      <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                        Avg: ₹{day.avgLoss}
-                      </p>
-                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Setup Patterns with Enhanced Details */}
+          {/* Setup Patterns - Compact Design */}
           {analysis.patterns.setupPatterns && analysis.patterns.setupPatterns.length > 0 && (
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <IconTarget className="w-5 h-5 text-blue-500" />
-                Setup Performance Analysis
+                Setup Performance
               </h3>
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {analysis.patterns.setupPatterns.map((setup, index) => (
-                  <div key={index} className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-700 dark:to-gray-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <span className="font-semibold text-slate-900 dark:text-white text-lg">{setup.setup}</span>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">{setup.wins} wins out of {setup.total} trades</p>
+                  <div key={index} className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-700 dark:to-gray-700 rounded-lg p-3 border border-slate-200 dark:border-slate-600">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-slate-900 dark:text-white">{setup.setup}</span>
+                          <span className="text-xs bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-400 px-2 py-1 rounded">
+                            {setup.total} trades
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
+                          <span>₹{setup.avgProfit || 0} avg</span>
+                          <span>•</span>
+                          <span>{setup.lastUsed || 'N/A'}</span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-slate-900 dark:text-white">{setup.winRate}%</div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">Success Rate</p>
+                      <div className="text-right ml-3">
+                        <div className="text-xl font-bold text-slate-900 dark:text-white">{setup.winRate}%</div>
+                        <div className="text-xs text-slate-600 dark:text-slate-400">Win Rate</div>
                       </div>
                     </div>
                     
-                    {/* Progress Bar */}
-                    <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2 mb-3">
+                    {/* Compact Progress Bar */}
+                    <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-1.5">
                       <div 
-                        className={`h-2 rounded-full ${
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
                           setup.winRate >= 70 ? 'bg-emerald-500' :
                           setup.winRate >= 50 ? 'bg-yellow-500' : 'bg-red-500'
                         }`}
                         style={{ width: `${Math.min(setup.winRate, 100)}%` }}
                       ></div>
-                    </div>
-                    
-                    {/* Additional Stats */}
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-slate-600 dark:text-slate-400">Avg Profit:</span>
-                        <span className="ml-2 font-semibold text-slate-900 dark:text-white">
-                          ₹{setup.avgProfit || 0}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-slate-600 dark:text-slate-400">Last Used:</span>
-                        <span className="ml-2 font-semibold text-slate-900 dark:text-white">
-                          {setup.lastUsed || 'N/A'}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 ))}
