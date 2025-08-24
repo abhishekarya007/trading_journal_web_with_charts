@@ -529,6 +529,95 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
         </div>
       </div>
 
+      {/* Monthly Summary Table */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <IconCalendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Monthly Summary</h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Click on any month to filter data</p>
+            </div>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px]">
+            <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800">
+              <tr>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Month
+                </th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Trades
+                </th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Win Rate
+                </th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Total Net
+                </th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Average
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+              {allMonthRows.length ? allMonthRows.map((m, index) => (
+                <tr 
+                  key={m.month} 
+                  className={`hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg cursor-pointer ${
+                    activeMonthLabel === m.month ? 'bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20' : ''
+                  }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  onClick={() => onSelectMonth(m.month)}
+                >
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base">{m.month}</span>
+                      {activeMonthLabel === m.month && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-2">
+                      <IconUsers className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                      <span className="font-medium text-sm sm:text-base">{m.total}</span>
+                    </div>
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <span className={`font-semibold text-sm sm:text-base ${getWinRateColor(m.winRate)}`}>
+                      {m.winRate}%
+                    </span>
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <span className={`font-bold text-sm sm:text-base ${getPerformanceColor(m.totalNet)}`}>
+                      ₹{formatNumber(m.totalNet)}
+                    </span>
+                  </td>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4">
+                    <span className={`font-semibold text-sm sm:text-base ${getPerformanceColor(m.avg)}`}>
+                      ₹{formatNumber(m.avg)}
+                    </span>
+                  </td>
+                </tr>
+              )) : (
+                <tr>
+                  <td colSpan="5" className="px-6 py-8 text-center text-slate-500">
+                    <div className="flex flex-col items-center gap-2">
+                      <IconCalendar className="w-8 h-8 text-slate-300" />
+                      <p>No trades yet</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Monthly P&L Chart */}
@@ -699,95 +788,6 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Monthly Summary Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <IconCalendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Monthly Summary</h3>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Click on any month to filter data</p>
-            </div>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[600px]">
-            <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800">
-              <tr>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Month
-                </th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Trades
-                </th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Win Rate
-                </th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Total Net
-                </th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                  Average
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-              {allMonthRows.length ? allMonthRows.map((m, index) => (
-                <tr 
-                  key={m.month} 
-                  className={`hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg cursor-pointer ${
-                    activeMonthLabel === m.month ? 'bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20' : ''
-                  }`}
-                  style={{ animationDelay: `${index * 50}ms` }}
-                  onClick={() => onSelectMonth(m.month)}
-                >
-                  <td className="px-3 sm:px-6 py-3 sm:py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base">{m.month}</span>
-                      {activeMonthLabel === m.month && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4">
-                    <div className="flex items-center gap-2">
-                      <IconUsers className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
-                      <span className="font-medium text-sm sm:text-base">{m.total}</span>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4">
-                    <span className={`font-semibold text-sm sm:text-base ${getWinRateColor(m.winRate)}`}>
-                      {m.winRate}%
-                    </span>
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4">
-                    <span className={`font-bold text-sm sm:text-base ${getPerformanceColor(m.totalNet)}`}>
-                      ₹{formatNumber(m.totalNet)}
-                    </span>
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4">
-                    <span className={`font-semibold text-sm sm:text-base ${getPerformanceColor(m.avg)}`}>
-                      ₹{formatNumber(m.avg)}
-                    </span>
-                  </td>
-                </tr>
-              )) : (
-                <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-slate-500">
-                    <div className="flex flex-col items-center gap-2">
-                      <IconCalendar className="w-8 h-8 text-slate-300" />
-                      <p>No trades yet</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
         </div>
       </div>
 
