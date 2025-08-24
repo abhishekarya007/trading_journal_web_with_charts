@@ -2219,12 +2219,12 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
         {/* z-index hierarchy: 
             z-[100] - Timer settings dropdown (highest)
             z-[90]  - Timer backdrop overlay
-            z-50    - Export dropdown
+            z-50    - Export dropdown & Mobile sidebar
             z-30    - Export container
-            z-20    - Header & Timer container
-            z-10    - Navigation sidebar
+            z-10    - Header & Timer container
+            z-0     - Desktop sidebar (relative positioning)
         */}
-        <header className="relative bg-gradient-to-r from-white via-slate-50 to-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-lg z-20">
+        <header className="relative bg-gradient-to-r from-white via-slate-50 to-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-lg z-10">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full translate-y-12 -translate-x-12 animate-bounce"></div>

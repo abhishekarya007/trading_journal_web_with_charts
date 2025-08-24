@@ -176,16 +176,16 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       )}
       
       {/* Navigation Sidebar */}
-      <nav className={`bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-500 flex flex-col shadow-xl ${
+      <nav className={`bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-500 flex flex-col shadow-xl overflow-hidden ${
         mobileOpen 
-          ? `fixed inset-y-0 left-0 z-50 ${isCollapsed ? 'w-20' : 'w-80 sm:w-72'}` 
+          ? `fixed top-0 left-0 bottom-0 z-50 ${isCollapsed ? 'w-20' : 'w-80 sm:w-72'}` 
           : isCollapsed 
-            ? 'hidden lg:flex lg:w-20 z-10' 
-            : 'hidden lg:flex lg:w-72 z-10'
+            ? 'hidden lg:flex lg:w-20 lg:relative lg:z-0' 
+            : 'hidden lg:flex lg:w-72 lg:relative lg:z-0'
       }`}>
         
         {/* Navigation Header */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-4 sm:p-6 text-white">
+        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-4 sm:p-6 text-white flex-shrink-0">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-white/10 rounded-full -translate-y-8 sm:-translate-y-10 translate-x-8 sm:translate-x-10 animate-pulse"></div>
           <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 bg-white/10 rounded-full translate-y-6 sm:translate-y-8 -translate-x-6 sm:-translate-x-8 animate-bounce"></div>
@@ -221,7 +221,7 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
         </div>
 
         {/* Navigation Items */}
-        <div className="flex-1 p-3 sm:p-4">
+        <div className="flex-1 p-3 sm:p-4 overflow-y-auto">
           <div className="space-y-1.5 sm:space-y-2">
             {navigationItems.map((item, index) => {
               const Icon = item.icon;
@@ -294,7 +294,7 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
 
         {/* Footer */}
         {!isCollapsed && (
-          <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-700">
+          <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-700 flex-shrink-0">
             <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 rounded-xl p-3 sm:p-4">
               <div className="flex items-center gap-2 sm:gap-3 mb-2">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
@@ -315,7 +315,7 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
 
         {/* Collapsed Footer */}
         {isCollapsed && (
-          <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-700">
+          <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-700 flex-shrink-0">
             <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mx-auto">
               <IconSparkles className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
             </div>
