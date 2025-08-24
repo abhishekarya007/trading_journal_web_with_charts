@@ -22,7 +22,7 @@ import GrowthCalculatorTab from "./components/GrowthCalculatorTab";
 import ReportsTab from "./components/ReportsTab";
 import DailyPsychologyTab from "./components/DailyPsychologyTab";
 import GamificationTab from "./components/GamificationTab";
-// import AITradingAssistantTab from "./components/AITradingAssistantTab";
+import AITradingAssistantTab from "./components/AITradingAssistantTab";
 // import SmartAutomationTab from "./components/SmartAutomationTab";
 import CooldownTimer from "./components/CooldownTimer";
 import Navigation from "./components/Navigation";
@@ -2538,13 +2538,13 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
               />
             )}
             
-                    {/* {activeTab === 'ai-assistant' && (
+                    {activeTab === 'ai-assistant' && (
           <AITradingAssistantTab
             trades={trades}
             psychologyData={psychologyData}
             formatNumber={formatNumber}
           />
-        )} */}
+        )}
             
                     {/* {activeTab === 'smart-automation' && (
           <SmartAutomationTab
