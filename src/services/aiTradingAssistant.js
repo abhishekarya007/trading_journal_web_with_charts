@@ -327,15 +327,20 @@ class AITradingAssistant {
     let positiveCount = 0;
     
     recentEntries.forEach(entry => {
-      if (entry && entry.entry && typeof entry.entry === 'string') {
-        const entryText = entry.entry.toLowerCase();
-        emotionalWords.forEach(word => {
-          if (entryText.includes(word)) negativeCount++;
-        });
-        positiveWords.forEach(word => {
-          if (entryText.includes(word)) positiveCount++;
-        });
-      }
+      // Check all three fields: psychology, emotions, and mistakes
+      const fieldsToCheck = ['psychology', 'emotions', 'mistakes'];
+      
+      fieldsToCheck.forEach(field => {
+        if (entry && entry[field] && typeof entry[field] === 'string') {
+          const entryText = entry[field].toLowerCase();
+          emotionalWords.forEach(word => {
+            if (entryText.includes(word)) negativeCount++;
+          });
+          positiveWords.forEach(word => {
+            if (entryText.includes(word)) positiveCount++;
+          });
+        }
+      });
     });
     
     const totalEmotions = negativeCount + positiveCount;
@@ -371,9 +376,21 @@ class AITradingAssistant {
   analyzeEmotionalTrading(trades, psychologyData) {
     // Simple heuristic: trades made on days with negative psychology entries
     const negativePsychologyDays = psychologyData
-      .filter(entry => entry && entry.entry && typeof entry.entry === 'string')
       .filter(entry => {
-        const entryText = entry.entry.toLowerCase();
+        // Check if any of the three fields contain negative emotions
+        const fieldsToCheck = ['psychology', 'emotions', 'mistakes'];
+        return fieldsToCheck.some(field => 
+          entry && entry[field] && typeof entry[field] === 'string'
+        );
+      })
+      .filter(entry => {
+        // Check all three fields for negative emotions
+        const fieldsToCheck = ['psychology', 'emotions', 'mistakes'];
+        const entryText = fieldsToCheck
+          .map(field => entry[field] || '')
+          .join(' ')
+          .toLowerCase();
+        
         return entryText.includes('fear') || 
                entryText.includes('greed') ||
                entryText.includes('panic') ||
@@ -688,14 +705,19 @@ class AITradingAssistant {
     const emotionCounts = {};
     
     recentEntries.forEach(entry => {
-      if (entry && entry.entry && typeof entry.entry === 'string') {
-        const entryText = entry.entry.toLowerCase();
-        emotionalWords.forEach(word => {
-          if (entryText.includes(word)) {
-            emotionCounts[word] = (emotionCounts[word] || 0) + 1;
-          }
-        });
-      }
+      // Check all three fields: psychology, emotions, and mistakes
+      const fieldsToCheck = ['psychology', 'emotions', 'mistakes'];
+      
+      fieldsToCheck.forEach(field => {
+        if (entry && entry[field] && typeof entry[field] === 'string') {
+          const entryText = entry[field].toLowerCase();
+          emotionalWords.forEach(word => {
+            if (entryText.includes(word)) {
+              emotionCounts[word] = (emotionCounts[word] || 0) + 1;
+            }
+          });
+        }
+      });
     });
     
     return {

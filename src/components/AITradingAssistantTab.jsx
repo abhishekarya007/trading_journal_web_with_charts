@@ -33,9 +33,7 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
     setIsAnalyzing(true);
     // Simulate analysis time for better UX
     setTimeout(() => {
-      console.log('Analyzing data with:', { trades: trades.length, psychologyData: psychologyData.length });
       const result = aiTradingAssistant.analyzeTradingPerformance(trades, psychologyData);
-      console.log('Analysis result:', result);
       setAnalysis(result);
       setIsAnalyzing(false);
     }, 500);
