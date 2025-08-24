@@ -27,7 +27,8 @@ import {
   IconCheck,
   IconX,
   IconChevronUp,
-  IconChevronDown
+  IconChevronDown,
+  IconClock
 } from './icons';
 
 const TradesTab = ({ 
@@ -731,257 +732,290 @@ const TradesTab = ({
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Basic Trade Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    value={form.date}
-                    onChange={(e) => setForm({...form, date: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
+            <form onSubmit={handleSubmit} className="p-6 space-y-8">
+              {/* Basic Trade Information Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-700">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                    <IconTarget className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Basic Information</h3>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Symbol
-                  </label>
-                  <input
-                    type="text"
-                    value={form.symbol}
-                    onChange={(e) => setForm({...form, symbol: e.target.value})}
-                    placeholder="e.g., RELIANCE, TCS"
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Trade Type and Quantity */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Trade Type
-                  </label>
-                  <select
-                    value={form.type}
-                    onChange={(e) => setForm({...form, type: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  >
-                    <option value="Long">Long</option>
-                    <option value="Short">Short</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value={form.qty}
-                    onChange={(e) => setForm({...form, qty: e.target.value})}
-                    placeholder="Number of shares"
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Risk to Reward
-                  </label>
-                  <input
-                    type="text"
-                    value={form.riskReward}
-                    onChange={(e) => setForm({...form, riskReward: e.target.value})}
-                    placeholder="e.g., 1:2"
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      value={form.date}
+                      onChange={(e) => setForm({...form, date: e.target.value})}
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Symbol
+                    </label>
+                    <input
+                      type="text"
+                      value={form.symbol}
+                      onChange={(e) => setForm({...form, symbol: e.target.value})}
+                      placeholder="e.g., RELIANCE, TCS"
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Entry and Exit Times */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Entry Time
-                  </label>
-                  <input
-                    type="time"
-                    value={form.entryTime || ''}
-                    onChange={(e) => setForm({...form, entryTime: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  />
+              {/* Trade Details Section */}
+              <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-6 border border-emerald-200 dark:border-emerald-700">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg flex items-center justify-center">
+                    <IconTrendingUp className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Trade Details</h3>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Exit Time
-                  </label>
-                  <input
-                    type="time"
-                    value={form.exitTime || ''}
-                    onChange={(e) => setForm({...form, exitTime: e.target.value})}
-                    min={form.entryTime || undefined}
-                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                      form.entryTime && form.exitTime && form.exitTime <= form.entryTime 
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                        : 'border-slate-200 dark:border-slate-600'
-                    }`}
-                  />
-                  {form.entryTime && form.exitTime && form.exitTime <= form.entryTime && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Exit time must be after entry time for day trading
-                    </p>
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Trade Type
+                    </label>
+                    <select
+                      value={form.type}
+                      onChange={(e) => setForm({...form, type: e.target.value})}
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    >
+                      <option value="Long">Long</option>
+                      <option value="Short">Short</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      value={form.qty}
+                      onChange={(e) => setForm({...form, qty: e.target.value})}
+                      placeholder="Number of shares"
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Risk to Reward
+                    </label>
+                    <input
+                      type="text"
+                      value={form.riskReward}
+                      onChange={(e) => setForm({...form, riskReward: e.target.value})}
+                      placeholder="e.g., 1:2"
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Buy Price
+                    </label>
+                    <input
+                      type="number"
+                      value={form.buy}
+                      onChange={(e) => setForm({...form, buy: e.target.value})}
+                      placeholder="Buy price per share"
+                      step="0.01"
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Sell Price
+                    </label>
+                    <input
+                      type="number"
+                      value={form.sell}
+                      onChange={(e) => setForm({...form, sell: e.target.value})}
+                      placeholder="Sell price per share"
+                      step="0.01"
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Buy and Sell Prices */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Buy Price
-                  </label>
-                  <input
-                    type="number"
-                    value={form.buy}
-                    onChange={(e) => setForm({...form, buy: e.target.value})}
-                    placeholder="Buy price per share"
-                    step="0.01"
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
+              {/* Timing Section */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 border border-purple-200 dark:border-purple-700">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <IconClock className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Timing</h3>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Sell Price
-                  </label>
-                  <input
-                    type="number"
-                    value={form.sell}
-                    onChange={(e) => setForm({...form, sell: e.target.value})}
-                    placeholder="Sell price per share"
-                    step="0.01"
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Analysis Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Trend
-                  </label>
-                  <select
-                    value={form.trend}
-                    onChange={(e) => setForm({...form, trend: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  >
-                    <option value="Up">Up</option>
-                    <option value="Down">Down</option>
-                    <option value="Sideways">Sideways</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Rule Followed
-                  </label>
-                  <select
-                    value={form.rule}
-                    onChange={(e) => setForm({...form, rule: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  >
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="Partially">Partially</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Emotion
-                  </label>
-                  <select
-                    value={form.emotion}
-                    onChange={(e) => setForm({...form, emotion: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  >
-                    <option value="">Select emotion...</option>
-                    <option value="Confident">Confident</option>
-                    <option value="Fearful">Fearful</option>
-                    <option value="Greedy">Greedy</option>
-                    <option value="Patient">Patient</option>
-                    <option value="Impatient">Impatient</option>
-                    <option value="FOMO">FOMO</option>
-                    <option value="Revenge">Revenge Trading</option>
-                    <option value="Calm">Calm</option>
-                    <option value="Excited">Excited</option>
-                    <option value="Stressed">Stressed</option>
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Entry Time
+                    </label>
+                    <input
+                      type="time"
+                      value={form.entryTime || ''}
+                      onChange={(e) => setForm({...form, entryTime: e.target.value})}
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Exit Time
+                    </label>
+                    <input
+                      type="time"
+                      value={form.exitTime || ''}
+                      onChange={(e) => setForm({...form, exitTime: e.target.value})}
+                      min={form.entryTime || undefined}
+                      className={`w-full px-3 py-2.5 border rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors ${
+                        form.entryTime && form.exitTime && form.exitTime <= form.entryTime 
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                          : 'border-slate-200 dark:border-slate-600'
+                      }`}
+                    />
+                    {form.entryTime && form.exitTime && form.exitTime <= form.entryTime && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Exit time must be after entry time for day trading
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Setup and Remarks */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Setup
-                  </label>
-                  <select
-                    value={form.setup}
-                    onChange={(e) => setForm({...form, setup: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  >
-                    <option value="">Select setup...</option>
-                    <option value="Breakout">Breakout</option>
-                    <option value="Breakdown">Breakdown</option>
-                    <option value="Pullback">Pullback</option>
-                    <option value="Support">Support</option>
-                    <option value="Resistance">Resistance</option>
-                    <option value="Gap">Gap</option>
-                    <option value="Liquidity-Sweep">Liquidity-Sweep</option>
-                    <option value="Trendline">Trendline</option>
-                    <option value="M-Pattern">M-Pattern</option>
-                    <option value="W-Pattern">W-Pattern</option>
-                    <option value="Pin-Bar">Pin-Bar</option>
-                    <option value="Magic-Candle">Magic-candle</option>
-                    <option value="Trap">Trap</option>
-                    <option value="Scalping">Scalping</option>
-                    <option value="Swing">Swing</option>
-                    <option value="Other">Other</option>
-                  </select>
+              {/* Analysis Section */}
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-6 border border-orange-200 dark:border-orange-700">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                    <IconChartBar className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Analysis</h3>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Remarks
-                  </label>
-                  <input
-                    type="text"
-                    value={form.remarks}
-                    onChange={(e) => setForm({...form, remarks: e.target.value})}
-                    placeholder="Additional notes..."
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Trend
+                    </label>
+                    <select
+                      value={form.trend}
+                      onChange={(e) => setForm({...form, trend: e.target.value})}
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    >
+                      <option value="Up">Up</option>
+                      <option value="Down">Down</option>
+                      <option value="Sideways">Sideways</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Rule Followed
+                    </label>
+                    <select
+                      value={form.rule}
+                      onChange={(e) => setForm({...form, rule: e.target.value})}
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    >
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                      <option value="Partially">Partially</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Emotion
+                    </label>
+                    <select
+                      value={form.emotion}
+                      onChange={(e) => setForm({...form, emotion: e.target.value})}
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    >
+                      <option value="">Select emotion...</option>
+                      <option value="Confident">Confident</option>
+                      <option value="Fearful">Fearful</option>
+                      <option value="Greedy">Greedy</option>
+                      <option value="Patient">Patient</option>
+                      <option value="Impatient">Impatient</option>
+                      <option value="FOMO">FOMO</option>
+                      <option value="Revenge">Revenge Trading</option>
+                      <option value="Calm">Calm</option>
+                      <option value="Excited">Excited</option>
+                      <option value="Stressed">Stressed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Setup
+                    </label>
+                    <select
+                      value={form.setup}
+                      onChange={(e) => setForm({...form, setup: e.target.value})}
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    >
+                      <option value="">Select setup...</option>
+                      <option value="Breakout">Breakout</option>
+                      <option value="Breakdown">Breakdown</option>
+                      <option value="Pullback">Pullback</option>
+                      <option value="Support">Support</option>
+                      <option value="Resistance">Resistance</option>
+                      <option value="Gap">Gap</option>
+                      <option value="Liquidity-Sweep">Liquidity-Sweep</option>
+                      <option value="Trendline">Trendline</option>
+                      <option value="M-Pattern">M-Pattern</option>
+                      <option value="W-Pattern">W-Pattern</option>
+                      <option value="Pin-Bar">Pin-Bar</option>
+                      <option value="Magic-Candle">Magic-candle</option>
+                      <option value="Trap">Trap</option>
+                      <option value="Scalping">Scalping</option>
+                      <option value="Swing">Swing</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Remarks
+                    </label>
+                    <input
+                      type="text"
+                      value={form.remarks}
+                      onChange={(e) => setForm({...form, remarks: e.target.value})}
+                      placeholder="Additional notes..."
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Screenshots */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Screenshots
-                </label>
+              {/* Screenshots Section */}
+              <div className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800 dark:to-gray-800 rounded-xl p-6 border border-slate-200 dark:border-slate-600">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-slate-500 to-gray-500 rounded-lg flex items-center justify-center">
+                    <IconDownload className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Screenshots</h3>
+                </div>
                 <ScreenshotManager
                   screenshots={form.screenshots || []}
                   onChange={(screenshots) => setForm({...form, screenshots})}
