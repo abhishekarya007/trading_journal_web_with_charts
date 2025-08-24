@@ -47,7 +47,7 @@ ChartJS.register(
 
 const STORAGE_KEY = "trading_journal_trades_v1";
 
-// Money sound function - Updated for new project name
+// Money sound function - Updated for new project name v2
 function playSuccessSound() {
   try {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
