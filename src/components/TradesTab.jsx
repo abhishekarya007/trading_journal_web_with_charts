@@ -828,8 +828,18 @@ const TradesTab = ({
                     type="time"
                     value={form.exitTime || ''}
                     onChange={(e) => setForm({...form, exitTime: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    min={form.entryTime || undefined}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                      form.entryTime && form.exitTime && form.exitTime <= form.entryTime 
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                        : 'border-slate-200 dark:border-slate-600'
+                    }`}
                   />
+                  {form.entryTime && form.exitTime && form.exitTime <= form.entryTime && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Exit time must be after entry time for day trading
+                    </p>
+                  )}
                 </div>
               </div>
 

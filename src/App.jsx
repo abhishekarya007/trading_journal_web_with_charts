@@ -169,6 +169,8 @@ function blankTrade() {
     riskReward: "",
     setup: "",
     remarks: "",
+    entryTime: "",
+    exitTime: "",
     screenshots: [] // Array of {id, name, thumbnail, fullSize, fileName}
   };
 }

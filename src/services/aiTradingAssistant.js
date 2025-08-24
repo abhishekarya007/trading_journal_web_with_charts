@@ -412,43 +412,218 @@ class AITradingAssistant {
 
   analyzeTimePatterns(trades) {
     // Analyze time of day patterns
-    const tradesWithTime = trades.filter(trade => trade.entryTime && trade.exitTime);
+    console.log('Analyzing time patterns for', trades.length, 'trades');
+    
+    // Debug: Log all trades to see their structure
+    trades.forEach((trade, index) => {
+      console.log(`Trade ${index}:`, {
+        id: trade.id,
+        entryTime: trade.entryTime,
+        exitTime: trade.exitTime,
+        hasEntryTime: !!trade.entryTime,
+        hasExitTime: !!trade.exitTime,
+        entryTimeType: typeof trade.entryTime,
+        exitTimeType: typeof trade.exitTime
+      });
+    });
+    
+    const tradesWithTime = trades.filter(trade => {
+      // More flexible validation - check if times exist and are strings
+      const hasValidTimes = trade.entryTime && trade.exitTime && 
+                           typeof trade.entryTime === 'string' && 
+                           typeof trade.exitTime === 'string';
+      
+      if (!hasValidTimes) {
+        console.log('Trade filtered out - missing or invalid time data:', {
+          id: trade.id,
+          entryTime: trade.entryTime,
+          exitTime: trade.exitTime
+        });
+        return false;
+      }
+      
+      // Check if times are in HH:MM or HH:MM:SS format (more flexible)
+      const timeRegex = /^\d{1,2}:\d{2}(:\d{2})?$/;
+      const validFormat = timeRegex.test(trade.entryTime) && timeRegex.test(trade.exitTime);
+      
+      if (!validFormat) {
+        console.log('Trade filtered out - invalid time format:', {
+          id: trade.id,
+          entryTime: trade.entryTime,
+          exitTime: trade.exitTime
+        });
+        return false;
+      }
+      
+      return true;
+    });
+    
+    console.log('Trades with valid time data:', tradesWithTime.length);
     
     if (tradesWithTime.length === 0) {
-      return { message: 'No trades with time data available' };
+      return { message: 'No trades with valid time data available' };
     }
 
     // Group trades by hour
     const tradesByHour = {};
+    const sessionStats = {
+      morning: { trades: [], wins: 0, total: 0, totalProfit: 0 },
+      midDay: { trades: [], wins: 0, total: 0, totalProfit: 0 },
+      closing: { trades: [], wins: 0, total: 0, totalProfit: 0 }
+    };
+
     tradesWithTime.forEach(trade => {
+      // Handle both HH:MM and HH:MM:SS formats
       const entryHour = parseInt(trade.entryTime.split(':')[0]);
+      const profit = trade.meta?.net || 0;
+      
+      // Validate hour is within reasonable range (0-23)
+      if (isNaN(entryHour) || entryHour < 0 || entryHour > 23) {
+        console.warn('Invalid entry hour:', trade.entryTime, 'for trade:', trade.id);
+        return; // Skip this trade
+      }
+      
+      // Group by hour
       if (!tradesByHour[entryHour]) {
-        tradesByHour[entryHour] = { trades: [], wins: 0, total: 0 };
+        tradesByHour[entryHour] = { trades: [], wins: 0, total: 0, totalProfit: 0 };
       }
       tradesByHour[entryHour].trades.push(trade);
       tradesByHour[entryHour].total++;
-      if ((trade.meta?.net || 0) > 0) {
+      tradesByHour[entryHour].totalProfit += profit;
+      if (profit > 0) {
         tradesByHour[entryHour].wins++;
+      }
+
+      // Group by session - Indian market hours (9:15 AM - 3:30 PM)
+      if (entryHour >= 9 && entryHour < 11) {
+        sessionStats.morning.trades.push(trade);
+        sessionStats.morning.total++;
+        sessionStats.morning.totalProfit += profit;
+        if (profit > 0) sessionStats.morning.wins++;
+      } else if (entryHour >= 11 && entryHour < 14) {
+        sessionStats.midDay.trades.push(trade);
+        sessionStats.midDay.total++;
+        sessionStats.midDay.totalProfit += profit;
+        if (profit > 0) sessionStats.midDay.wins++;
+      } else if (entryHour >= 14 && entryHour < 16) {
+        sessionStats.closing.trades.push(trade);
+        sessionStats.closing.total++;
+        sessionStats.closing.totalProfit += profit;
+        if (profit > 0) sessionStats.closing.wins++;
       }
     });
 
-    // Calculate win rates by hour
+    // Calculate hour statistics
     const hourStats = Object.entries(tradesByHour)
-      .filter(([hour, data]) => data.total >= 2) // Only include hours with at least 2 trades
+      .filter(([hour, data]) => data.total >= 1) // Include hours with at least 1 trade for debugging
       .map(([hour, data]) => ({
         hour: parseInt(hour),
         time: `${hour}:00`,
-        winRate: Math.round((data.wins / data.total) * 100),
-        trades: data.total
+        winRate: data.total > 0 ? Math.round((data.wins / data.total) * 100) : 0,
+        trades: data.total,
+        avgProfit: data.total > 0 ? Math.round(data.totalProfit / data.total) : 0,
+        totalProfit: Math.round(data.totalProfit)
       }))
       .sort((a, b) => b.winRate - a.winRate);
 
+    // Calculate session statistics
+    const sessionAnalysis = Object.entries(sessionStats)
+      .filter(([session, data]) => data.total >= 1) // Show sessions even with 1 trade for debugging
+      .map(([session, data]) => ({
+        session: session.charAt(0).toUpperCase() + session.slice(1),
+        winRate: data.total > 0 ? Math.round((data.wins / data.total) * 100) : 0,
+        trades: data.total,
+        avgProfit: data.total > 0 ? Math.round(data.totalProfit / data.total) : 0,
+        totalProfit: Math.round(data.totalProfit)
+      }))
+      .sort((a, b) => b.winRate - a.winRate);
+
+    // Find best and worst hours
     const bestHours = hourStats.slice(0, 3);
     const worstHours = hourStats.slice(-3).reverse();
+
+    // Calculate trade duration patterns
+    const durationStats = tradesWithTime.map(trade => {
+      try {
+        // Handle both HH:MM and HH:MM:SS formats for duration calculation
+        const entryTimeStr = trade.entryTime.includes(':') && trade.entryTime.split(':').length === 2 
+          ? `${trade.entryTime}:00` 
+          : trade.entryTime;
+        const exitTimeStr = trade.exitTime.includes(':') && trade.exitTime.split(':').length === 2 
+          ? `${trade.exitTime}:00` 
+          : trade.exitTime;
+        
+        const entryTime = new Date(`2000-01-01T${entryTimeStr}`);
+        const exitTime = new Date(`2000-01-01T${exitTimeStr}`);
+        
+        // For day trading, exit time should always be after entry time
+        let durationMinutes = (exitTime - entryTime) / (1000 * 60);
+        
+        // If duration is negative, it's an invalid day trade (exit before entry)
+        if (durationMinutes < 0) {
+          console.warn('Invalid day trade: Exit time before entry time for trade:', trade.id, 
+                      'Entry:', trade.entryTime, 'Exit:', trade.exitTime);
+          return null; // Skip this trade
+        }
+        
+        // Cap duration at 8 hours (480 minutes) for day trading
+        durationMinutes = Math.min(durationMinutes, 480);
+        
+        return {
+          duration: durationMinutes,
+          profit: trade.meta?.net || 0,
+          isWin: (trade.meta?.net || 0) > 0
+        };
+      } catch (error) {
+        console.warn('Error calculating duration for trade:', trade.id, error);
+        return null; // Skip this trade
+      }
+    }).filter(d => d !== null && d.duration >= 0); // Filter out invalid durations
+
+    // Add debugging information after durationStats is calculated
+    console.log('Time Analysis Debug:', {
+      totalTradesWithTime: tradesWithTime.length,
+      sessionStats,
+      hourStats: Object.keys(tradesByHour).length,
+      durationStats: durationStats.length
+    });
+
+    const shortTrades = durationStats.filter(d => d.duration > 0 && d.duration <= 30);
+    const mediumTrades = durationStats.filter(d => d.duration > 30 && d.duration <= 120);
+    const longTrades = durationStats.filter(d => d.duration > 120 && d.duration <= 480); // Max 8 hours for day trading
+
+    const durationAnalysis = {
+      short: {
+        count: shortTrades.length,
+        winRate: shortTrades.length > 0 ? Math.round((shortTrades.filter(d => d.isWin).length / shortTrades.length) * 100) : 0,
+        avgProfit: shortTrades.length > 0 ? Math.round(shortTrades.reduce((sum, d) => sum + d.profit, 0) / shortTrades.length) : 0
+      },
+      medium: {
+        count: mediumTrades.length,
+        winRate: mediumTrades.length > 0 ? Math.round((mediumTrades.filter(d => d.isWin).length / mediumTrades.length) * 100) : 0,
+        avgProfit: mediumTrades.length > 0 ? Math.round(mediumTrades.reduce((sum, d) => sum + d.profit, 0) / mediumTrades.length) : 0
+      },
+      long: {
+        count: longTrades.length,
+        winRate: longTrades.length > 0 ? Math.round((longTrades.filter(d => d.isWin).length / longTrades.length) * 100) : 0,
+        avgProfit: longTrades.length > 0 ? Math.round(longTrades.reduce((sum, d) => sum + d.profit, 0) / longTrades.length) : 0
+      }
+    };
+
+    // Add duration debugging
+    console.log('Duration Analysis Debug:', {
+      totalDurationStats: durationStats.length,
+      shortTrades: shortTrades.length,
+      mediumTrades: mediumTrades.length,
+      longTrades: longTrades.length,
+      durationAnalysis
+    });
 
     return {
       bestHours,
       worstHours,
+      sessionAnalysis,
+      durationAnalysis,
       totalTradesWithTime: tradesWithTime.length,
       message: `Analyzed ${tradesWithTime.length} trades with time data`
     };

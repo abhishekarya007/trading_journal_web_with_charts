@@ -30,6 +30,8 @@ class TradeService {
         riskReward: trade.risk_reward,
         setup: trade.setup,
         remarks: trade.remarks,
+        entryTime: trade.entry_time || "",
+        exitTime: trade.exit_time || "",
         screenshots: trade.screenshots || [],
         meta: trade.meta || {}
       }))
@@ -64,6 +66,8 @@ class TradeService {
         risk_reward: tradeData.riskReward,
         setup: tradeData.setup,
         remarks: tradeData.remarks,
+        entry_time: tradeData.entryTime || null,
+        exit_time: tradeData.exitTime || null,
         screenshots: tradeData.screenshots || [],
         meta: meta
       }
@@ -85,6 +89,8 @@ class TradeService {
         riskReward: newTrade.risk_reward,
         setup: newTrade.setup,
         remarks: newTrade.remarks,
+        entryTime: newTrade.entry_time || "",
+        exitTime: newTrade.exit_time || "",
         screenshots: newTrade.screenshots || [],
         meta: newTrade.meta || {}
       }
@@ -120,6 +126,8 @@ class TradeService {
         risk_reward: updates.riskReward,
         setup: updates.setup,
         remarks: updates.remarks,
+        entry_time: updates.entryTime || null,
+        exit_time: updates.exitTime || null,
         screenshots: updates.screenshots,
         meta: meta
       }
@@ -148,6 +156,8 @@ class TradeService {
         riskReward: updatedTrade.risk_reward,
         setup: updatedTrade.setup,
         remarks: updatedTrade.remarks,
+        entryTime: updatedTrade.entry_time || "",
+        exitTime: updatedTrade.exit_time || "",
         screenshots: updatedTrade.screenshots || [],
         meta: updatedTrade.meta || {}
       }
