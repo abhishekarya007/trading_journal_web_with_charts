@@ -506,23 +506,47 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
             </div>
           )}
 
-          {/* Setup Patterns - Box Grid */}
+          {/* Setup Patterns - Progress Bar Grid */}
           {analysis.patterns.setupPatterns && analysis.patterns.setupPatterns.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border border-slate-200 dark:border-slate-700">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-                  <IconTarget className="w-4 h-4 text-white" />
+            <div className="bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 rounded-xl p-4 shadow-lg border border-slate-200 dark:border-slate-600">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg">
+                  <IconTarget className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Setup Performance</h3>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Setup Performance</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Your trading setup effectiveness with progress indicators</p>
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {analysis.patterns.setupPatterns.map((setup, index) => (
-                  <div key={index} className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-3 border border-indigo-200 dark:border-indigo-700">
+                  <div key={index} className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-600 shadow-md hover:shadow-lg transition-shadow">
+                    <div className="mb-2">
+                      <div className="text-base font-bold text-slate-900 dark:text-white">{setup.setup}</div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400">{setup.total} trades</div>
+                    </div>
+                    <div className="mb-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Win Rate</span>
+                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{setup.winRate}%</span>
+                      </div>
+                      <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2 shadow-inner">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-500 ${
+                            setup.winRate >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                            setup.winRate >= 60 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
+                            setup.winRate >= 40 ? 'bg-gradient-to-r from-orange-500 to-red-500' :
+                            'bg-gradient-to-r from-red-500 to-pink-500'
+                          }`}
+                          style={{ width: `${Math.min(setup.winRate, 100)}%` }}
+                        ></div>
+                      </div>
+                    </div>
                     <div className="text-center">
-                      <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{setup.setup}</div>
-                      <div className="text-lg font-bold text-indigo-600 dark:text-indigo-400 mb-1">{setup.winRate}%</div>
-                      <div className="text-xs text-indigo-600 dark:text-indigo-400 mb-1">{setup.total} trades</div>
-                      <div className="text-xs text-slate-600 dark:text-slate-400">₹{setup.avgProfit || 0} avg</div>
+                      <div className={`text-base font-bold ${(setup.avgProfit || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        ₹{setup.avgProfit || 0}
+                      </div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400">Average Profit</div>
                     </div>
                   </div>
                 ))}
