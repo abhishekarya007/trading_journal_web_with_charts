@@ -411,8 +411,47 @@ class AITradingAssistant {
   }
 
   analyzeTimePatterns(trades) {
-    // This would analyze time of day patterns if we had time data
-    return { message: 'Time analysis requires trade timestamps' };
+    // Analyze time of day patterns
+    const tradesWithTime = trades.filter(trade => trade.entryTime && trade.exitTime);
+    
+    if (tradesWithTime.length === 0) {
+      return { message: 'No trades with time data available' };
+    }
+
+    // Group trades by hour
+    const tradesByHour = {};
+    tradesWithTime.forEach(trade => {
+      const entryHour = parseInt(trade.entryTime.split(':')[0]);
+      if (!tradesByHour[entryHour]) {
+        tradesByHour[entryHour] = { trades: [], wins: 0, total: 0 };
+      }
+      tradesByHour[entryHour].trades.push(trade);
+      tradesByHour[entryHour].total++;
+      if ((trade.meta?.net || 0) > 0) {
+        tradesByHour[entryHour].wins++;
+      }
+    });
+
+    // Calculate win rates by hour
+    const hourStats = Object.entries(tradesByHour)
+      .filter(([hour, data]) => data.total >= 2) // Only include hours with at least 2 trades
+      .map(([hour, data]) => ({
+        hour: parseInt(hour),
+        time: `${hour}:00`,
+        winRate: Math.round((data.wins / data.total) * 100),
+        trades: data.total
+      }))
+      .sort((a, b) => b.winRate - a.winRate);
+
+    const bestHours = hourStats.slice(0, 3);
+    const worstHours = hourStats.slice(-3).reverse();
+
+    return {
+      bestHours,
+      worstHours,
+      totalTradesWithTime: tradesWithTime.length,
+      message: `Analyzed ${tradesWithTime.length} trades with time data`
+    };
   }
 
   analyzeEmotionalPatterns(trades, psychologyData) {

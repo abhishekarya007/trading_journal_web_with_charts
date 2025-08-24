@@ -533,19 +533,29 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
           )}
 
           {/* Time-based Patterns */}
-          {analysis.patterns.timePatterns && (
+          {analysis.patterns.timePatterns && analysis.patterns.timePatterns.bestHours && (
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <IconClock className="w-5 h-5 text-purple-500" />
                 Time-based Patterns
               </h3>
+              
+              {analysis.patterns.timePatterns.message && (
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm text-blue-600 dark:text-blue-400">{analysis.patterns.timePatterns.message}</p>
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Best Trading Hours</h4>
                   <div className="space-y-2">
                     {analysis.patterns.timePatterns.bestHours?.map((hour, index) => (
                       <div key={index} className="flex items-center justify-between p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded">
-                        <span className="text-slate-900 dark:text-white">{hour.time}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-900 dark:text-white font-medium">{hour.time}</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400">({hour.trades} trades)</span>
+                        </div>
                         <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{hour.winRate}%</span>
                       </div>
                     ))}
@@ -556,7 +566,10 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
                   <div className="space-y-2">
                     {analysis.patterns.timePatterns.worstHours?.map((hour, index) => (
                       <div key={index} className="flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded">
-                        <span className="text-slate-900 dark:text-white">{hour.time}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-900 dark:text-white font-medium">{hour.time}</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400">({hour.trades} trades)</span>
+                        </div>
                         <span className="text-red-600 dark:text-red-400 font-semibold">{hour.winRate}%</span>
                       </div>
                     ))}
