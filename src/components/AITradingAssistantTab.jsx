@@ -604,7 +604,7 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
                         </div>
                         <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
                           <div className="text-center">
-                            <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Long (2-8h)</div>
+                            <div className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Long (&gt;2h)</div>
                             <div className="text-lg font-bold text-blue-600 dark:text-blue-400">{analysis.patterns.timePatterns.durationAnalysis.long.winRate}%</div>
                             <div className="text-xs text-blue-600 dark:text-blue-400">{analysis.patterns.timePatterns.durationAnalysis.long.count} trades</div>
                             <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">

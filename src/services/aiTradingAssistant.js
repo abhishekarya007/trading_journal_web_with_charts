@@ -494,18 +494,18 @@ class AITradingAssistant {
         tradesByHour[entryHour].wins++;
       }
 
-      // Group by session - Indian market hours (9:15 AM - 3:30 PM)
+      // Group by session - Indian market hours (9:15 AM - 3:20 PM)
       if (entryHour >= 9 && entryHour < 11) {
         sessionStats.morning.trades.push(trade);
         sessionStats.morning.total++;
         sessionStats.morning.totalProfit += profit;
         if (profit > 0) sessionStats.morning.wins++;
-      } else if (entryHour >= 11 && entryHour < 14) {
+      } else if (entryHour >= 11 && entryHour < 13) {
         sessionStats.midDay.trades.push(trade);
         sessionStats.midDay.total++;
         sessionStats.midDay.totalProfit += profit;
         if (profit > 0) sessionStats.midDay.wins++;
-      } else if (entryHour >= 14 && entryHour < 16) {
+      } else if (entryHour >= 13 && entryHour < 16) {
         sessionStats.closing.trades.push(trade);
         sessionStats.closing.total++;
         sessionStats.closing.totalProfit += profit;
@@ -518,7 +518,7 @@ class AITradingAssistant {
       .filter(([hour, data]) => data.total >= 1) // Include hours with at least 1 trade for debugging
       .map(([hour, data]) => ({
         hour: parseInt(hour),
-        time: `${hour}:00`,
+        time: hour < 12 ? `${hour}:00 AM` : hour === 12 ? `12:00 PM` : `${hour - 12}:00 PM`,
         winRate: data.total > 0 ? Math.round((data.wins / data.total) * 100) : 0,
         trades: data.total,
         avgProfit: data.total > 0 ? Math.round(data.totalProfit / data.total) : 0,
@@ -530,7 +530,9 @@ class AITradingAssistant {
     const sessionAnalysis = Object.entries(sessionStats)
       .filter(([session, data]) => data.total >= 1) // Show sessions even with 1 trade for debugging
       .map(([session, data]) => ({
-        session: session.charAt(0).toUpperCase() + session.slice(1),
+        session: session === 'morning' ? 'Morning (9:15-11:00)' : 
+                session === 'midDay' ? 'Mid-day (11:00-13:00)' : 
+                'Closing (13:00-15:20)',
         winRate: data.total > 0 ? Math.round((data.wins / data.total) * 100) : 0,
         trades: data.total,
         avgProfit: data.total > 0 ? Math.round(data.totalProfit / data.total) : 0,
@@ -566,8 +568,8 @@ class AITradingAssistant {
           return null; // Skip this trade
         }
         
-        // Cap duration at 8 hours (480 minutes) for day trading
-        durationMinutes = Math.min(durationMinutes, 480);
+        // Cap duration at 6 hours (365 minutes) for Indian market day trading (9:15 AM - 3:20 PM)
+        durationMinutes = Math.min(durationMinutes, 365);
         
         return {
           duration: durationMinutes,
@@ -590,7 +592,7 @@ class AITradingAssistant {
 
     const shortTrades = durationStats.filter(d => d.duration > 0 && d.duration <= 30);
     const mediumTrades = durationStats.filter(d => d.duration > 30 && d.duration <= 120);
-    const longTrades = durationStats.filter(d => d.duration > 120 && d.duration <= 480); // Max 8 hours for day trading
+    const longTrades = durationStats.filter(d => d.duration > 120); // Long trades: more than 2 hours
 
     const durationAnalysis = {
       short: {
