@@ -2494,6 +2494,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 periodControls={periodControls}
                 onSelectMonth={onSelectMonth}
                 advancedMetrics={scopedAdvancedMetrics}
+                trades={trades}
               />
             )}
             

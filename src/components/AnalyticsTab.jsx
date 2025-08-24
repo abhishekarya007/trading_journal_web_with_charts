@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Line, Bar } from "react-chartjs-2";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { Chart } from 'chart.js';
+import PerformanceHeatmap from './PerformanceHeatmap';
 
 // Register the zoom plugin
 Chart.register(zoomPlugin);
@@ -28,7 +29,7 @@ import {
   IconFileText
 } from './icons';
 
-export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, directionRows, emotionRows, rrAnalysis, monthlyChart, equityChart, drawdownChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth, advancedMetrics }) {
+export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMonthLabel, setupRows, directionRows, emotionRows, rrAnalysis, monthlyChart, equityChart, drawdownChart, commonChartOptions, formatNumber, periodLabel, periodControls, onSelectMonth, advancedMetrics, trades }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [animateCharts, setAnimateCharts] = useState(false);
   const [hoveredMetric, setHoveredMetric] = useState(null);
@@ -478,7 +479,14 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
         </div>
       </div>
 
-
+      {/* Performance Heatmap */}
+      <PerformanceHeatmap 
+        trades={trades} 
+        onDateClick={(date, dayTrades) => {
+          // You can add functionality here to show trades for a specific day
+          console.log(`Clicked on ${date} with ${dayTrades.length} trades:`, dayTrades);
+        }}
+      />
 
       {/* Period Controls */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">

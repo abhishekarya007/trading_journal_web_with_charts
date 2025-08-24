@@ -98,6 +98,33 @@ export const IconBookOpen = (props) => (
   </svg>
 );
 
+export const IconSparkles = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <path d="M12 3l1.09 1.09a2 2 0 0 0 3.31 0L18 3l1.09-1.09a2 2 0 0 0 0-3.31L18-3l-1.09 1.09a2 2 0 0 0-3.31 0L12-3l-1.09-1.09a2 2 0 0 0-3.31 0L6-3l-1.09 1.09a2 2 0 0 0 0 3.31L6 3l1.09 1.09a2 2 0 0 0 3.31 0L12 3z"/>
+    <path d="M12 21l1.09-1.09a2 2 0 0 1 3.31 0L18 21l1.09 1.09a2 2 0 0 1 0 3.31L18 27l-1.09-1.09a2 2 0 0 1-3.31 0L12 27l-1.09 1.09a2 2 0 0 1-3.31 0L6 27l-1.09-1.09a2 2 0 0 1 0-3.31L6 21l1.09-1.09a2 2 0 0 1 3.31 0L12 21z"/>
+  </svg>
+);
+
+export const IconTarget = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <circle cx="12" cy="12" r="10"/>
+    <circle cx="12" cy="12" r="6"/>
+    <circle cx="12" cy="12" r="2"/>
+  </svg>
+);
+
+export const IconZap = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  </svg>
+);
+
+export const IconStar = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+);
+
 export const IconMood = (props) => (
   <svg viewBox="0 0 24 24" {...base} {...props}>
     <circle cx="12" cy="12" r="10"/>
@@ -147,24 +174,12 @@ export const IconFire = (props) => (
   </svg>
 );
 
-export const IconZap = (props) => (
-  <svg viewBox="0 0 24 24" {...base} {...props}>
-    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
-  </svg>
-);
-
 export const IconRocket = (props) => (
   <svg viewBox="0 0 24 24" {...base} {...props}>
     <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
     <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
     <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
     <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
-  </svg>
-);
-
-export const IconStar = (props) => (
-  <svg viewBox="0 0 24 24" {...base} {...props}>
-    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
   </svg>
 );
 
@@ -182,14 +197,6 @@ export const IconDollarSign = (props) => (
   <svg viewBox="0 0 24 24" {...base} {...props}>
     <line x1="12" y1="1" x2="12" y2="23"/>
     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-  </svg>
-);
-
-export const IconTarget = (props) => (
-  <svg viewBox="0 0 24 24" {...base} {...props}>
-    <circle cx="12" cy="12" r="10"/>
-    <circle cx="12" cy="12" r="6"/>
-    <circle cx="12" cy="12" r="2"/>
   </svg>
 );
 
@@ -333,12 +340,6 @@ export const IconClock = (props) => (
   <svg viewBox="0 0 24 24" {...base} {...props}>
     <circle cx="12" cy="12" r="10"/>
     <polyline points="12,6 12,12 16,14"/>
-  </svg>
-);
-
-export const IconSparkles = (props) => (
-  <svg viewBox="0 0 24 24" {...base} {...props}>
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
   </svg>
 );
 
