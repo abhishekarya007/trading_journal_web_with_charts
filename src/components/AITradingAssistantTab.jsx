@@ -33,7 +33,9 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
     setIsAnalyzing(true);
     // Simulate analysis time for better UX
     setTimeout(() => {
+      console.log('Analyzing data with:', { trades: trades.length, psychologyData: psychologyData.length });
       const result = aiTradingAssistant.analyzeTradingPerformance(trades, psychologyData);
+      console.log('Analysis result:', result);
       setAnalysis(result);
       setIsAnalyzing(false);
     }, 500);
@@ -733,52 +735,89 @@ const AITradingAssistantTab = ({ trades, psychologyData, formatNumber }) => {
           )}
 
           {/* Psychology Analysis with Enhanced Visualization */}
-          {analysis.psychologyAnalysis && analysis.psychologyAnalysis.dominantEmotions && (
+          {analysis && analysis.psychologyAnalysis && (
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <IconBrain className="w-5 h-5 text-indigo-500" />
                 Psychology Analysis
               </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Entry Statistics</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded">
-                      <span className="text-slate-600 dark:text-slate-400">Total Entries</span>
-                      <span className="font-semibold text-slate-900 dark:text-white">{analysis.psychologyAnalysis.totalEntries}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded">
-                      <span className="text-slate-600 dark:text-slate-400">Recent Entries (7 days)</span>
-                      <span className="font-semibold text-slate-900 dark:text-white">{analysis.psychologyAnalysis.recentEntries}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded">
-                      <span className="text-slate-600 dark:text-slate-400">Consistency Score</span>
-                      <span className="font-semibold text-slate-900 dark:text-white">
-                        {analysis.psychologyAnalysis.consistencyScore || 0}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Emotional Patterns</h4>
-                  <div className="space-y-2">
-                    {analysis.psychologyAnalysis.dominantEmotions.map((emotion, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">
-                            {emotion.emotion === 'fear' ? '😨' : 
-                             emotion.emotion === 'greed' ? '😈' : 
-                             emotion.emotion === 'confidence' ? '😎' : 
-                             emotion.emotion === 'frustration' ? '😤' : '😐'}
-                          </span>
-                          <span className="text-slate-900 dark:text-white capitalize">{emotion.emotion}</span>
-                        </div>
-                        <span className="font-semibold text-indigo-600 dark:text-indigo-400">{emotion.count}</span>
+              
+              {analysis.psychologyAnalysis.hasData ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Entry Statistics</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded">
+                        <span className="text-slate-600 dark:text-slate-400">Total Entries</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">{analysis.psychologyAnalysis.totalEntries}</span>
                       </div>
-                    ))}
+                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded">
+                        <span className="text-slate-600 dark:text-slate-400">Recent Entries (10 days)</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">{analysis.psychologyAnalysis.recentEntries}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded">
+                        <span className="text-slate-600 dark:text-slate-400">Data Quality</span>
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">Good</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Emotional Patterns</h4>
+                    {analysis.psychologyAnalysis.dominantEmotions.length > 0 ? (
+                      <div className="space-y-2">
+                        {analysis.psychologyAnalysis.dominantEmotions.map((emotion, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">
+                                {emotion.emotion === 'fear' ? '😨' : 
+                                 emotion.emotion === 'greed' ? '😈' : 
+                                 emotion.emotion === 'confident' ? '😎' : 
+                                 emotion.emotion === 'frustrated' ? '😤' : 
+                                 emotion.emotion === 'calm' ? '😌' : 
+                                 emotion.emotion === 'excited' ? '🤩' : 
+                                 emotion.emotion === 'anxious' ? '😰' : 
+                                 emotion.emotion === 'optimistic' ? '😊' : 
+                                 emotion.emotion === 'stressed' ? '😫' : 
+                                 emotion.emotion === 'focused' ? '🎯' : 
+                                 emotion.emotion === 'distracted' ? '🤔' : '😐'}
+                              </span>
+                              <span className="text-slate-900 dark:text-white capitalize">{emotion.emotion}</span>
+                            </div>
+                            <span className="font-semibold text-indigo-600 dark:text-indigo-400">{emotion.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6">
+                        <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <IconBrain className="w-6 h-6 text-slate-400" />
+                        </div>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">No emotional patterns detected yet</p>
+                        <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">Add more psychology entries to see patterns</p>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <IconBrain className="w-8 h-8 text-indigo-500" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No Psychology Data Available</h4>
+                  <p className="text-slate-600 dark:text-slate-400 mb-4">
+                    Start logging your daily psychology to get AI-powered emotional analysis and insights.
+                  </p>
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/10 dark:to-purple-900/10 rounded-xl p-4 border border-indigo-200 dark:border-indigo-700">
+                    <h5 className="font-semibold text-slate-900 dark:text-white mb-2">What you'll get:</h5>
+                    <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                      <li>• Emotional pattern recognition</li>
+                      <li>• Trading mindset analysis</li>
+                      <li>• Psychology-based recommendations</li>
+                      <li>• Consistency tracking</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -306,17 +306,47 @@ class AITradingAssistant {
   }
 
   calculatePsychologyScore(psychologyData) {
-    if (psychologyData.length === 0) return 0;
+    if (!psychologyData || psychologyData.length === 0) {
+      return 0;
+    }
     
-    // Simple scoring based on frequency and recency
-    const recentEntries = psychologyData.filter(entry => {
-      const entryDate = new Date(entry.date);
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return entryDate >= weekAgo;
+    // Calculate score based on multiple factors
+    let score = 0;
+    
+    // 1. Entry frequency (40% weight)
+    const recentEntries = psychologyData.slice(-30); // Last 30 days
+    const entryFrequency = recentEntries.length / 30; // Entries per day
+    const frequencyScore = Math.min(entryFrequency * 100, 100);
+    score += frequencyScore * 0.4;
+    
+    // 2. Emotional balance (30% weight)
+    const emotionalWords = ['fear', 'greed', 'panic', 'frustrated', 'anxious', 'stressed'];
+    const positiveWords = ['confident', 'calm', 'excited', 'optimistic', 'focused'];
+    
+    let negativeCount = 0;
+    let positiveCount = 0;
+    
+    recentEntries.forEach(entry => {
+      if (entry && entry.entry && typeof entry.entry === 'string') {
+        const entryText = entry.entry.toLowerCase();
+        emotionalWords.forEach(word => {
+          if (entryText.includes(word)) negativeCount++;
+        });
+        positiveWords.forEach(word => {
+          if (entryText.includes(word)) positiveCount++;
+        });
+      }
     });
     
-    return Math.min(100, recentEntries.length * 20);
+    const totalEmotions = negativeCount + positiveCount;
+    const emotionalBalance = totalEmotions > 0 ? (positiveCount / totalEmotions) * 100 : 50;
+    score += emotionalBalance * 0.3;
+    
+    // 3. Consistency (30% weight)
+    const consistencyScore = Math.min(psychologyData.length * 2, 100); // More entries = better consistency
+    score += consistencyScore * 0.3;
+    
+    return Math.round(score);
   }
 
   calculateAverageTradesPerDay(trades) {
@@ -643,12 +673,18 @@ class AITradingAssistant {
   }
 
   analyzePsychology(trades, psychologyData) {
-    if (psychologyData.length === 0) {
-      return { message: 'No psychology data available' };
+    if (!psychologyData || psychologyData.length === 0) {
+      return {
+        totalEntries: 0,
+        recentEntries: 0,
+        dominantEmotions: [],
+        message: 'No psychology data available',
+        hasData: false
+      };
     }
     
     const recentEntries = psychologyData.slice(-10);
-    const emotionalWords = ['fear', 'greed', 'panic', 'frustrated', 'confident', 'calm', 'excited'];
+    const emotionalWords = ['fear', 'greed', 'panic', 'frustrated', 'confident', 'calm', 'excited', 'anxious', 'optimistic', 'stressed', 'focused', 'distracted'];
     const emotionCounts = {};
     
     recentEntries.forEach(entry => {
@@ -668,7 +704,8 @@ class AITradingAssistant {
       dominantEmotions: Object.entries(emotionCounts)
         .sort(([,a], [,b]) => b - a)
         .slice(0, 3)
-        .map(([emotion, count]) => ({ emotion, count }))
+        .map(([emotion, count]) => ({ emotion, count })),
+      hasData: true
     };
   }
 
