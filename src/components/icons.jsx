@@ -83,6 +83,20 @@ export const IconTrendingUp = (props) => (
   </svg>
 );
 
+export const IconTrendingUp2 = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/>
+    <polyline points="17,6 23,6 23,12"/>
+  </svg>
+);
+
+export const IconTrendingDown2 = (props) => (
+  <svg viewBox="0 0 24 24" {...base} {...props}>
+    <polyline points="23,18 13.5,8.5 8.5,13.5 1,6"/>
+    <polyline points="17,18 23,18 23,12"/>
+  </svg>
+);
+
 export const IconBarChart = (props) => (
   <svg viewBox="0 0 24 24" {...base} {...props}>
     <path d="M12 20V4"/>

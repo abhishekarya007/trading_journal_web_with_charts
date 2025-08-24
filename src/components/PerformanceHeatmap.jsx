@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react'
-import { IconTrendingUp, IconTrendingDown, IconCalendar, IconBarChart, IconSparkles, IconTarget, IconZap, IconStar, IconX } from './icons'
+import { IconTrendingUp, IconTrendingDown, IconCalendar, IconBarChart, IconSparkles, IconTarget, IconZap, IconStar, IconX, IconTrendingUp2, IconTrendingDown2 } from './icons'
 
 export default function PerformanceHeatmap({ trades, isOpen, onClose }) {
-  const [selectedPeriod, setSelectedPeriod] = useState('month') // 'week', 'month', 'year'
+  const [selectedPeriod, setSelectedPeriod] = useState('month') // 'week', 'month'
   const [hoveredDay, setHoveredDay] = useState(null)
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
   const [isAnimating, setIsAnimating] = useState(false)
@@ -27,19 +27,9 @@ export default function PerformanceHeatmap({ trades, isOpen, onClose }) {
         break
         
       case 'month':
+      default:
         // Show last 30 days
         for (let i = 29; i >= 0; i--) {
-          const day = new Date(today)
-          day.setDate(today.getDate() - i)
-          const dayKey = day.toISOString().slice(0, 10)
-          data[dayKey] = { trades: [], net: 0, count: 0 }
-        }
-        break
-        
-      case 'year':
-      default:
-        // Show last 365 days
-        for (let i = 364; i >= 0; i--) {
           const day = new Date(today)
           day.setDate(today.getDate() - i)
           const dayKey = day.toISOString().slice(0, 10)
@@ -104,128 +94,33 @@ export default function PerformanceHeatmap({ trades, isOpen, onClose }) {
     }
   }, [periodData])
 
-  // Generate creative visual elements
-  const visualElements = useMemo(() => {
-    const elements = []
-    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
-    
-    Object.entries(periodData).forEach(([key, data], index) => {
-      if (data.count > 0) {
-        const intensity = Math.min(Math.abs(data.net) / 1000, 1) // Normalize intensity
-        const colorIndex = Math.floor(Math.random() * colors.length)
-        const size = Math.max(0.3, intensity * 0.8)
-        
-        elements.push({
-          key,
-          data,
-          color: colors[colorIndex],
-          size,
-          intensity,
-          x: Math.random() * 100,
-          y: Math.random() * 100,
-          rotation: Math.random() * 360,
-          pulse: Math.random() > 0.5
-        })
-      }
-    })
-    
-    return elements
-  }, [periodData])
-
-  // Animate canvas elements
-  useEffect(() => {
-    if (!canvasRef.current) return
-    
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
-    }
-    
-    resizeCanvas()
-    window.addEventListener('resize', resizeCanvas)
-    
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight)
-      
-      // Draw animated background particles
-      visualElements.forEach((element, index) => {
-        const time = Date.now() * 0.001
-        const x = (element.x + Math.sin(time + index) * 20) % canvas.offsetWidth
-        const y = (element.y + Math.cos(time + index) * 15) % canvas.offsetHeight
-        
-        ctx.save()
-        ctx.translate(x, y)
-        ctx.rotate(element.rotation + time * 30)
-        
-        // Create gradient
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, element.size * 50)
-        gradient.addColorStop(0, `${element.color}80`)
-        gradient.addColorStop(0.7, `${element.color}40`)
-        gradient.addColorStop(1, 'transparent')
-        
-        ctx.fillStyle = gradient
-        ctx.beginPath()
-        ctx.arc(0, 0, element.size * 50, 0, Math.PI * 2)
-        ctx.fill()
-        
-        // Add sparkle effect
-        if (element.pulse && Math.sin(time * 3 + index) > 0.8) {
-          ctx.fillStyle = '#ffffff'
-          ctx.beginPath()
-          ctx.arc(0, 0, 3, 0, Math.PI * 2)
-          ctx.fill()
-        }
-        
-        ctx.restore()
-      })
-      
-      animationRef.current = requestAnimationFrame(animate)
-    }
-    
-    animate()
-    
-    return () => {
-      window.removeEventListener('resize', resizeCanvas)
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
-    }
-  }, [visualElements])
-
-  // Get grid layout
+  // Get grid layout for calendar
   const getGridLayout = () => {
     switch (selectedPeriod) {
       case 'week':
-        return { cols: 7, rows: 1, cellSize: 80 }
+        return { cols: 7, rows: 1, cellSize: 80, showHeaders: true }
       case 'month':
-        return { cols: 6, rows: 5, cellSize: 70 }
-      case 'year':
-        return { cols: 53, rows: 7, cellSize: 12 }
       default:
-        return { cols: 6, rows: 5, cellSize: 70 }
+        return { cols: 7, rows: 5, cellSize: 70, showHeaders: true }
     }
   }
 
   const gridLayout = getGridLayout()
-
-  // Handle period change with animation
-  const handlePeriodChange = (period) => {
-    setIsAnimating(true)
-    setSelectedPeriod(period)
-    setTimeout(() => setIsAnimating(false), 500)
-  }
 
   // Get period label
   const getPeriodLabel = () => {
     switch (selectedPeriod) {
       case 'week': return '7 Days'
       case 'month': return '30 Days'
-      case 'year': return '365 Days'
       default: return 'Month'
     }
+  }
+
+  // Handle period change with animation
+  const handlePeriodChange = (period) => {
+    setIsAnimating(true)
+    setSelectedPeriod(period)
+    setTimeout(() => setIsAnimating(false), 500)
   }
 
   // Handle escape key
@@ -250,42 +145,30 @@ export default function PerformanceHeatmap({ trades, isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-7xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-7xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-10 h-10 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+          className="absolute top-4 right-4 z-10 w-10 h-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
         >
-          <IconX className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          <IconX className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </button>
 
         {/* Content */}
         <div className="p-8">
-          {/* Header */}
+          {/* Header with Period Selector */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <IconBarChart className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Performance Heatmap
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">Visualize your trading performance</p>
-              </div>
-            </div>
-
             {/* Period Selector */}
-            <div className="flex items-center justify-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-              {['week', 'month', 'year'].map((period) => (
+            <div className="flex items-center justify-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
+              {['week', 'month'].map((period) => (
                 <button
                   key={period}
                   onClick={() => handlePeriodChange(period)}
                   className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
                     selectedPeriod === period
-                      ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-md'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {period.charAt(0).toUpperCase() + period.slice(1)}
@@ -347,11 +230,11 @@ export default function PerformanceHeatmap({ trades, isOpen, onClose }) {
             </div>
           </div>
 
-          {/* Main Heatmap Grid */}
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+          {/* Calendar Grid */}
+          <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 mb-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">{getPeriodLabel()} Performance</h3>
-              <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">{getPeriodLabel()} Performance Calendar</h3>
+              <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                   <span>Loss</span>
@@ -363,101 +246,191 @@ export default function PerformanceHeatmap({ trades, isOpen, onClose }) {
               </div>
             </div>
 
-            {/* Grid Container */}
+            {/* Calendar Container */}
             <div className="flex justify-center">
-              <div 
-                className="grid gap-1"
-                style={{
-                  gridTemplateColumns: `repeat(${gridLayout.cols}, ${gridLayout.cellSize}px)`,
-                  gridTemplateRows: `repeat(${gridLayout.rows}, ${gridLayout.cellSize}px)`
-                }}
-              >
-                {Object.entries(periodData).map(([key, data], index) => {
-                  const net = data.net || 0
-                  const intensity = Math.min(Math.abs(net) / 1000, 1)
-                  const isPositive = net > 0
-                  const hasTrades = data.count > 0
-                  
-                  return (
-                    <div
-                      key={key}
-                      className={`
-                        relative transition-all duration-300 transform hover:scale-105
-                        ${hasTrades ? 'hover:shadow-lg cursor-pointer' : ''}
-                        ${isAnimating ? 'animate-pulse' : ''}
-                      `}
-                      style={{
-                        width: gridLayout.cellSize,
-                        height: gridLayout.cellSize
-                      }}
-                      onMouseEnter={(e) => {
-                        if (hasTrades) {
-                          setHoveredDay({ key, data, net, count: data.count })
-                          setTooltipPosition({ x: e.clientX, y: e.clientY })
-                        }
-                      }}
-                      onMouseLeave={() => setHoveredDay(null)}
-                    >
+              <div className="space-y-2">
+                {/* Day Headers for Week and Month */}
+                {gridLayout.showHeaders && (
+                  <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${gridLayout.cols}, ${gridLayout.cellSize}px)` }}>
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                      <div key={day} className="text-center text-sm font-medium text-slate-600 dark:text-slate-400 py-2">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Calendar Grid */}
+                <div 
+                  className="grid gap-1"
+                  style={{
+                    gridTemplateColumns: `repeat(${gridLayout.cols}, ${gridLayout.cellSize}px)`,
+                    gridTemplateRows: `repeat(${gridLayout.rows}, ${gridLayout.cellSize}px)`
+                  }}
+                >
+                  {Object.entries(periodData).map(([key, data], index) => {
+                    const net = data.net || 0
+                    const isPositive = net > 0
+                    const hasTrades = data.count > 0
+                    const date = new Date(key)
+                    const dayOfMonth = date.getDate()
+                    
+                    // Simple color coding - no intensity
+                    let backgroundColor, borderColor, hoverColor
+                    if (hasTrades) {
+                      if (isPositive) {
+                        backgroundColor = 'bg-green-500'
+                        borderColor = 'border-green-400'
+                        hoverColor = 'hover:bg-green-600'
+                      } else {
+                        backgroundColor = 'bg-red-500'
+                        borderColor = 'border-red-400'
+                        hoverColor = 'hover:bg-red-600'
+                      }
+                    } else {
+                      backgroundColor = 'bg-slate-200 dark:bg-slate-700'
+                      borderColor = 'border-slate-300 dark:border-slate-600'
+                      hoverColor = ''
+                    }
+                    
+                    return (
                       <div
+                        key={key}
                         className={`
-                          w-full h-full rounded-lg border transition-all duration-300
-                          ${hasTrades 
-                            ? isPositive 
-                              ? 'bg-green-500 border-green-400' 
-                              : 'bg-red-500 border-red-400'
-                            : 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600'
-                          }
+                          relative transition-all duration-300 transform hover:scale-105 border rounded-lg
+                          ${backgroundColor} ${borderColor} ${hoverColor}
+                          ${isAnimating ? 'animate-pulse' : ''}
                         `}
                         style={{
-                          opacity: hasTrades ? 0.3 + (intensity * 0.7) : 0.3
+                          width: gridLayout.cellSize,
+                          height: gridLayout.cellSize
                         }}
-                      />
-                      
-                      {/* Trade count indicator */}
-                      {hasTrades && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full opacity-90"></div>
+                        onMouseEnter={(e) => {
+                          if (hasTrades) {
+                            setHoveredDay({ key, data, net, count: data.count })
+                            setTooltipPosition({ x: e.clientX, y: e.clientY })
+                          }
+                        }}
+                        onMouseLeave={() => setHoveredDay(null)}
+                      >
+                        {/* Date Number */}
+                        <div className="absolute top-1 left-1 text-xs font-medium text-slate-700 dark:text-slate-300">
+                          {dayOfMonth}
                         </div>
-                      )}
-                      
-                      {/* Hover glow effect */}
-                      {hoveredDay?.key === key && (
-                        <div className="absolute inset-0 rounded-lg bg-white/30 animate-ping"></div>
-                      )}
+                        
+                        {/* Trade Count Indicator */}
+                        {hasTrades && (
+                          <div className="absolute bottom-1 right-1">
+                            <div className="w-2 h-2 rounded-full bg-white opacity-90"></div>
+                          </div>
+                        )}
+                        
+                        {/* Hover Glow Effect */}
+                        {hoveredDay?.key === key && (
+                          <div className="absolute inset-0 rounded-lg bg-white/30 animate-ping"></div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Empty State */}
+            {Object.values(periodData).filter(entry => entry.count > 0).length === 0 && (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IconCalendar className="w-8 h-8 text-slate-400" />
+                </div>
+                <p className="text-slate-600 dark:text-slate-400">No trading activity in this period</p>
+                <p className="text-sm text-slate-500 dark:text-slate-500">Start trading to see your performance here!</p>
+              </div>
+            )}
+          </div>
+
+          {/* Performance Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Best vs Worst Day */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Performance Highlights</h4>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                      <IconTrendingUp className="w-4 h-4 text-white" />
                     </div>
-                  )
-                })}
+                    <span className="text-green-700 dark:text-green-300 font-medium">Best Day</span>
+                  </div>
+                  <span className="text-green-600 dark:text-green-400 font-bold">
+                    ₹{insights.bestPeriod.toLocaleString()}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                      <IconTrendingDown className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-red-700 dark:text-red-300 font-medium">Worst Day</span>
+                  </div>
+                  <span className="text-red-600 dark:text-red-400 font-bold">
+                    ₹{insights.worstPeriod.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Trading Statistics - Improved UI */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Trading Statistics</h4>
+              <div className="space-y-4">
+                {/* Total Trades with Icon */}
+                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                      <IconBarChart className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-blue-700 dark:text-blue-300 font-medium">Total Trades</span>
+                  </div>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold text-lg">{insights.totalTrades}</span>
+                </div>
+
+                {/* Average per Day with Icon */}
+                <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+                      <IconTarget className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-emerald-700 dark:text-emerald-300 font-medium">Avg per Day</span>
+                  </div>
+                  <span className={`font-bold text-lg ${insights.avgPerPeriod >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    ₹{insights.avgPerPeriod.toLocaleString()}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Interactive Legend */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              💡 Hover over colored cells to see trading details
-            </p>
-          </div>
-
-          {/* Floating Tooltip */}
-          {hoveredDay && (
-            <div
-              className="fixed z-50 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-2xl pointer-events-none"
-              style={{
-                left: tooltipPosition.x + 10,
-                top: tooltipPosition.y - 10,
-                transform: 'translateY(-50%)'
-              }}
-            >
-              <div className="text-gray-900 dark:text-white">
-                <p className="font-bold text-blue-600 dark:text-blue-400">{hoveredDay.key}</p>
-                <p className="text-sm">Trades: {hoveredDay.count}</p>
-                <p className={`text-sm font-bold ${hoveredDay.net >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  Net: ₹{hoveredDay.net.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Floating Tooltip */}
+        {hoveredDay && (
+          <div
+            className="fixed z-50 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-2xl pointer-events-none"
+            style={{
+              left: tooltipPosition.x + 10,
+              top: tooltipPosition.y - 10,
+              transform: 'translateY(-50%)'
+            }}
+          >
+            <div className="text-slate-900 dark:text-white">
+              <p className="font-bold text-blue-600 dark:text-blue-400">{hoveredDay.key}</p>
+              <p className="text-sm">Trades: {hoveredDay.count}</p>
+              <p className={`text-sm font-bold ${hoveredDay.net >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                Net: ₹{hoveredDay.net.toLocaleString()}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
