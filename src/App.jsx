@@ -288,10 +288,8 @@ export default function App() {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        console.log('Initializing authentication...');
         // Get current user
         const currentUser = await authApi.getCurrentUser();
-        console.log('Current user:', currentUser ? currentUser.email : 'None');
         setUser(currentUser);
         
         // If user is already authenticated, load their trades, profile, and growth data
@@ -309,7 +307,7 @@ export default function App() {
         
         // Listen for auth state changes
         const { data: { subscription } } = authApi.onAuthStateChange((event, session) => {
-          console.log('Auth state change:', event, session?.user?.email);
+          
           setUser(session?.user || null);
           
           if (event === 'SIGNED_IN') {
@@ -385,9 +383,7 @@ export default function App() {
   // Load trades function (moved from useEffect for reuse)
   const loadTrades = async () => {
     try {
-      console.log('Loading trades from database...');
       const loadedTrades = await tradeService.loadTrades();
-      console.log(`Loaded ${loadedTrades.length} trades from database`);
       setTrades(loadedTrades);
     } catch (error) {
       console.error('Error loading trades from database:', error);
@@ -396,7 +392,6 @@ export default function App() {
       if (savedTrades) {
         try {
           const parsedTrades = JSON.parse(savedTrades);
-          console.log(`Loaded ${parsedTrades.length} trades from localStorage fallback`);
           setTrades(parsedTrades);
         } catch (parseError) {
           console.error('Error parsing saved trades:', parseError);
@@ -412,9 +407,7 @@ export default function App() {
   // Load growth data from database
   const loadGrowthData = async () => {
     try {
-      console.log('Loading growth data from database...');
       const data = await growthCalculatorService.loadGrowthData();
-      console.log(`Loaded ${data.length} growth records from database`);
       setGrowthData(data);
       setGrowthDataLoaded(true);
     } catch (error) {
@@ -427,9 +420,7 @@ export default function App() {
   // Load psychology data from database
   const loadPsychologyData = async () => {
     try {
-      console.log('Loading psychology data from database...');
       const data = await psychologyService.getAllEntries();
-      console.log(`Loaded ${data.length} psychology records from database`);
       setPsychologyData(data);
     } catch (error) {
       console.error('Error loading psychology data:', error);

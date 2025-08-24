@@ -228,9 +228,6 @@ class AITradingAssistant {
     const bestDays = this.findBestTradingDays(trades);
     const worstDays = this.findWorstTradingDays(trades);
     
-    console.log('Best Days:', bestDays);
-    console.log('Worst Days:', worstDays);
-    
     const patterns = {
       bestDays: bestDays,
       worstDays: worstDays,
@@ -412,20 +409,6 @@ class AITradingAssistant {
 
   analyzeTimePatterns(trades) {
     // Analyze time of day patterns
-    console.log('Analyzing time patterns for', trades.length, 'trades');
-    
-    // Debug: Log all trades to see their structure
-    trades.forEach((trade, index) => {
-      console.log(`Trade ${index}:`, {
-        id: trade.id,
-        entryTime: trade.entryTime,
-        exitTime: trade.exitTime,
-        hasEntryTime: !!trade.entryTime,
-        hasExitTime: !!trade.exitTime,
-        entryTimeType: typeof trade.entryTime,
-        exitTimeType: typeof trade.exitTime
-      });
-    });
     
     const tradesWithTime = trades.filter(trade => {
       // More flexible validation - check if times exist and are strings
@@ -434,11 +417,6 @@ class AITradingAssistant {
                            typeof trade.exitTime === 'string';
       
       if (!hasValidTimes) {
-        console.log('Trade filtered out - missing or invalid time data:', {
-          id: trade.id,
-          entryTime: trade.entryTime,
-          exitTime: trade.exitTime
-        });
         return false;
       }
       
@@ -447,18 +425,11 @@ class AITradingAssistant {
       const validFormat = timeRegex.test(trade.entryTime) && timeRegex.test(trade.exitTime);
       
       if (!validFormat) {
-        console.log('Trade filtered out - invalid time format:', {
-          id: trade.id,
-          entryTime: trade.entryTime,
-          exitTime: trade.exitTime
-        });
         return false;
       }
       
       return true;
     });
-    
-    console.log('Trades with valid time data:', tradesWithTime.length);
     
     if (tradesWithTime.length === 0) {
       return { message: 'No trades with valid time data available' };
@@ -582,14 +553,6 @@ class AITradingAssistant {
       }
     }).filter(d => d !== null && d.duration >= 0); // Filter out invalid durations
 
-    // Add debugging information after durationStats is calculated
-    console.log('Time Analysis Debug:', {
-      totalTradesWithTime: tradesWithTime.length,
-      sessionStats,
-      hourStats: Object.keys(tradesByHour).length,
-      durationStats: durationStats.length
-    });
-
     const shortTrades = durationStats.filter(d => d.duration > 0 && d.duration <= 30);
     const mediumTrades = durationStats.filter(d => d.duration > 30 && d.duration <= 120);
     const longTrades = durationStats.filter(d => d.duration > 120); // Long trades: more than 2 hours
@@ -611,15 +574,6 @@ class AITradingAssistant {
         avgProfit: longTrades.length > 0 ? Math.round(longTrades.reduce((sum, d) => sum + d.profit, 0) / longTrades.length) : 0
       }
     };
-
-    // Add duration debugging
-    console.log('Duration Analysis Debug:', {
-      totalDurationStats: durationStats.length,
-      shortTrades: shortTrades.length,
-      mediumTrades: mediumTrades.length,
-      longTrades: longTrades.length,
-      durationAnalysis
-    });
 
     return {
       bestHours,

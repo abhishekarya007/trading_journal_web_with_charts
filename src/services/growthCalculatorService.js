@@ -8,10 +8,8 @@ class GrowthCalculatorService {
   // Load growth data from database
   async loadGrowthData() {
     try {
-      console.log('Loading growth data from database...')
       const data = await growthCalculatorApi.getGrowthData()
-      console.log(`Loaded ${data.length} growth records from database`)
-      
+
       // Transform database data to the format expected by the component
       const transformedData = data.map(item => ({
         id: item.id,
@@ -53,15 +51,12 @@ class GrowthCalculatorService {
   // Add new growth data
   async addGrowthData(year, month, capitalUsed) {
     try {
-      console.log('Adding growth data:', { year, month, capitalUsed })
       
       const newData = await growthCalculatorApi.addGrowthData({
         year: parseInt(year),
         month: parseInt(month),
         capital_used: parseFloat(capitalUsed)
       })
-      
-      console.log('Growth data added successfully:', newData)
       
       // Reload data to get the updated list
       await this.loadGrowthData()
@@ -76,15 +71,11 @@ class GrowthCalculatorService {
   // Update growth data
   async updateGrowthData(id, year, month, capitalUsed) {
     try {
-      console.log('Updating growth data:', { id, year, month, capitalUsed })
-      
       const updatedData = await growthCalculatorApi.updateGrowthData(id, {
         year: parseInt(year),
         month: parseInt(month),
         capital_used: parseFloat(capitalUsed)
       })
-      
-      console.log('Growth data updated successfully:', updatedData)
       
       // Reload data to get the updated list
       await this.loadGrowthData()
@@ -99,12 +90,7 @@ class GrowthCalculatorService {
   // Delete growth data
   async deleteGrowthData(id) {
     try {
-      console.log('Deleting growth data:', id)
-      
       await growthCalculatorApi.deleteGrowthData(id)
-      
-      console.log('Growth data deleted successfully')
-      
       // Reload data to get the updated list
       await this.loadGrowthData()
     } catch (error) {

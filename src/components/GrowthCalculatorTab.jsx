@@ -301,7 +301,6 @@ const GrowthCalculatorTab = ({ trades, growthData, setGrowthData, recalculateMet
   // Recalculate metrics whenever component mounts (when user navigates to this tab)
   useEffect(() => {
     if (growthData.length > 0 && trades.length > 0) {
-      console.log('🔄 GrowthCalculatorTab: Auto-recalculating metrics on tab visit');
       recalculateMetrics();
     }
   }, []); // Empty dependency array means it runs once when component mounts
