@@ -267,7 +267,7 @@ const CooldownTimer = () => {
 
       {/* Settings Dropdown */}
       {showSettings && (
-        <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-[100] overflow-hidden">
+        <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-[99999] overflow-hidden">
           <div className="p-4">
             <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
               Cooldown Duration
@@ -306,7 +306,7 @@ const CooldownTimer = () => {
       {/* Click outside to close settings */}
       {showSettings && (
         <div 
-          className="fixed inset-0 z-[90]" 
+          className="fixed inset-0 z-[99998]" 
           onClick={() => setShowSettings(false)}
         ></div>
       )}

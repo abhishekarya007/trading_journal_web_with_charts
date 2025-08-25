@@ -2217,14 +2217,19 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         {/* z-index hierarchy: 
-            z-[100] - Timer settings dropdown (highest)
-            z-[90]  - Timer backdrop overlay
-            z-50    - Export dropdown & Mobile sidebar
-            z-30    - Export container
-            z-10    - Header & Timer container
+            z-[99999] - Timer settings dropdown & Export dropdown (highest - header level)
+            z-[99998] - Timer backdrop overlay
+            z-[99997] - Export container
+            z-[99991] - Timer container
+            z-[99990] - Header container
+            z-[9999] - Screenshot modals & other app modals
+            z-50    - Mobile sidebar
+            z-40    - Mobile overlay
+            z-20    - Mobile sidebar
+            z-1     - Welcome back container (reduced)
             z-0     - Desktop sidebar (relative positioning)
         */}
-        <header className="relative bg-gradient-to-r from-white via-slate-50 to-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-lg z-10">
+        <header className="relative bg-gradient-to-r from-white via-slate-50 to-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-lg z-[99990]">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full translate-y-12 -translate-x-12 animate-bounce"></div>
@@ -2260,7 +2265,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
               </div>
               
             {/* Center Section - Timer */}
-            <div className="transform hover:scale-105 transition-transform duration-300 relative z-20 flex-shrink-0">
+            <div className="transform hover:scale-105 transition-transform duration-300 relative z-[99991] flex-shrink-0">
                 <CooldownTimer />
             </div>
 
@@ -2278,7 +2283,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
               </button>
 
               {/* Export Menu */}
-              <div className="relative z-30">
+              <div className="relative z-[99997]">
                 <button 
                   onClick={() => setShowExportMenu(v => !v)} 
                   type="button" 
@@ -2292,7 +2297,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
                 </button>
                 
                 {showExportMenu && (
-                  <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
+                  <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 z-[99999] overflow-hidden">
                     <div className="p-2">
                       <button 
                         onClick={() => { exportExcel(); setShowExportMenu(false); }}
@@ -2380,7 +2385,7 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full -translate-y-12 translate-x-12 animate-pulse"></div>
               <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full translate-y-10 -translate-x-10 animate-bounce"></div>
               
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+                <div className="relative z-1 flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
                 <div>
                     <div className="flex items-center gap-2 sm:gap-3 mb-2">
                       <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
