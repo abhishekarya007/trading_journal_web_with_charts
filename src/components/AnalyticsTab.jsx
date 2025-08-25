@@ -240,12 +240,11 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 xl:p-8 text-white animate-pulse min-h-0">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 xl:p-8 text-white min-h-0">
         <div className="absolute inset-0 bg-black/10"></div>
         {/* Mobile: Smaller decorative elements */}
         <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8 sm:-translate-y-12 sm:translate-x-12 lg:-translate-y-16 lg:translate-x-16 animate-bounce"></div>
-        <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-18 sm:h-18 lg:w-24 lg:h-24 bg-white/10 rounded-full translate-y-6 -translate-x-6 sm:translate-y-9 sm:-translate-x-9 lg:translate-y-12 lg:-translate-x-12 animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/2 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/5 rounded-full -translate-x-4 -translate-y-4 sm:-translate-x-6 sm:-translate-y-6 lg:-translate-x-8 lg:-translate-y-8 animate-spin"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-18 sm:h-18 lg:w-24 lg:h-24 bg-white/10 rounded-full translate-y-6 -translate-x-6 sm:translate-y-9 sm:-translate-x-9 lg:translate-y-12 lg:-translate-x-12"></div>
         
         <div className="relative z-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4 lg:mb-6">
@@ -274,7 +273,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className={`text-sm sm:text-lg lg:text-2xl font-bold truncate ${
-                    hoveredMetric === 'net' ? 'animate-pulse text-emerald-200' : 'animate-pulse'
+                    hoveredMetric === 'net' ? 'text-emerald-200' : ''
                   }`}>
                     {formatNumber(totals.net)}
                   </div>
@@ -298,7 +297,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className={`text-sm sm:text-lg lg:text-2xl font-bold truncate ${
-                    hoveredMetric === 'winRate' ? 'animate-pulse text-blue-200' : 'animate-pulse'
+                    hoveredMetric === 'winRate' ? 'text-blue-200' : ''
                   }`}>
                     {totals.winRate}%
                   </div>
@@ -322,7 +321,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className={`text-sm sm:text-lg lg:text-2xl font-bold truncate ${
-                    hoveredMetric === 'trades' ? 'animate-pulse text-purple-200' : 'animate-pulse'
+                    hoveredMetric === 'trades' ? 'text-purple-200' : ''
                   }`}>
                     {totals.trades}
                   </div>
@@ -346,7 +345,7 @@ export default function AnalyticsTab({ totals, monthRows, allMonthRows, activeMo
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className={`text-sm sm:text-lg lg:text-2xl font-bold truncate ${
-                    hoveredMetric === 'avg' ? 'animate-pulse text-orange-200' : 'animate-pulse'
+                    hoveredMetric === 'avg' ? 'text-orange-200' : ''
                   }`}>
                     {formatNumber(totals.avg)}
                   </div>

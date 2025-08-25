@@ -191,11 +191,10 @@ export default function TradingRulesTab() {
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white animate-pulse">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 sm:-translate-y-12 lg:-translate-y-16 translate-x-8 sm:translate-x-12 lg:translate-x-16 animate-bounce"></div>
-        <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white/10 rounded-full translate-y-6 sm:translate-y-8 lg:translate-y-12 -translate-x-6 sm:-translate-x-8 lg:-translate-x-12 animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/2 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/5 rounded-full -translate-x-4 sm:-translate-x-6 lg:-translate-x-8 -translate-y-4 sm:-translate-y-6 lg:-translate-y-8 animate-spin"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white/10 rounded-full translate-y-6 sm:translate-y-8 lg:translate-y-12 -translate-x-6 sm:-translate-x-8 lg:-translate-x-12"></div>
         
         <div className="relative z-10">
           <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
@@ -215,7 +214,7 @@ export default function TradingRulesTab() {
                   <IconBookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300" />
                 </div>
                 <div>
-                  <div className="text-lg sm:text-2xl font-bold animate-pulse">{tradingRules.length}</div>
+                  <div className="text-lg sm:text-2xl font-bold">{tradingRules.length}</div>
                   <div className="text-indigo-100 text-xs sm:text-sm">Total Rules</div>
                 </div>
               </div>
@@ -227,7 +226,7 @@ export default function TradingRulesTab() {
                   <IconAlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-300" />
                 </div>
                 <div>
-                  <div className="text-lg sm:text-2xl font-bold animate-pulse">
+                  <div className="text-lg sm:text-2xl font-bold">
                     {tradingRules.filter(r => r.priority === 'high').length}
                   </div>
                   <div className="text-indigo-100 text-xs sm:text-sm">High Priority</div>
@@ -241,7 +240,7 @@ export default function TradingRulesTab() {
                   <IconAward className="w-4 h-4 sm:w-5 sm:h-5 text-green-300" />
                 </div>
                 <div>
-                  <div className="text-lg sm:text-2xl font-bold animate-pulse">{categories.length - 1}</div>
+                  <div className="text-lg sm:text-2xl font-bold">{categories.length - 1}</div>
                   <div className="text-indigo-100 text-xs sm:text-sm">Categories</div>
                 </div>
               </div>
