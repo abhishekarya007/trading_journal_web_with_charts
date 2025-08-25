@@ -101,6 +101,15 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       darkBgColor: 'from-blue-900/20 to-cyan-900/20'
     },
     {
+      id: 'ai-assistant',
+      label: 'AI Assistant',
+      icon: IconBrain,
+      description: 'Intelligent trading insights',
+      color: 'from-indigo-500 via-purple-500 to-pink-500',
+      bgColor: 'from-indigo-50 via-purple-50 to-pink-50',
+      darkBgColor: 'from-indigo-900/20 via-purple-900/20 to-pink-900/20'
+    },
+    {
       id: 'growth-calculator',
       label: 'Growth Calculator',
       icon: IconTarget,
@@ -136,24 +145,15 @@ const Navigation = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, mobi
       bgColor: 'from-yellow-50 to-orange-50',
       darkBgColor: 'from-yellow-900/20 to-orange-900/20'
     },
-            {
-          id: 'ai-assistant',
-          label: 'AI Assistant',
-          icon: IconBrain,
-          description: 'Intelligent trading insights',
-          color: 'from-indigo-500 via-purple-500 to-pink-500',
-          bgColor: 'from-indigo-50 via-purple-50 to-pink-50',
-          darkBgColor: 'from-indigo-900/20 via-purple-900/20 to-pink-900/20'
-        },
-            // {
-        //   id: 'smart-automation',
-        //   label: 'Smart Automation',
-        //   icon: IconZap,
-        //   description: 'Automated insights & alerts',
-        //   color: 'from-purple-500 to-indigo-500',
-        //   bgColor: 'from-purple-50 to-indigo-50',
-        //   darkBgColor: 'from-purple-900/20 to-indigo-900/20'
-        // },
+    // {
+    //   id: 'smart-automation',
+    //   label: 'Smart Automation',
+    //   icon: IconZap,
+    //   description: 'Automated insights & alerts',
+    //   color: 'from-purple-500 to-indigo-500',
+    //   bgColor: 'from-purple-50 to-indigo-50',
+    //   darkBgColor: 'from-purple-900/20 to-indigo-900/20'
+    // },
     {
       id: 'rules',
       label: 'Trading Rules',
