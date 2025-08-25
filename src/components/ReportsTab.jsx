@@ -908,10 +908,14 @@ const ReportsTab = ({ trades, formatNumber, formatCurrency, showToast }) => {
                       <span className="text-slate-600 dark:text-slate-400">Emotion:</span>
                       <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.emotion || '-'}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">Notes:</span>
-                      <span className="font-medium text-slate-900 dark:text-white">{selectedTrade.notes || '-'}</span>
-                    </div>
+                                         <div className="space-y-2">
+                       <span className="text-slate-600 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">Notes:</span>
+                       <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 border border-slate-200 dark:border-slate-600">
+                         <p className="text-slate-900 dark:text-white text-sm leading-relaxed whitespace-pre-wrap break-words">
+                           {selectedTrade.remarks || 'No notes available'}
+                         </p>
+                       </div>
+                     </div>
                   </div>
                 </div>
 
