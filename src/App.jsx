@@ -1494,9 +1494,9 @@ Total Screenshots: ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0
         ? `Export complete! ZIP contains ${trades.length} trades and ${trades.reduce((sum, t) => sum + (t.screenshots?.length || 0), 0)} screenshots.`
         : `Export complete! ZIP contains ${trades.length} trades (no screenshots found).`;
       
-      alert(message);
+      showToast(message, 'success');
     } catch (error) {
-      alert('Error creating ZIP file: ' + error.message);
+      showToast('Error creating ZIP file: ' + error.message, 'error');
     }
   }
 
