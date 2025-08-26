@@ -797,14 +797,15 @@ const TradesTab = ({
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Quantity
                     </label>
-                    <input
-                      type="number"
-                      value={form.qty}
-                      onChange={(e) => setForm({...form, qty: e.target.value})}
-                      placeholder="Number of shares"
-                      className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                      required
-                    />
+                                         <input
+                       type="number"
+                       value={form.qty}
+                       onChange={(e) => setForm({...form, qty: e.target.value})}
+                       onWheel={(e) => e.target.blur()}
+                       placeholder="Number of shares"
+                       className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                       required
+                     />
                   </div>
 
                   <div>
@@ -826,30 +827,32 @@ const TradesTab = ({
                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                        Entry Price
                      </label>
-                     <input
-                       type="number"
-                       value={form.buy}
-                       onChange={(e) => setForm({...form, buy: e.target.value})}
-                       placeholder="Entry price per share"
-                       step="0.01"
-                       className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                       required
-                     />
+                                           <input
+                        type="number"
+                        value={form.buy}
+                        onChange={(e) => setForm({...form, buy: e.target.value})}
+                        onWheel={(e) => e.target.blur()}
+                        placeholder="Entry price per share"
+                        step="0.01"
+                        className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        required
+                      />
                    </div>
                    
                    <div>
                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                        Exit Price
                      </label>
-                     <input
-                       type="number"
-                       value={form.sell}
-                       onChange={(e) => setForm({...form, sell: e.target.value})}
-                       placeholder="Exit price per share"
-                       step="0.01"
-                       className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                       required
-                     />
+                                           <input
+                        type="number"
+                        value={form.sell}
+                        onChange={(e) => setForm({...form, sell: e.target.value})}
+                        onWheel={(e) => e.target.blur()}
+                        placeholder="Exit price per share"
+                        step="0.01"
+                        className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        required
+                      />
                    </div>
                  </div>
               </div>
