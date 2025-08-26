@@ -706,12 +706,12 @@ const TradesTab = ({
         
       </div>
 
-      {/* Add/Edit Trade Modal */}
-      {showModal && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          onClick={() => { setShowModal(false); setEditingId(null); }}
-        >
+             {/* Add/Edit Trade Modal */}
+       {showModal && (
+         <div 
+           className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+           onClick={() => { setShowModal(false); setEditingId(null); }}
+         >
           <div 
             className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
